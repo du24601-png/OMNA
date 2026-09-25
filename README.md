@@ -9,4 +9,4 @@
 | [PLAN.md](PLAN.md) | 阶段任务与验收 |
 | [AGENTS.md](AGENTS.md) | AI 开发执行规则 |
 
-当前阶段见 [PLAN.md](PLAN.md)（启动基线：**P0.1**）。
+当前阶段见 [PLAN.md](PLAN.md)。P0 已 GO，P1.5 已通过，下一任务是 P2.1。

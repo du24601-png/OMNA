@@ -1,0 +1,44 @@
+{
+  "task": "P1.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "real_cloud_extraction": "NOT_RUN",
+  "extractor_double": "local-http",
+  "save_status": 200,
+  "fault_gate": {
+    "armed_in_temp_test_mode": true,
+    "blocked_without_test_mode": true,
+    "blocked_outside_temp": true,
+    "blocked_without_point": true
+  },
+  "accept_once": true,
+  "accept_then_reject": true,
+  "reject_then_accept": true,
+  "same_decision_different_payload": true,
+  "edit_saved": true,
+  "update_conflict": true,
+  "keep_both": true,
+  "kernel_crash": {
+    "point": "kernel",
+    "process_exited": true,
+    "hidden_before_recovery": true,
+    "recovered": true,
+    "published_once": true,
+    "request_status": 0,
+    "retry_key_ignored": true
+  },
+  "commit_crash": {
+    "point": "commit",
+    "process_exited": true,
+    "hidden_before_recovery": false,
+    "recovered": true,
+    "published_once": true,
+    "request_status": 0,
+    "already_visible": true,
+    "visible_before_retry": "87b595a5-afec-4560-8712-603394643d7c",
+    "retry_key_ignored": true
+  },
+  "experiment_unchanged": true,
+  "credential_in_logs": false,
+  "pass": true
+}

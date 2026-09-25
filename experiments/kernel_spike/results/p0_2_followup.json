@@ -1,0 +1,201 @@
+{
+  "task": "P0.2-followup",
+  "p0_2_status": "PARTIAL",
+  "delete": {
+    "forgotten": true,
+    "get_after_forget": null,
+    "kernel_id": "bde4d1758e3d7748",
+    "residue": [
+      {
+        "table": "gists",
+        "row": {
+          "id": "gist_bde4d1758e3d7748",
+          "text": "待删除正文，含 250ms 超时。标记 ZW-P02-DELETE。",
+          "timestamp": "2026-09-24T22:10:46.652584",
+          "participants_json": "[]",
+          "location": null,
+          "emotion": null,
+          "time_scope": null,
+          "memory_id": "bde4d1758e3d7748",
+          "created_at": "2026-09-25 02:10:46"
+        }
+      },
+      {
+        "table": "memoria_facts",
+        "row": {
+          "id": 1,
+          "session_id": "zhiwo-p0-2",
+          "message_idx": 0,
+          "fact_type": "metric",
+          "key": "待删除正文，含_ms",
+          "value": "250ms",
+          "context_snippet": "待删除正文，含 250ms 超时。标记 ZW-P02-DELETE。",
+          "importance": 0.65,
+          "timestamp": null,
+          "version_id": 0,
+          "previous_value": null,
+          "updated_msg_idx": null,
+          "valid_from_msg_idx": 0,
+          "valid_to_msg_idx": null,
+          "source_memory_id": "bde4d1758e3d7748"
+        }
+      }
+    ],
+    "recall_after_forget": [],
+    "public_names": [
+      "forget"
+    ],
+    "extract_flag_disables_memoria": false,
+    "exit_code": 0
+  },
+  "capacity": {
+    "silent_trim_at_2": {
+      "max_items_constant": 2,
+      "env_at_process_start": "2",
+      "guarded": false,
+      "refused_third": false,
+      "surviving": [
+        {
+          "content": "容量样本一。标记 ZW-P02-CAP-1。",
+          "present": false,
+          "id": null
+        },
+        {
+          "content": "容量样本二。标记 ZW-P02-CAP-2。",
+          "present": true,
+          "id": "02085de08f87c6ec"
+        },
+        {
+          "content": "容量样本三。标记 ZW-P02-CAP-3。",
+          "present": true,
+          "id": "b479293a60683318"
+        }
+      ],
+      "ids": [
+        "aa7490c47c2f5461",
+        "02085de08f87c6ec",
+        "b479293a60683318"
+      ],
+      "exit_code": 0
+    },
+    "guard_refuses_third": {
+      "max_items_constant": 2,
+      "env_at_process_start": "2",
+      "guarded": true,
+      "refused_third": true,
+      "surviving": [
+        {
+          "content": "容量样本一。标记 ZW-P02-CAP-1。",
+          "present": true,
+          "id": "c68cdc1a95eca597"
+        },
+        {
+          "content": "容量样本二。标记 ZW-P02-CAP-2。",
+          "present": true,
+          "id": "1839af5f82d88776"
+        },
+        {
+          "content": "容量样本三。标记 ZW-P02-CAP-3。",
+          "present": false,
+          "id": null
+        }
+      ],
+      "ids": [
+        "c68cdc1a95eca597",
+        "1839af5f82d88776"
+      ],
+      "exit_code": 0
+    },
+    "env_after_import_ignored": {
+      "constant_after_import": 1000000,
+      "env_mutated_after_import": "2",
+      "constant_unchanged": true,
+      "exit_code": 0
+    },
+    "read_path_keeps_rows": {
+      "write": {
+        "max_items_constant": 1000000,
+        "env_at_process_start": "1000000",
+        "guarded": false,
+        "refused_third": false,
+        "surviving": [
+          {
+            "content": "容量样本一。标记 ZW-P02-CAP-1。",
+            "present": true,
+            "id": "72aa5572dc5cc2a8"
+          },
+          {
+            "content": "容量样本二。标记 ZW-P02-CAP-2。",
+            "present": true,
+            "id": "c6a7538c2240c530"
+          },
+          {
+            "content": "容量样本三。标记 ZW-P02-CAP-3。",
+            "present": true,
+            "id": "f16c693346005eae"
+          }
+        ],
+        "ids": [
+          "72aa5572dc5cc2a8",
+          "c6a7538c2240c530",
+          "f16c693346005eae"
+        ],
+        "exit_code": 0
+      },
+      "read": {
+        "count_before_read": 3,
+        "count_after_read": 3,
+        "got": 3,
+        "exit_code": 0
+      }
+    }
+  },
+  "idempotency": {
+    "crashed_after_kernel_write": {
+      "exit_code": 86
+    },
+    "different_payload": {
+      "conflict": true,
+      "remember_called": false,
+      "status": "prepared",
+      "kernel_id_still_unconfirmed": true,
+      "original_content_rows": 1,
+      "other_content_rows": 0,
+      "exit_code": 0
+    },
+    "retry_original_payload": {
+      "kernel_id": "8148aac192a6e6dd",
+      "copies": 1,
+      "published_status": "published",
+      "published_kernel_id": "8148aac192a6e6dd",
+      "payload_unchanged": true,
+      "exit_code": 0
+    }
+  },
+  "identity": {
+    "daily_kernel_id": "75977559f41f1e37",
+    "formal_kernel_id": "75977559f41f1e37",
+    "shared_kernel_id": true,
+    "copies": 1,
+    "after_daily": {
+      "id": "75977559f41f1e37",
+      "valid_until": "2099-01-01T00:00:00",
+      "superseded_by": null
+    },
+    "after_second_remember": {
+      "id": "75977559f41f1e37",
+      "valid_until": "2000-01-01T00:00:00",
+      "superseded_by": null
+    },
+    "invalidate_returned": true,
+    "after_invalidate": {
+      "id": "75977559f41f1e37",
+      "valid_until": "2026-09-24T22:10:51.861347",
+      "superseded_by": null
+    },
+    "forget_returned": true,
+    "get_after_forget": null,
+    "scenarios_in_kernel": false,
+    "exit_code": 0
+  }
+}

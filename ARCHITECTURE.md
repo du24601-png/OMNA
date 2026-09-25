@@ -60,12 +60,12 @@ flowchart TD
 | --- | --- |
 | `sources` | `id, kind, name, content, content_hash, imported_at`；`kind=manual/paste/file/agent_claim` |
 | `import_jobs` | `id, source_id, status, extractor_config, error_code`；提取状态与重试，不存密钥 |
-| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id` |
+| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json`；`intent_json` 保存已提交的审核意图，用于判断重放或冲突 |
 | `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文 |
 | `agents` | `id, name, credential_hash, enabled, policy_version`；凭证可重置 |
 | `agent_permissions` | `agent_id, allowed_tools, allowed_categories`；空集即无权限 |
 | `access_events` | `request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state` |
-| `operations` | `id, action, target_id, base_revision, status, error_code`；跨库写入恢复及幂等 |
+| `operations` | `id, action, target_id, base_revision, revision, payload_hash, payload_json, kernel_id, status, error_code`；跨库写入恢复及幂等。`payload_json` 只用于核对和恢复，不作为正式检索正文 |
 | `settings` | 非敏感设置、schema 版本、选定模型；密钥使用系统凭据存储或开发环境变量 |
 
 统一外部 `memory_id` 为知我生成的稳定 UUID；`revision` 从 1 递增；Kernel ID 只在 Adapter 内解释。类别冻结为 `identity/goal/preference/project/event/other`，每条一个类别；`scope` 表示适用场景，不是权限类别。
@@ -94,7 +94,7 @@ Profile 首版用模板组合已确认内容，不从原文再次推断。事件
 
 ## 5. 审核、版本与跨库一致性
 
-提案状态：`pending → publishing → accepted`；拒绝为 `rejected`；发布失败为 `failed`，允许按同一操作重试。更新前比较 `base_revision`；冲突返回 `CONFLICT`，不自动覆盖。手动保存走相同发布机制，但不创建待审核提案。
+提案状态：`pending → publishing → accepted`；拒绝为 `rejected`；发布失败为 `failed`，允许按同一操作重试。更新前比较 `base_revision`；冲突返回 `CONFLICT`，不自动覆盖。手动保存和直接编辑已确认记忆都走相同发布机制，但不创建待审核提案。直接编辑是 `PATCH /api/v1/memories/{id}`，载荷含 `source_refs` 与 `base_revision`。导入失败时 `import_jobs.error_code` 区分 `TIMEOUT` 与 `VALIDATION_ERROR`，来源保留，可以重试。
 
 两个 SQLite 库之间不假定原子事务。首版用**单服务写锁 + 持久操作记录 + 发布可见性检查**：
 
@@ -105,13 +105,17 @@ Profile 首版用模板组合已确认内容，不从原文再次推断。事件
 
 如果 Kernel 写成功而业务提交失败，重启后按 `operation_id` 查证并补完，不盲目再次写入。恢复前受影响的新版本保持不可见。若上游不能可靠定位写入结果、隔离自动合并或保存历史，P0 判阻塞，不另造第二个事实库补洞。
 
+P1.2 的正式新增只经过 `services/publish.py` 的 `publish_memory()`。它先写操作记录，再写 Kernel；本地向量和正文都核对之后，才在同一事务里登记唯一的 `active` 版本。导入与提取不调用这个入口。`ZHIWO_KERNEL_CONNECT_ONLY=1` 只用于不加载向量的连接测试。
+
+P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 的决定是 `accept`、`update`、`keep_both`、`edit`、`reject`。拒绝不写 Kernel。更新另写一条 Kernel 记录，并在控制库的同一事务里把新版本标为当前、旧版本标为 `superseded`、提案标为 `accepted`。`base_revision` 与当前版本不一致时返回 `CONFLICT`，提案留在 `pending`。两者保留必须带 `scope`，并新建 `memory_id`。同一提案再次提交时比较已保存的审核意图：决定、编辑内容、场景、目标记忆和目标版本。意图相同则返回第一次的结果，即使 `Idempotency-Key` 不同；意图不同返回 `409 CONFLICT`，说明实际状态，正式记忆不变。恢复时用操作记录里的原始载荷和版本 session 中已有的 Kernel 行补完控制库，不另建任务调度。故障注入只在 `ZHIWO_TEST_MODE=1` 且数据目录位于系统临时目录时生效。正式检索只认已提交的 `active` 版本。`GET /api/v1/memories/{id}/versions` 按控制库中的版本读取 Kernel 正文。`GET /api/v1/operations/{id}` 只返回操作状态。
+
 删除先在业务库标记不可见，再逐项清理 Kernel 版本、索引和业务内容副本；未完成时为“删除处理中”，重启继续。不能仅删 `memory_refs` 就声称永久删除成功。
 
 ## 6. Owner API 与 MCP 契约
 
 ### 6.1 本机 Owner API
 
-前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。
+前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。`GET /health` 在此前缀之外，只表示进程在运行。`GET /api/v1/health` 返回控制库版本、Kernel 连接、提取模型是否已配置，以及 `test_mode`。`test_mode` 只在 `ZHIWO_TEST_MODE=1` 时为真，页面用它标明演示数据。该接口要求 Owner 凭证。
 
 | 路由 | 用途 |
 | --- | --- |
@@ -120,6 +124,7 @@ Profile 首版用模板组合已确认内容，不从原文再次推断。事件
 | `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核，批量审核可逐项调用并汇总结果 |
 | `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}` | 查询、添加、修改、永久删除 |
 | `GET /memories/{id}/versions` | 历史版本 |
+| `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
 | `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置 |
 | `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照 |
 | `GET/PATCH /settings`；`POST /settings/test-model` | 非敏感设置及模型连通测试，响应不回显密钥 |
@@ -177,14 +182,36 @@ Profile 首版用模板组合已确认内容，不从原文再次推断。事件
 | `server/zhiwo/api/`、`gateway/` | Owner HTTP API、MCP bridge 与 Agent 入口 |
 | `server/zhiwo/services/`、`adapters/` | 产品逻辑、Mnemosyne 和提取模型适配 |
 | `server/zhiwo/repositories/`、`contracts/` | 业务库访问/迁移、共享数据结构 |
-| `experiments/kernel_spike/` | P0 可复现验证脚本与结果 |
+| `experiments/kernel_spike/` | P0 可复现验证脚本与结果。正式服务不导入此目录，也不读取实验 `control.json` |
 | `tests/`、`fixtures/` | 关键边界测试、固定合成中文样本 |
 
 运行数据库、个人原文、API Key、访问快照、备份不提交 Git。上游仅在 Adapter 中引用；不直接更改其 schema 或源码。没有实际需要时不增加消息队列、独立向量库、第二套后端或微服务。
 
-## 9. P0 待验证与参考依据
+P1.1 的本机服务位于 `server/zhiwo/`。`zhiwo.db` 的 `memory_refs` 记录身份、版本和状态，不保存正式正文。`kind`、`category` 与适用场景 `scope` 是三个字段。Kernel 连接由 `adapters/kernel_client.py` 打开调用方指定的 `ZHIWO_DATA_DIR`。这一步没有 MCP Gateway、权限平台、界面或 Electron。
 
-以下未验证项必须填写实测证据后才能转为确认：精确依赖版本、Windows 原生安装、中文本地模型、正式记忆持久性、版本/删除接口、自动整理禁用或隔离、幂等写入定位、一个真实客户端的 stdio 通信。未通过时保持 P0 阻塞，按 [AGENTS.md](AGENTS.md) 提交决策选项。
+## 9. P0 实测依据
+
+P0.1 已确认 Windows 原生安装与主键读回。P0.2 已确认下面的 Adapter 映射。P0.3 已确认中文本地召回、断网复测和向量索引删除。P0.4 已用 OpenCode 1.18.16 走通 stdio：实验入口只注册 `search_memory`，不提供 resources 或 prompts。专用凭证放在子进程环境变量里，服务只保存 sha256，并用它解析 `agent_id`。错误凭证仍能完成握手和工具发现，但工具结果是 `UNAUTHENTICATED`，不含记忆正文。这还不是完整 Gateway。实验入口里的正文比对、`kind="unspecified"`、把场景写成 category，以及没有发布状态和权限检查，都只属于这次验证，不能原样成为 P1/P2 的读取实现。正式读取仍按第 6 节的契约：已发布版本、类别、共享、有效期和精确版本。`search_published()` 按合格结果计数，`limit` 不再先截断候选；实验召回窗口是 `RECALL_CANDIDATES`（40），大于最大返回条数 20。这个窗口不是全库扫描，也不是权限过滤。P0 验收结论为 GO。这些实验映射仍然不是正式读取实现。
+
+### 9.1 P0.2 实测映射（mnemosyne-memory 3.15.1）
+
+正式正文写入 `Mnemosyne.remember()`，落在 `working_memory`。产品版本不调用 `Mnemosyne.update()`：该方法原地覆盖同一行，旧正文不再存在。更新改为再 `remember()` 一行；当前版本、历史指针、适用场景、事实/事件和 `operation_id` 放在控制元数据。Kernel 的 `memory_type` 对本次中文样本都标成 `fact`，不能当作产品类别。
+
+`get(id)` 能读回已过期和已 `invalidate` 的旧正文，但不返回 `valid_until`。`recall()` 与 `get_context()` 会排除过期和被取代的行。因此历史保留靠 `get(kernel_id)`，当前检索过滤由 Kernel 执行，有效期仍要记在控制元数据里。
+
+`remember()` 不会因为配置里的 `auto_sleep_enabled` 或 `persona_enabled` 去调用 `sleep()` 或写 persona 文件。产品写入路径不要主动调用 `sleep()`。显式 `sleep(force=True)` 会保留原行，并额外写入一条内容不同的 episodic 摘要；未登记的 id 不能当正式记忆。
+
+每次 `remember()` 都会清理未巩固的旧工作记忆，条件是超过导入时读到的 `MNEMOSYNE_WM_TTL_HOURS`（默认 168）或 `MNEMOSYNE_WM_MAX_ITEMS`（默认 10000）。这两个值在模块导入后改环境变量不会生效，`config.yaml` 也不参与这次清理。`get()` 和 `recall()` 不会触发它。MVP 把这两个 Kernel 参数固定为 `1000000`。写入前的拒绝只数同一个 session 里尚未巩固的行，和这次淘汰的范围一致，并包含该 session 里占着名额的历史或未发布记录。这不是整个记忆库的总容量，也不另做容量管理模块。达到该 session 的上限就拒绝新增。这条清理不能单独关掉。
+
+操作记录要在调用 `remember()` 之前写入，并保存不可变的原始载荷：正文、适用场景、有效期、产品记忆 id 和版本号。其中任一变化都是冲突，不再调用 Kernel。Kernel 没有 `operation_id`。同一版本重试使用原来的 session 和原始载荷。
+
+Kernel session 使用 `zhiwo:{memory_id}:r{revision}`。新版本和新的独立记忆使用不同 session。全部记录仍在同一个知我数据库。适用场景只放在控制记录里。写入使用公开接口的 `scope="global"`，只表示内核内可以跨 session 检索；对外仍由知我过滤。`mnemosyne-memory==3.15.1` 上，这个映射已经分出不同 kernel id，并且一个不在这些 session 里的读取端调用一次 `recall()` 就能同时见到它们。不再为相同正文增加引用计数或正文标识。
+
+`forget()` 不会清掉派生内容。负责人已批准 Adapter 的有限例外，集中在一个清理函数：仅 `mnemosyne-memory==3.15.1`，在核对 `gists.memory_id` 与 `memoria_facts.source_memory_id` 后，用参数化 SQL 删除明确属于目标 kernel id 的行。两张表的删除在同一事务中，不假定与 `forget()` 原子执行。正文已经不在时，重试仍要清理残留；全部完成后才标记删除成功。共用派生行时失败并报告，不按其中一个 id 删除。
+
+安装 `embeddings` 附加包后，`forget()` 会删掉 `memory_embeddings` 中该 id 的行，以及 `vec_working` 里对应 `working_memory.rowid` 的向量。P0.3 在 `BAAI/bge-small-zh-v1.5` 上核对过：目标向量消失，另一条记忆的正文、gist 和向量还在。这个检查不扩大清理函数。
+
+统一检索仍是一次 `Mnemosyne.recall()`。中文查询在这套 SQLite 上进不了 unicode61 全文词，会先按字做 LIKE，再并入 `vec_working`。工作记忆里的一行仍要过字面重叠门槛，向量相似度才混进分数。因此向量近邻可能不出现在最终前五条；P0.3 的 `r07` 就是这样。
 
 官方资料核对于 2026-09-25，仅用于确认集成方向：
 

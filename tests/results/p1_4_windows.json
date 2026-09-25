@@ -1,0 +1,31 @@
+{
+  "task": "P1.4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "real_cloud_extraction": "NOT_RUN",
+  "pass": true,
+  "data_dir": "isolated temp directory",
+  "manual_add_on_profile": true,
+  "manual_add_on_memory_page": true,
+  "share_switch_saved": true,
+  "search_confirmed_only": true,
+  "import_without_model": "extractor_unavailable, source kept, zero proposals, page said 提取模型未配置",
+  "demo_import_labeled": true,
+  "web_has_no_test_extractor_url": true,
+  "review_update": "revision 1 superseded, revision 2 active",
+  "source_shown_as_text": true,
+  "version_conflict": "page said 当前版本已经变化, suggestion stayed pending, official content unchanged",
+  "reload_kept_result": true,
+  "restart_kept_result": true,
+  "service_down": "本地服务未运行, draft kept",
+  "agent_page": "unconnected empty state",
+  "screenshots": [
+    "tests/results/p1_4/p1_4_profile.png",
+    "tests/results/p1_4/p1_4_memory.png",
+    "tests/results/p1_4/p1_4_import_unconfigured.png",
+    "tests/results/p1_4/p1_4_agents.png",
+    "tests/results/p1_4/p1_4_review.png",
+    "tests/results/p1_4/p1_4_versions.png",
+    "tests/results/p1_4/p1_4_conflict.png",
+    "tests/results/p1_4/p1_4_service_down.png"
+  ]
+}

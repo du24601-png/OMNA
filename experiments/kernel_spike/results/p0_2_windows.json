@@ -1,0 +1,505 @@
+{
+  "task": "P0.2",
+  "decision": "GO",
+  "p0_overall": "NOT_PASSED",
+  "native_windows": true,
+  "python": "3.12.13",
+  "python_pin_file": "3.12.13",
+  "mnemosyne": "3.15.1",
+  "commands": [
+    "uv python pin 3.12.13",
+    "uv lock",
+    "uv sync",
+    "uv run python p0_2_boundaries.py"
+  ],
+  "default_path_snapshot_unchanged": true,
+  "default_paths_before": {
+    "targets": {
+      "home": "C:\\Users\\example",
+      "HOME": "",
+      "HERMES_HOME": "C:\\Users\\example\\AppData\\Local\\hermes",
+      "unset_data_dir": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data",
+      "unset_db": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\mnemosyne.db",
+      "unset_config": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\config.yaml",
+      "unset_data_config": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\config.yaml",
+      "unset_persona": "C:\\Users\\example\\AppData\\Local\\hermes\\memory\\persona.md",
+      "unset_fastembed": "C:\\Users\\example\\AppData\\Local\\hermes\\cache\\fastembed",
+      "hermes_mnemosyne": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne",
+      "hermes_memory": "C:\\Users\\example\\AppData\\Local\\hermes\\memory",
+      "hermes_cache": "C:\\Users\\example\\AppData\\Local\\hermes\\cache",
+      "profile_hermes": "C:\\Users\\example\\.hermes",
+      "profile_mnemosyne": "C:\\Users\\example\\.mnemosyne"
+    },
+    "files": {
+      "unset_db": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\mnemosyne.db",
+        "exists": false
+      },
+      "unset_config": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\config.yaml",
+        "exists": false
+      },
+      "unset_data_config": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\config.yaml",
+        "exists": false
+      },
+      "unset_persona": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\memory\\persona.md",
+        "exists": false
+      }
+    },
+    "trees": {
+      "unset_data_dir": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "unset_fastembed": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\cache\\fastembed",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_mnemosyne": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_memory": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\memory",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_cache": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\cache",
+        "exists": true,
+        "file_count": 2,
+        "digest": "2dd79b94306b826f1f6d65b1c62ac1aaecf432b4b4d956bcfc0b067fad32433a"
+      },
+      "profile_hermes": {
+        "path": "C:\\Users\\example\\.hermes",
+        "exists": true,
+        "file_count": 522,
+        "digest": "38bb9ca192c929fc8611514faf846f07f86cafa823b3a8ea03f6b8f260227cca"
+      },
+      "profile_mnemosyne": {
+        "path": "C:\\Users\\example\\.mnemosyne",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      }
+    }
+  },
+  "default_paths_after": {
+    "targets": {
+      "home": "C:\\Users\\example",
+      "HOME": "",
+      "HERMES_HOME": "C:\\Users\\example\\AppData\\Local\\hermes",
+      "unset_data_dir": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data",
+      "unset_db": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\mnemosyne.db",
+      "unset_config": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\config.yaml",
+      "unset_data_config": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\config.yaml",
+      "unset_persona": "C:\\Users\\example\\AppData\\Local\\hermes\\memory\\persona.md",
+      "unset_fastembed": "C:\\Users\\example\\AppData\\Local\\hermes\\cache\\fastembed",
+      "hermes_mnemosyne": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne",
+      "hermes_memory": "C:\\Users\\example\\AppData\\Local\\hermes\\memory",
+      "hermes_cache": "C:\\Users\\example\\AppData\\Local\\hermes\\cache",
+      "profile_hermes": "C:\\Users\\example\\.hermes",
+      "profile_mnemosyne": "C:\\Users\\example\\.mnemosyne"
+    },
+    "files": {
+      "unset_db": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\mnemosyne.db",
+        "exists": false
+      },
+      "unset_config": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\config.yaml",
+        "exists": false
+      },
+      "unset_data_config": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data\\config.yaml",
+        "exists": false
+      },
+      "unset_persona": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\memory\\persona.md",
+        "exists": false
+      }
+    },
+    "trees": {
+      "unset_data_dir": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne\\data",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "unset_fastembed": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\cache\\fastembed",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_mnemosyne": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\mnemosyne",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_memory": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\memory",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      },
+      "hermes_cache": {
+        "path": "C:\\Users\\example\\AppData\\Local\\hermes\\cache",
+        "exists": true,
+        "file_count": 2,
+        "digest": "2dd79b94306b826f1f6d65b1c62ac1aaecf432b4b4d956bcfc0b067fad32433a"
+      },
+      "profile_hermes": {
+        "path": "C:\\Users\\example\\.hermes",
+        "exists": true,
+        "file_count": 522,
+        "digest": "38bb9ca192c929fc8611514faf846f07f86cafa823b3a8ea03f6b8f260227cca"
+      },
+      "profile_mnemosyne": {
+        "path": "C:\\Users\\example\\.mnemosyne",
+        "exists": false,
+        "file_count": 0,
+        "digest": null
+      }
+    }
+  },
+  "core": {
+    "resolved_paths": {
+      "requested_db": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\mnemosyne.db",
+      "instance_db": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\mnemosyne.db",
+      "library_default_db": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\mnemosyne.db",
+      "config_path": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\config.yaml",
+      "persona_file": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\persona.md",
+      "fastembed_cache": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\fastembed-cache",
+      "data_dir": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core"
+    },
+    "checks": [
+      {
+        "name": "version_bodies_stay_in_kernel",
+        "ok": true,
+        "evidence": {
+          "class": "mnemosyne.Mnemosyne",
+          "write": "remember(extract=False, extract_entities=False)",
+          "read": "get(memory_id)",
+          "table": "working_memory",
+          "old_id": "2a076b7e9e0bbb73",
+          "new_id": "17e3c7b016c47f12",
+          "control_has_body": false
+        }
+      },
+      {
+        "name": "current_history_and_coexistence",
+        "ok": true,
+        "evidence": {
+          "active": [
+            {
+              "product_memory_id": "bb44bf6b-2467-4900-843d-76d65902b104",
+              "revision": 1,
+              "kernel_id": "1ae26edd73c8ee18",
+              "scenario": null,
+              "kind": "event"
+            },
+            {
+              "product_memory_id": "75800dc4-de2f-473d-8eab-b8632b780e38",
+              "revision": 2,
+              "kernel_id": "17e3c7b016c47f12",
+              "scenario": "日常回复",
+              "kind": "fact"
+            },
+            {
+              "product_memory_id": "af6311a7-a342-4700-b3fd-9eb76942baf9",
+              "revision": 1,
+              "kernel_id": "8845ae99093aa300",
+              "scenario": "正式报告",
+              "kind": "fact"
+            }
+          ],
+          "historical_kernel_id": "2a076b7e9e0bbb73",
+          "kernel_scope": {
+            "2a076b7e9e0bbb73": {
+              "id": "2a076b7e9e0bbb73",
+              "content": "日常回复偏好简洁。标记 ZW-P02-PREF-OLD。",
+              "memory_type": "fact",
+              "scope": "global",
+              "valid_until": null,
+              "superseded_by": null,
+              "consolidated_at": null
+            },
+            "8845ae99093aa300": {
+              "id": "8845ae99093aa300",
+              "content": "正式报告需要详细论据。标记 ZW-P02-SCENE-FORMAL。",
+              "memory_type": "fact",
+              "scope": "global",
+              "valid_until": null,
+              "superseded_by": null,
+              "consolidated_at": null
+            }
+          }
+        }
+      },
+      {
+        "name": "same_store_is_recallable_by_token",
+        "ok": true,
+        "evidence": {
+          "method": "recall(token, top_k=5)",
+          "old": [
+            "2a076b7e9e0bbb73",
+            "17e3c7b016c47f12"
+          ],
+          "new": [
+            "17e3c7b016c47f12",
+            "2a076b7e9e0bbb73"
+          ],
+          "note": "Token hit only. This is not a Chinese Hit@5 result."
+        }
+      },
+      {
+        "name": "kernel_update_overwrites_body",
+        "ok": true,
+        "evidence": {
+          "method": "Mnemosyne.update -> BeamMemory.update_working",
+          "same_id": "2046d5687a73d45c",
+          "old_body_remaining": 0,
+          "adapter": "Do not use update() for a product version. remember() a new row."
+        }
+      },
+      {
+        "name": "expiry_hides_from_recall_but_keeps_history",
+        "ok": true,
+        "evidence": {
+          "kernel_stores_valid_until": {
+            "id": "c28f4b18e60f25ad",
+            "content": "本周试用深色主题，已经到期。标记 ZW-P02-EXPIRE。",
+            "memory_type": "fact",
+            "scope": "global",
+            "valid_until": "2000-01-01T00:00:00",
+            "superseded_by": null,
+            "consolidated_at": null
+          },
+          "get_returns_expired_body": true,
+          "recall_ids": [],
+          "future_recall_ids": [
+            "69146f4f4ec9a2f3"
+          ],
+          "get_context_contains_expired": false,
+          "adapter": "Product expiry also lives on the control row. get() does not return valid_until."
+        }
+      },
+      {
+        "name": "invalidate_keeps_old_body_and_hides_it",
+        "ok": true,
+        "evidence": {
+          "method": "invalidate(old_id, replacement_id=new_id)",
+          "meta": {
+            "id": "2a076b7e9e0bbb73",
+            "content": "日常回复偏好简洁。标记 ZW-P02-PREF-OLD。",
+            "memory_type": "fact",
+            "scope": "global",
+            "valid_until": "2026-09-24T22:00:30.757774",
+            "superseded_by": "17e3c7b016c47f12",
+            "consolidated_at": null
+          },
+          "recall_after": [
+            "17e3c7b016c47f12"
+          ]
+        }
+      },
+      {
+        "name": "retry_same_payload_finds_original",
+        "ok": true,
+        "evidence": {
+          "method": "BeamMemory.remember exact-content dedup within session_id",
+          "operation_id": "2885bdb5-cc1b-40e7-bf42-63e59cee56fd",
+          "kernel_id": "4e50ce52bfcf824d",
+          "row_count": 1,
+          "kernel_operation_id_field": false
+        }
+      },
+      {
+        "name": "operation_mismatch_and_lost_record",
+        "ok": true,
+        "evidence": {
+          "control_blocks_different_payload": true,
+          "kernel_has_no_operation_id": true,
+          "changed_payload_without_control_record_creates_new_row": "fac369cc2e9b5a62",
+          "adapter": "Retry the original payload. Persist operation_id only after remember() returns. A changed payload with no control row cannot be detected by the kernel."
+        }
+      },
+      {
+        "name": "forget_removes_working_body",
+        "ok": true,
+        "evidence": {
+          "method": "Mnemosyne.forget -> delete memories + BeamMemory.forget_working",
+          "facts_for_id_before": 1,
+          "facts_for_id_after": 1,
+          "annotations_for_id_after": 0,
+          "timelines_for_id_after": 0,
+          "legacy_rows_after": 0,
+          "counts_before_delete_sample": {
+            "working_memory": 9,
+            "episodic_memory": 0,
+            "memories": 9,
+            "memoria_facts": 1,
+            "memoria_timelines": 1,
+            "memoria_kg": 0,
+            "annotations": 18,
+            "triples": 0,
+            "memory_embeddings": 0
+          },
+          "counts_after": {
+            "working_memory": 9,
+            "episodic_memory": 0,
+            "memories": 9,
+            "memoria_facts": 2,
+            "memoria_timelines": 1,
+            "memoria_kg": 0,
+            "annotations": 18,
+            "triples": 0,
+            "memory_embeddings": 0
+          },
+          "vector_index": "sqlite-vec / fastembed not installed; cleanup not claimed"
+        }
+      },
+      {
+        "name": "remember_does_not_sleep_or_write_persona",
+        "ok": true,
+        "evidence": {
+          "episodic_rows_after_remember": 0,
+          "persona_file_exists": false,
+          "config_flags_are_not_execution": true
+        }
+      },
+      {
+        "name": "kernel_type_is_not_product_kind",
+        "ok": true,
+        "evidence": {
+          "kernel_memory_type": {
+            "preference_sample": "fact",
+            "event_sample": "fact"
+          },
+          "product_kind_stored_in": "control.memory_refs.kind"
+        }
+      }
+    ],
+    "control_db": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2\\core\\control.db",
+    "exit_code": 0
+  },
+  "ttl_default": {
+    "ttl_hours_seen_at_import": 168,
+    "doomed_id": "4dbe4064816771ed",
+    "survived": false,
+    "content": null,
+    "exit_code": 0
+  },
+  "ttl_disabled": {
+    "ttl_hours_seen_at_import": 1000000,
+    "doomed_id": "b3ca7401416df8c0",
+    "survived": true,
+    "content": "应受工作记忆清理影响的句子。标记 ZW-P02-TTL。",
+    "exit_code": 0
+  },
+  "explicit_sleep": {
+    "sleep_result_status": "consolidated",
+    "original_content": "睡眠压缩前的原句。标记 ZW-P02-SLEEP。",
+    "original_unchanged": true,
+    "consolidated_at": {
+      "id": "7fa513fc82d027fd",
+      "content": "睡眠压缩前的原句。标记 ZW-P02-SLEEP。",
+      "memory_type": "fact",
+      "scope": "global",
+      "valid_until": null,
+      "superseded_by": null,
+      "consolidated_at": "2026-09-24T22:00:33.944541"
+    },
+    "episodic": [
+      {
+        "id": "d9b480869762f536",
+        "summary_of": "7fa513fc82d027fd",
+        "content_equals_source": false,
+        "content_preview": "[zhiwo-p0.2] 睡眠压缩前的原句。标记 ZW-P02-SLEEP。"
+      }
+    ],
+    "exit_code": 0
+  },
+  "matrix": [
+    {
+      "check": "存取路径",
+      "api": "Mnemosyne.remember / get / recall",
+      "measured_ok": true,
+      "adapter": "Adapter 只把已发布 kernel_id 交给读取；recall 命中标记词只说明同一张 working_memory 可被检索。",
+      "limit": "中文 Hit@5 未测。"
+    },
+    {
+      "check": "自动 sleep / persona",
+      "api": "remember 不调用 sleep；persona.md 未生成",
+      "measured_ok": true,
+      "adapter": "产品写入路径不要调用 sleep()。配置项本身不是触发证据。",
+      "limit": "显式 sleep() 仍会生成压缩后的 episodic 行。"
+    },
+    {
+      "check": "显式 sleep",
+      "api": "Mnemosyne.sleep(force=True)",
+      "measured_ok": true,
+      "adapter": "不把 episodic 摘要当作正式正文。未登记的 kernel_id 一律丢弃。",
+      "limit": "默认 sleep 还会尝试模型刷新；本次用环境变量关掉了该分支。"
+    },
+    {
+      "check": "版本",
+      "api": "新 remember 行 + control.memory_refs",
+      "measured_ok": true,
+      "adapter": "更新时新建 kernel 行。当前指针和场景放在控制记录。",
+      "limit": "Mnemosyne.update 会原地覆盖，不能当作版本接口。"
+    },
+    {
+      "check": "有效期",
+      "api": "remember(valid_until) + invalidate + recall/get_context 过滤",
+      "measured_ok": true,
+      "adapter": "Kernel 负责检索过滤。知我仍保存有效期，并用 get(kernel_id) 读取历史正文。",
+      "limit": "get() 不返回 valid_until。"
+    },
+    {
+      "check": "删除",
+      "api": "Mnemosyne.forget",
+      "measured_ok": true,
+      "adapter": "正式正文走 forget。派生表残留不能当作正式记忆读取。",
+      "limit": "forget() 会留下 memoria_facts 派生行。向量索引未安装，不宣称已清理。"
+    },
+    {
+      "check": "幂等",
+      "api": "同会话相同正文的 remember 去重 + control.operations",
+      "measured_ok": true,
+      "adapter": "重试必须提交原始正文。operation_id 写在控制记录，不写进第二份正文库。",
+      "limit": "Kernel 没有 operation_id。控制记录丢失时，不同正文会再插入一行。"
+    },
+    {
+      "check": "工作记忆清理",
+      "api": "remember 后的 _trim_working_memory",
+      "measured_ok": true,
+      "adapter": "进程启动前设置 MNEMOSYNE_WM_TTL_HOURS 与足够大的 MNEMOSYNE_WM_MAX_ITEMS。",
+      "limit": "默认 168 小时会删除未巩固的旧行。常量在导入时读取。"
+    },
+    {
+      "check": "事实/事件",
+      "api": "control.memory_refs.kind；kernel memory_type 仅观察",
+      "measured_ok": true,
+      "adapter": "中文事实/事件由知我指定 kind。不要读取 kernel 的英文规则分类作为产品类别。",
+      "limit": "本次中文样本的 kernel memory_type 见结果，不能当成产品映射。"
+    }
+  ],
+  "not_verified": [
+    "Chinese Hit@5 and offline embeddings (P0.3)",
+    "vector index deletion (P0.3; embeddings extra not installed)",
+    "stdio MCP (P0.4)",
+    "product UI, full zhiwo.db, Electron"
+  ]
+}

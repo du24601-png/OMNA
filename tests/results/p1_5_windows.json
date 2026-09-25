@@ -1,0 +1,52 @@
+{
+  "task": "P1.5",
+  "platform": "Windows-11-10.0.26200",
+  "python": "3.12.13",
+  "service": "official FastAPI on 127.0.0.1",
+  "test_mode_for_real_extraction": false,
+  "embedding_model": "BAAI/bge-small-zh-v1.5",
+  "pass": true,
+  "items": {
+    "A01": {
+      "result": "PASS",
+      "evidence": "Added 日常回复偏好简洁, then edited it in the detail pane to 日常回复偏好先给结论 and checked 仅自己可见. Notice said the change took effect and did not enter 待确认. Pending proposals stayed empty. Version 1 is historical, version 2 is current. After restart the same revision and text were still readable. Screenshots: tests/results/p1_5/p1_5_direct_edit.png, p1_5_restart.png"
+    },
+    "A02": {
+      "result": "PASS",
+      "evidence": "Paste went through the page. TXT notes.txt and Markdown plan.md used POST /api/v1/imports, the same request the page sends after reading a file. Partial approve/reject is in tests/results/p1_5_extract.json. Approved memories keep source ids. Replaying the same Idempotency-Key did not add a source, job, or proposal. Screenshot: tests/results/p1_5/p1_5_source.png"
+    },
+    "A03": {
+      "result": "PASS_OWNER_READS",
+      "mcp": "NOT_RUN",
+      "evidence": "Pending 最近准备转 AI 产品 and rejected 正式报告需要详细论据, 进行面试辅导, 发布说明用完整句子 are absent from the memory list and profile. Search hits, when any, are other confirmed memories and do not contain those bodies. MCP is left for P2."
+    },
+    "A04": {
+      "result": "PASS_CITED",
+      "evidence": "tests/results/p1_3_windows.json update_conflict true, keep_both true. Not re-run."
+    },
+    "A05": {
+      "result": "PASS",
+      "evidence": "Profile shows only confirmed current facts. Detail shows memory id, version, and source text. Direct correction refreshed the profile. Screenshot: tests/results/p1_5/p1_5_profile_after_review.png"
+    },
+    "A11": {
+      "result": "PASS_PUBLISH_AND_RETRY",
+      "delete": "NOT_RUN",
+      "evidence": "tests/results/p1_3_windows.json accept_once, accept_then_reject, reject_then_accept, same_decision_different_payload, kernel_crash, commit_crash, pass true. Delete continuation remains P3."
+    },
+    "A12": {
+      "result": "PASS",
+      "offline": "Process HTTPS_PROXY/HTTP_PROXY pointed at 127.0.0.1:9. curl to the cloud host returned HTTP 000. Local save, read, and search of 断网探针：书桌靠窗 succeeded. Screenshot: tests/results/p1_5/p1_5_offline_search.png",
+      "unconfigured": "Import while no extractor was configured. Status extractor_unavailable, zero proposals, source kept. Screenshot: tests/results/p1_5/p1_5_import_unconfigured.png",
+      "timeout": "Local test endpoint, not the real model. Job error_code TIMEOUT. UI: 提取超时。来源仍在，可以重试。 Retry kept one source and zero proposals. Screenshot: tests/results/p1_5/p1_5_timeout.png",
+      "invalid_format": "Local test endpoint, not the real model. Job error_code VALIDATION_ERROR. UI: 提取结果格式无效。来源仍在，可以重试。 Retry kept one source and zero proposals. Screenshot: tests/results/p1_5/p1_5_invalid.png",
+      "blocked_cloud_call": "Same offline process, dummy extractor key, base URL https://api.deepseek.com. Job error_code MODEL_UNAVAILABLE. UI: 提取没有完成。来源仍在，可以重试。 Search for the source sentence returned no items. This is not the real-model result."
+    }
+  },
+  "real_model": {
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "sample": "tests/results/p1_5_extract.json",
+    "test_endpoint_used_as_substitute": false
+  },
+  "credential_in_repo": false
+}

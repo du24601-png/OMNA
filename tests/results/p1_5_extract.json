@@ -1,0 +1,82 @@
+{
+  "task": "P1.5",
+  "kind": "real_model",
+  "provider": "DeepSeek",
+  "base_url": "https://api.deepseek.com",
+  "model": "deepseek-flash",
+  "test_mode": false,
+  "path": "POST /api/v1/imports on the official service",
+  "source": {
+    "format": "paste",
+    "text": "林舟做产品运营，最近准备转 AI 产品。日常回复希望简洁。正式报告需要详细论据。"
+  },
+  "candidates": [
+    {
+      "content": "林舟做产品运营",
+      "category": "identity",
+      "evidence": "林舟做产品运营",
+      "evidence_in_source": true,
+      "judgment": "原文直接支持。",
+      "decision": "accept"
+    },
+    {
+      "content": "日常回复希望简洁",
+      "category": "preference",
+      "evidence": "日常回复希望简洁",
+      "evidence_in_source": true,
+      "judgment": "只覆盖日常回复，没有扩大成所有场景都简洁。",
+      "decision": "accept"
+    },
+    {
+      "content": "正式报告需要详细论据",
+      "category": "preference",
+      "evidence": "正式报告需要详细论据",
+      "evidence_in_source": true,
+      "judgment": "原文直接支持。按部分批准的要求拒绝，不进入正式记忆。",
+      "decision": "reject"
+    },
+    {
+      "content": "最近准备转 AI 产品",
+      "category": "goal",
+      "evidence": "最近准备转 AI 产品",
+      "evidence_in_source": true,
+      "judgment": "原文直接支持。留在待确认，用于检查未批准内容不会进入正式记忆、搜索和画像。",
+      "decision": "left_pending"
+    }
+  ],
+  "overgeneralization_all_scenes_concise": false,
+  "file_imports": [
+    {
+      "format": "txt",
+      "name": "notes.txt",
+      "text": "周宁每周三晚上面试辅导。备忘只记结论。",
+      "candidates": [
+        {
+          "content": "周宁每周三晚上进行面试辅导。",
+          "evidence": "周宁每周三晚上面试辅导",
+          "judgment": "证据是原文连续片段。候选正文多了「进行」，这次拒绝。",
+          "decision": "reject"
+        }
+      ]
+    },
+    {
+      "format": "markdown",
+      "name": "plan.md",
+      "text": "# 安排\n沈夏负责本地部署。发布说明用完整句子。\n",
+      "candidates": [
+        {
+          "content": "沈夏负责本地部署。",
+          "evidence": "沈夏负责本地部署。",
+          "judgment": "原文直接支持。",
+          "decision": "accept"
+        },
+        {
+          "content": "发布说明用完整句子。",
+          "evidence": "发布说明用完整句子。",
+          "judgment": "原文直接支持。按部分批准的要求拒绝。",
+          "decision": "reject"
+        }
+      ]
+    }
+  ]
+}

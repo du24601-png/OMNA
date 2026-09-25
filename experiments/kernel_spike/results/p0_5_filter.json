@@ -1,0 +1,25 @@
+{
+  "task": "P0.5",
+  "pass": true,
+  "command": ".venv\\Scripts\\python.exe -m unittest test_search_filter.py",
+  "recall_candidates": 40,
+  "max_response_limit": 20,
+  "reran_p0_experiments": false,
+  "tests": [
+    {
+      "name": "test_unregistered_first_row_does_not_consume_limit",
+      "rows": ["unregistered", "qualified"],
+      "limit": 1,
+      "returned_ids": ["m-keep"],
+      "truncated": false
+    },
+    {
+      "name": "test_limit_counts_qualified_rows_and_marks_truncated",
+      "rows": ["qualified", "qualified"],
+      "limit": 1,
+      "returned_count": 1,
+      "returned_ids": ["m-first"],
+      "truncated": true
+    }
+  ]
+}

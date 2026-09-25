@@ -1,0 +1,1277 @@
+{
+  "task": "P0.3",
+  "first_model": "BAAI/bge-small-zh-v1.5",
+  "second_model": "NOT_RUN",
+  "first": {
+    "model": "BAAI/bge-small-zh-v1.5",
+    "online_status": "SCORED",
+    "versions": {
+      "mnemosyne-memory": "3.15.1",
+      "fastembed": "0.8.1",
+      "sqlite-vec": "0.1.9",
+      "numpy": "2.5.3",
+      "onnxruntime": "1.30.0"
+    },
+    "index": {
+      "configured_model": "BAAI/bge-small-zh-v1.5",
+      "memory_embeddings": [
+        {
+          "model": "BAAI/bge-small-zh-v1.5",
+          "count": 20
+        }
+      ],
+      "vec_working_count": 20,
+      "vec_working_error": null,
+      "public_api": "Mnemosyne.recall(explain=True)",
+      "engine": "linear",
+      "working_path": "CJK queries miss unicode61 FTS terms and fall back to per-character LIKE, then merge sqlite-vec vec_working (or memory_embeddings cosine if vec0 is absent). A kept working-memory row still has to pass the lexical overlap gate; vector similarity is then blended into that score."
+    },
+    "kernel_ids": {
+      "m01": "4b21c536148750cd",
+      "m02": "fd2edebc3ed4ee69",
+      "m03": "1955be5e5e7bdf36",
+      "m04": "4f59db17c74b0ce7",
+      "m05": "a30cb54ebacaffbd",
+      "m06": "c41f09b2d6870208",
+      "m07": "0451ec0a22851b8f",
+      "m08": "9e76821f7a560cf5",
+      "m09": "3ac4ea6f0fceabc3",
+      "m10": "ff42382742fc7e32",
+      "m11": "71c24c5e4cf6fa69",
+      "m12": "1fd48c951dacdf06",
+      "m13": "5b03917cff32aded",
+      "m14": "20ce147fb7a52973",
+      "m15": "874e288087dc291d",
+      "m16": "d6d757045b65c900",
+      "m17": "51f22e8360c5b92c",
+      "m18": "aff936690f67dc27",
+      "m19": "e6173c218364dbe1",
+      "m20": "40986b607840d32d"
+    },
+    "direct": {
+      "queries": 10,
+      "hits": 10,
+      "hit_rate": 1.0,
+      "vector_hits": 10,
+      "vector_hit_rate": 1.0,
+      "failures": [],
+      "vector_misses": []
+    },
+    "rewrite": {
+      "queries": 10,
+      "hits": 9,
+      "hit_rate": 0.9,
+      "vector_hits": 10,
+      "vector_hit_rate": 1.0,
+      "failures": [
+        "r07"
+      ],
+      "vector_misses": []
+    },
+    "combined": {
+      "queries": 20,
+      "hits": 19,
+      "hit_at_5": 0.95,
+      "pass_80": true,
+      "vector_hits": 20,
+      "vector_hit_at_5": 1.0,
+      "vector_pass_80": true
+    },
+    "cases": [
+      {
+        "id": "d01",
+        "group": "direct",
+        "target_product": "m01",
+        "target_kernel": "4b21c536148750cd",
+        "query": "日常说话是不是希望先给结论并且句子简短",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "4b21c536148750cd",
+            "dense_score": 0.9326,
+            "keyword_score": 0.55,
+            "fts_score": 0.55,
+            "score": 0.4416800000000001,
+            "preview": "日常和别人说话时，希望先给结论，句子保持简短。"
+          },
+          {
+            "id": "40986b607840d32d",
+            "dense_score": 0.8847,
+            "keyword_score": 0.1667,
+            "fts_score": 0.1667,
+            "score": 0.3044,
+            "preview": "阅读喜欢短篇非虚构，不读连续剧式的长篇小说。"
+          }
+        ],
+        "vector_top": [
+          "4b21c536148750cd",
+          "40986b607840d32d",
+          "5b03917cff32aded",
+          "3ac4ea6f0fceabc3",
+          "aff936690f67dc27"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 30,
+            "after_filter_count": 20,
+            "kept_count": 2,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d02",
+        "group": "direct",
+        "target_product": "m02",
+        "target_kernel": "fd2edebc3ed4ee69",
+        "query": "正式书面材料里的判断要不要附依据和来源",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "fd2edebc3ed4ee69",
+            "dense_score": 0.9256,
+            "keyword_score": 0.875,
+            "fts_score": 0.875,
+            "score": 0.56216,
+            "preview": "写正式书面材料时，每一项判断都要附上依据和来源。"
+          },
+          {
+            "id": "40986b607840d32d",
+            "dense_score": 0.8748,
+            "keyword_score": 0.1667,
+            "fts_score": 0.1667,
+            "score": 0.30288000000000004,
+            "preview": "阅读喜欢短篇非虚构，不读连续剧式的长篇小说。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.8594,
+            "keyword_score": 0.1667,
+            "fts_score": 0.1667,
+            "score": 0.3004,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "fd2edebc3ed4ee69",
+          "9e76821f7a560cf5",
+          "4b21c536148750cd",
+          "51f22e8360c5b92c",
+          "5b03917cff32aded"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 32,
+            "after_filter_count": 20,
+            "kept_count": 3,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d03",
+        "group": "direct",
+        "target_product": "m03",
+        "target_kernel": "1955be5e5e7bdf36",
+        "query": "工作日早上七点起床后是不是先喝温水再看日程",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "1955be5e5e7bdf36",
+            "dense_score": 0.9404,
+            "keyword_score": 0.55,
+            "fts_score": 0.55,
+            "score": 0.44288,
+            "preview": "工作日早上七点起床，先喝一杯温水，再看当天日程。"
+          },
+          {
+            "id": "3ac4ea6f0fceabc3",
+            "dense_score": 0.874,
+            "keyword_score": 0.1579,
+            "fts_score": 0.1579,
+            "score": 0.29992,
+            "preview": "正在学日语，眼下的目标是能看懂菜单。"
+          },
+          {
+            "id": "9e76821f7a560cf5",
+            "dense_score": 0.8702,
+            "keyword_score": 0.1579,
+            "fts_score": 0.1579,
+            "score": 0.29936,
+            "preview": "工作是给中小商家整理库存表。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.8672,
+            "keyword_score": 0.1579,
+            "fts_score": 0.1579,
+            "score": 0.29888,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "1955be5e5e7bdf36",
+          "1fd48c951dacdf06",
+          "874e288087dc291d",
+          "51f22e8360c5b92c",
+          "a30cb54ebacaffbd"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 35,
+            "after_filter_count": 20,
+            "kept_count": 4,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d04",
+        "group": "direct",
+        "target_product": "m04",
+        "target_kernel": "4f59db17c74b0ce7",
+        "query": "午餐是不是通常自己带饭并且避开油炸",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "4f59db17c74b0ce7",
+            "dense_score": 0.9334,
+            "keyword_score": 0.7656,
+            "fts_score": 0.7656,
+            "score": 0.52128,
+            "preview": "午餐通常自己带饭，尽量不吃油炸的食物。"
+          },
+          {
+            "id": "51f22e8360c5b92c",
+            "dense_score": 0.8818,
+            "keyword_score": 0.1906,
+            "fts_score": 0.1906,
+            "score": 0.31168,
+            "preview": "记账按周进行，餐饮和交通要分开记。"
+          }
+        ],
+        "vector_top": [
+          "4f59db17c74b0ce7",
+          "ff42382742fc7e32",
+          "51f22e8360c5b92c",
+          "1955be5e5e7bdf36",
+          "3ac4ea6f0fceabc3"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 35,
+            "after_filter_count": 20,
+            "kept_count": 2,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d05",
+        "group": "direct",
+        "target_product": "m05",
+        "target_kernel": "a30cb54ebacaffbd",
+        "query": "周三晚上是不是去社区游泳池游一千米",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "a30cb54ebacaffbd",
+            "dense_score": 0.9337,
+            "keyword_score": 0.85,
+            "fts_score": 0.85,
+            "score": 0.5536800000000001,
+            "preview": "每周三晚上到社区游泳池，游大约一千米。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.867,
+            "keyword_score": 0.2682,
+            "fts_score": 0.2682,
+            "score": 0.33456,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "a30cb54ebacaffbd",
+          "1955be5e5e7bdf36",
+          "1fd48c951dacdf06",
+          "c41f09b2d6870208",
+          "0451ec0a22851b8f"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 37,
+            "after_filter_count": 20,
+            "kept_count": 2,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d06",
+        "group": "direct",
+        "target_product": "m06",
+        "target_kernel": "c41f09b2d6870208",
+        "query": "周末是不是骑公路自行车并且单次大约四十公里",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "c41f09b2d6870208",
+            "dense_score": 0.9392,
+            "keyword_score": 0.55,
+            "fts_score": 0.55,
+            "score": 0.44272,
+            "preview": "周末喜欢骑公路自行车，单次大约四十公里。"
+          },
+          {
+            "id": "1fd48c951dacdf06",
+            "dense_score": 0.8689,
+            "keyword_score": 0.2115,
+            "fts_score": 0.2115,
+            "score": 0.31632,
+            "preview": "睡觉前不看手机，改听大约二十分钟雨声。"
+          },
+          {
+            "id": "a30cb54ebacaffbd",
+            "dense_score": 0.8808,
+            "keyword_score": 0.1579,
+            "fts_score": 0.1579,
+            "score": 0.30104000000000003,
+            "preview": "每周三晚上到社区游泳池，游大约一千米。"
+          },
+          {
+            "id": "e6173c218364dbe1",
+            "dense_score": 0.8735,
+            "keyword_score": 0.1579,
+            "fts_score": 0.1579,
+            "score": 0.29984000000000005,
+            "preview": "冬天室内保持十八度，不把暖气开得很大。"
+          }
+        ],
+        "vector_top": [
+          "c41f09b2d6870208",
+          "a30cb54ebacaffbd",
+          "51f22e8360c5b92c",
+          "e6173c218364dbe1",
+          "1955be5e5e7bdf36"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 34,
+            "after_filter_count": 20,
+            "kept_count": 4,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d07",
+        "group": "direct",
+        "target_product": "m07",
+        "target_kernel": "0451ec0a22851b8f",
+        "query": "是不是住在杭州拱墅并且靠近运河",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "0451ec0a22851b8f",
+            "dense_score": 0.9424,
+            "keyword_score": 0.55,
+            "fts_score": 0.55,
+            "score": 0.44320000000000004,
+            "preview": "住在杭州拱墅，住处靠近运河。"
+          }
+        ],
+        "vector_top": [
+          "0451ec0a22851b8f",
+          "a30cb54ebacaffbd",
+          "e6173c218364dbe1",
+          "51f22e8360c5b92c",
+          "9e76821f7a560cf5"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 31,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d08",
+        "group": "direct",
+        "target_product": "m08",
+        "target_kernel": "9e76821f7a560cf5",
+        "query": "工作是不是给中小商家整理库存表",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "9e76821f7a560cf5",
+            "dense_score": 0.9484,
+            "keyword_score": 0.9464,
+            "fts_score": 0.9464,
+            "score": 0.59392,
+            "preview": "工作是给中小商家整理库存表。"
+          }
+        ],
+        "vector_top": [
+          "9e76821f7a560cf5",
+          "5b03917cff32aded",
+          "fd2edebc3ed4ee69",
+          "51f22e8360c5b92c",
+          "40986b607840d32d"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 30,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d09",
+        "group": "direct",
+        "target_product": "m09",
+        "target_kernel": "3ac4ea6f0fceabc3",
+        "query": "学日语的目标是不是先能看懂菜单",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "3ac4ea6f0fceabc3",
+            "dense_score": 0.9403,
+            "keyword_score": 0.8929,
+            "fts_score": 0.8929,
+            "score": 0.5714400000000001,
+            "preview": "正在学日语，眼下的目标是能看懂菜单。"
+          },
+          {
+            "id": "1955be5e5e7bdf36",
+            "dense_score": 0.8738,
+            "keyword_score": 0.2143,
+            "fts_score": 0.2143,
+            "score": 0.31800000000000006,
+            "preview": "工作日早上七点起床，先喝一杯温水，再看当天日程。"
+          }
+        ],
+        "vector_top": [
+          "3ac4ea6f0fceabc3",
+          "4b21c536148750cd",
+          "51f22e8360c5b92c",
+          "5b03917cff32aded",
+          "aff936690f67dc27"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 31,
+            "after_filter_count": 20,
+            "kept_count": 2,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "d10",
+        "group": "direct",
+        "target_product": "m10",
+        "target_kernel": "ff42382742fc7e32",
+        "query": "是不是对花生过敏所以点餐要确认酱料",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "ff42382742fc7e32",
+            "dense_score": 0.9413,
+            "keyword_score": 0.55,
+            "fts_score": 0.55,
+            "score": 0.44304,
+            "preview": "对花生过敏，点餐时必须确认酱料里没有花生。"
+          }
+        ],
+        "vector_top": [
+          "ff42382742fc7e32",
+          "4f59db17c74b0ce7",
+          "51f22e8360c5b92c",
+          "1955be5e5e7bdf36",
+          "aff936690f67dc27"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 33,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r01",
+        "group": "rewrite",
+        "target_product": "m11",
+        "target_kernel": "71c24c5e4cf6fa69",
+        "query": "宠物是一只小猫，能不能跳到睡觉的床上",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.9143,
+            "keyword_score": 0.5781,
+            "fts_score": 0.5781,
+            "score": 0.44888000000000006,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          },
+          {
+            "id": "a30cb54ebacaffbd",
+            "dense_score": 0.8755,
+            "keyword_score": 0.224,
+            "fts_score": 0.224,
+            "score": 0.32144,
+            "preview": "每周三晚上到社区游泳池，游大约一千米。"
+          },
+          {
+            "id": "40986b607840d32d",
+            "dense_score": 0.8697,
+            "keyword_score": 0.224,
+            "fts_score": 0.224,
+            "score": 0.32048000000000004,
+            "preview": "阅读喜欢短篇非虚构，不读连续剧式的长篇小说。"
+          },
+          {
+            "id": "1fd48c951dacdf06",
+            "dense_score": 0.8681,
+            "keyword_score": 0.224,
+            "fts_score": 0.224,
+            "score": 0.32024,
+            "preview": "睡觉前不看手机，改听大约二十分钟雨声。"
+          },
+          {
+            "id": "1955be5e5e7bdf36",
+            "dense_score": 0.8671,
+            "keyword_score": 0.224,
+            "fts_score": 0.224,
+            "score": 0.32008000000000003,
+            "preview": "工作日早上七点起床，先喝一杯温水，再看当天日程。"
+          }
+        ],
+        "vector_top": [
+          "71c24c5e4cf6fa69",
+          "a30cb54ebacaffbd",
+          "40986b607840d32d",
+          "1fd48c951dacdf06",
+          "1955be5e5e7bdf36"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 35,
+            "after_filter_count": 20,
+            "kept_count": 7,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r02",
+        "group": "rewrite",
+        "target_product": "m12",
+        "target_kernel": "1fd48c951dacdf06",
+        "query": "入睡之前会不会放下屏幕去听下雨的声音",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "1fd48c951dacdf06",
+            "dense_score": 0.9059,
+            "keyword_score": 0.5312,
+            "fts_score": 0.5312,
+            "score": 0.4308,
+            "preview": "睡觉前不看手机，改听大约二十分钟雨声。"
+          }
+        ],
+        "vector_top": [
+          "1fd48c951dacdf06",
+          "1955be5e5e7bdf36",
+          "874e288087dc291d",
+          "20ce147fb7a52973",
+          "e6173c218364dbe1"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 29,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r03",
+        "group": "rewrite",
+        "target_product": "m13",
+        "target_kernel": "5b03917cff32aded",
+        "query": "开会后的笔记是不是一行一条，避免连成一大段",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "5b03917cff32aded",
+            "dense_score": 0.9123,
+            "keyword_score": 0.5147,
+            "fts_score": 0.5147,
+            "score": 0.42592,
+            "preview": "会议记录只用条目，不写成长段落。"
+          },
+          {
+            "id": "51f22e8360c5b92c",
+            "dense_score": 0.9012,
+            "keyword_score": 0.2324,
+            "fts_score": 0.2324,
+            "score": 0.32816,
+            "preview": "记账按周进行，餐饮和交通要分开记。"
+          },
+          {
+            "id": "40986b607840d32d",
+            "dense_score": 0.8825,
+            "keyword_score": 0.2324,
+            "fts_score": 0.2324,
+            "score": 0.32528,
+            "preview": "阅读喜欢短篇非虚构，不读连续剧式的长篇小说。"
+          },
+          {
+            "id": "e6173c218364dbe1",
+            "dense_score": 0.8798,
+            "keyword_score": 0.2324,
+            "fts_score": 0.2324,
+            "score": 0.32480000000000003,
+            "preview": "冬天室内保持十八度，不把暖气开得很大。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.8636,
+            "keyword_score": 0.2324,
+            "fts_score": 0.2324,
+            "score": 0.32232,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "5b03917cff32aded",
+          "51f22e8360c5b92c",
+          "aff936690f67dc27",
+          "fd2edebc3ed4ee69",
+          "9e76821f7a560cf5"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 36,
+            "after_filter_count": 20,
+            "kept_count": 5,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r04",
+        "group": "rewrite",
+        "target_product": "m14",
+        "target_kernel": "20ce147fb7a52973",
+        "query": "出门办事的行李是不是一个能带上飞机的箱子，衣物偏向黑灰",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "20ce147fb7a52973",
+            "dense_score": 0.9142,
+            "keyword_score": 0.4688,
+            "fts_score": 0.4688,
+            "score": 0.41008,
+            "preview": "出差只带一个登机箱，衣服尽量选深色。"
+          },
+          {
+            "id": "4f59db17c74b0ce7",
+            "dense_score": 0.8727,
+            "keyword_score": 0.25,
+            "fts_score": 0.25,
+            "score": 0.32944,
+            "preview": "午餐通常自己带饭，尽量不吃油炸的食物。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.8712,
+            "keyword_score": 0.25,
+            "fts_score": 0.25,
+            "score": 0.3292,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "20ce147fb7a52973",
+          "e6173c218364dbe1",
+          "9e76821f7a560cf5",
+          "4f59db17c74b0ce7",
+          "c41f09b2d6870208"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 38,
+            "after_filter_count": 20,
+            "kept_count": 3,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r05",
+        "group": "rewrite",
+        "target_product": "m15",
+        "target_kernel": "874e288087dc291d",
+        "query": "含咖啡因的热饮是不是只放在午前，午后换成叶子泡的饮品",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "874e288087dc291d",
+            "dense_score": 0.9095,
+            "keyword_score": 0.4286,
+            "fts_score": 0.4286,
+            "score": 0.39536,
+            "preview": "咖啡只在上午喝，下午改喝茶。"
+          }
+        ],
+        "vector_top": [
+          "874e288087dc291d",
+          "1955be5e5e7bdf36",
+          "51f22e8360c5b92c",
+          "ff42382742fc7e32",
+          "4f59db17c74b0ce7"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 35,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r06",
+        "group": "rewrite",
+        "target_product": "m16",
+        "target_kernel": "d6d757045b65c900",
+        "query": "母亲所在的城市是不是四川的省会，而且按月打一次可视电话",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "d6d757045b65c900",
+            "dense_score": 0.9083,
+            "keyword_score": 0.4062,
+            "fts_score": 0.4062,
+            "score": 0.38752000000000003,
+            "preview": "妈妈住在成都，每个月通一次视频。"
+          }
+        ],
+        "vector_top": [
+          "d6d757045b65c900",
+          "51f22e8360c5b92c",
+          "5b03917cff32aded",
+          "1fd48c951dacdf06",
+          "1955be5e5e7bdf36"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 39,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r07",
+        "group": "rewrite",
+        "target_product": "m17",
+        "target_kernel": "51f22e8360c5b92c",
+        "query": "花销是不是七天汇总一次，吃饭和出行的钱不写在同一栏",
+        "hit": false,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "4f59db17c74b0ce7",
+            "dense_score": 0.8729,
+            "keyword_score": 0.3929,
+            "fts_score": 0.3929,
+            "score": 0.37736000000000003,
+            "preview": "午餐通常自己带饭，尽量不吃油炸的食物。"
+          }
+        ],
+        "vector_top": [
+          "51f22e8360c5b92c",
+          "9e76821f7a560cf5",
+          "5b03917cff32aded",
+          "1955be5e5e7bdf36",
+          "aff936690f67dc27"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 40,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r08",
+        "group": "rewrite",
+        "target_product": "m18",
+        "target_kernel": "aff936690f67dc27",
+        "query": "做投影片时是不是控制在十张以内，一张只讲一件事",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "aff936690f67dc27",
+            "dense_score": 0.8933,
+            "keyword_score": 0.3684,
+            "fts_score": 0.3684,
+            "score": 0.37224,
+            "preview": "演示文稿最多十页，每页只放一个观点。"
+          },
+          {
+            "id": "e6173c218364dbe1",
+            "dense_score": 0.8785,
+            "keyword_score": 0.3684,
+            "fts_score": 0.3684,
+            "score": 0.36984,
+            "preview": "冬天室内保持十八度，不把暖气开得很大。"
+          },
+          {
+            "id": "71c24c5e4cf6fa69",
+            "dense_score": 0.8643,
+            "keyword_score": 0.3684,
+            "fts_score": 0.3684,
+            "score": 0.36760000000000004,
+            "preview": "家里养了一只叫米粒的猫，不让它上床。"
+          }
+        ],
+        "vector_top": [
+          "aff936690f67dc27",
+          "5b03917cff32aded",
+          "fd2edebc3ed4ee69",
+          "51f22e8360c5b92c",
+          "9e76821f7a560cf5"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 39,
+            "after_filter_count": 20,
+            "kept_count": 3,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r09",
+        "group": "rewrite",
+        "target_product": "m19",
+        "target_kernel": "e6173c218364dbe1",
+        "query": "冷天屋里的温度是不是停在十八摄氏度附近，供暖不会拧到很高",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "e6173c218364dbe1",
+            "dense_score": 0.9139,
+            "keyword_score": 0.4688,
+            "fts_score": 0.4688,
+            "score": 0.41,
+            "preview": "冬天室内保持十八度，不把暖气开得很大。"
+          }
+        ],
+        "vector_top": [
+          "e6173c218364dbe1",
+          "1955be5e5e7bdf36",
+          "0451ec0a22851b8f",
+          "a30cb54ebacaffbd",
+          "1fd48c951dacdf06"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 37,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      },
+      {
+        "id": "r10",
+        "group": "rewrite",
+        "target_product": "m20",
+        "target_kernel": "40986b607840d32d",
+        "query": "看书是不是偏向纪实类短文，避开一季接一季的虚构故事",
+        "hit": true,
+        "vector_hit": true,
+        "top": [
+          {
+            "id": "40986b607840d32d",
+            "dense_score": 0.9139,
+            "keyword_score": 0.4286,
+            "fts_score": 0.4286,
+            "score": 0.39608,
+            "preview": "阅读喜欢短篇非虚构，不读连续剧式的长篇小说。"
+          }
+        ],
+        "vector_top": [
+          "40986b607840d32d",
+          "5b03917cff32aded",
+          "4b21c536148750cd",
+          "aff936690f67dc27",
+          "9e76821f7a560cf5"
+        ],
+        "embedding": {
+          "available": true,
+          "computed": true
+        },
+        "stages": [
+          {
+            "name": "wm_primary",
+            "raw_count": 36,
+            "after_filter_count": 20,
+            "kept_count": 1,
+            "fallback_used": false
+          },
+          {
+            "name": "em_fallback",
+            "raw_count": 0,
+            "after_filter_count": 0,
+            "kept_count": 0,
+            "fallback_used": true
+          }
+        ]
+      }
+    ],
+    "online_error": null,
+    "offline_network": "blocked:OSError:offline guard refused create_connection",
+    "offline_direct": {
+      "queries": 10,
+      "hits": 10,
+      "hit_rate": 1.0,
+      "vector_hits": 10,
+      "vector_hit_rate": 1.0,
+      "failures": [],
+      "vector_misses": []
+    },
+    "offline_rewrite": {
+      "queries": 10,
+      "hits": 9,
+      "hit_rate": 0.9,
+      "vector_hits": 10,
+      "vector_hit_rate": 1.0,
+      "failures": [
+        "r07"
+      ],
+      "vector_misses": []
+    },
+    "offline_combined": {
+      "queries": 20,
+      "hits": 19,
+      "hit_at_5": 0.95,
+      "pass_80": true,
+      "vector_hits": 20,
+      "vector_hit_at_5": 1.0,
+      "vector_pass_80": true
+    },
+    "offline_error": null,
+    "filters": {
+      "expired_id": "6b762286973f1122",
+      "expired_recalled": false,
+      "expired_get_content": "这座城市的公共图书馆每周三全天闭馆。",
+      "invalidated_id": "b93ccb0d57fbefa1",
+      "invalidated_recalled": false,
+      "invalidated_get_content": "旧地址在城西的老邮局旁边。",
+      "irrelevant_query": "如何校准实验室里的激光干涉仪",
+      "irrelevant_returned": 0,
+      "irrelevant_ids": [],
+      "exit_code": 0
+    },
+    "delete": {
+      "forgot": true,
+      "cleaned": {
+        "gists": 1,
+        "memoria_facts": 0
+      },
+      "drop_kernel": "71c24c5e4cf6fa69",
+      "keep_kernel": "4b21c536148750cd",
+      "before": {
+        "working": 1,
+        "memories": 1,
+        "memory_embeddings": 1,
+        "fts_working": 1,
+        "gists": 1,
+        "memoria_facts": 0,
+        "vec_rowid": 11,
+        "vec_working": 1
+      },
+      "after": {
+        "working": 0,
+        "memories": 0,
+        "memory_embeddings": 0,
+        "fts_working": 0,
+        "gists": 0,
+        "memoria_facts": 0,
+        "vec_working": 0
+      },
+      "keep_content": "日常和别人说话时，希望先给结论，句子保持简短。",
+      "keep_valid_until": "2099-01-01T00:00:00",
+      "keep_embedding": 1,
+      "keep_vec_working": 1,
+      "keep_gists": 1,
+      "other_tables_with_target_text": [],
+      "exit_code": 0
+    }
+  },
+  "second": null,
+  "accepted_model": "BAAI/bge-small-zh-v1.5",
+  "pass": true
+}

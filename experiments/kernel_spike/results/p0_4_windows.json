@@ -1,0 +1,248 @@
+{
+  "task": "P0.4",
+  "pass": true,
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64"
+  },
+  "client": {
+    "name": "OpenCode",
+    "version": "1.18.16",
+    "model": "opencode-go/deepseek-v4-flash",
+    "invocation": [
+      "C:\\Users\\example\\npm-global\\node_modules\\opencode-ai\\bin\\opencode.exe",
+      "run",
+      "<普通中文问题>",
+      "--dir",
+      "<runs/p0_4>",
+      "--model",
+      "opencode-go/deepseek-v4-flash",
+      "--format",
+      "json",
+      "--auto",
+      "--pure"
+    ],
+    "config": "experiments/kernel_spike/runs/p0_4/opencode.json",
+    "cursor_version": "3.21.18",
+    "cursor_not_used_because": "Cursor 3.21.18 的 CLI 能登记 MCP，但没有可脚本化的无头工具调用。cursor agent --print 会被交给 Electron。",
+    "claude_code_not_used_because": "Claude Code 2.1.158 能连上 stdio 并在初始化消息里发现 search_memory，但模型请求返回 HTTP 400，Coding Plan 订阅不可用，工具没有执行。",
+    "cursor_commit": "c4730f7d93d787d9ab120af715999f0345ee5bc0"
+  },
+  "server": {
+    "entry": "experiments/kernel_spike/p0_4_stdio.py",
+    "sdk": {
+      "mcp": "2.2.0",
+      "mnemosyne-memory": "3.15.1",
+      "fastembed": "0.8.1",
+      "sqlite-vec": "0.1.9"
+    },
+    "startup": {
+      "command": "D:\\zhiwo\\experiments\\kernel_spike\\.venv\\Scripts\\python.exe",
+      "args": [
+        "D:\\zhiwo\\experiments\\kernel_spike\\p0_4_stdio.py"
+      ],
+      "env": {
+        "PATH": "<inherited>",
+        "PATHEXT": "<inherited>",
+        "SYSTEMROOT": "C:\\WINDOWS",
+        "SYSTEMDRIVE": "C:",
+        "TEMP": "C:\\Users\\EXAMPL~1\\AppData\\Local\\Temp",
+        "TMP": "C:\\Users\\EXAMPL~1\\AppData\\Local\\Temp",
+        "USERPROFILE": "C:\\Users\\example",
+        "APPDATA": "C:\\Users\\example\\AppData\\Roaming",
+        "LOCALAPPDATA": "C:\\Users\\example\\AppData\\Local",
+        "HOMEDRIVE": "C:",
+        "HOMEPATH": "\\Users\\example",
+        "USERNAME": "example",
+        "PROCESSOR_ARCHITECTURE": "AMD64",
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+        "ZHIWO_DATA_DIR": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_4\\data",
+        "ZHIWO_CONTROL_PATH": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_4\\data\\control.json",
+        "ZHIWO_AGENT_FILE": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_4\\agent.json",
+        "ZHIWO_ACCESS_LOG": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_4\\access.jsonl",
+        "ZHIWO_SERVER_LOG": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_4\\server.log",
+        "MNEMOSYNE_FASTEMBED_CACHE_DIR": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_3\\fastembed-cache",
+        "ZHIWO_AGENT_CREDENTIAL": "<redacted>"
+      },
+      "cwd": "D:\\zhiwo\\experiments\\kernel_spike"
+    },
+    "exposed_tools": [
+      "search_memory"
+    ],
+    "database": "copy of experiments/kernel_spike/runs/p0_3/zh/before-recall/mnemosyne.db",
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "embedding_cache": "experiments/kernel_spike/runs/p0_3/fastembed-cache",
+    "offline": true
+  },
+  "question": {
+    "id": "d06",
+    "text": "周末是不是骑公路自行车并且单次大约四十公里",
+    "target_id": "m06",
+    "target_content": "周末喜欢骑公路自行车，单次大约四十公里。"
+  },
+  "preflight": [
+    {
+      "initialized": true,
+      "tools": [
+        "search_memory"
+      ],
+      "pid": 11864,
+      "authenticated_process": true,
+      "capabilities": {
+        "tools": true,
+        "resources": false,
+        "prompts": false
+      },
+      "server_payload": "{\"request_id\": \"aa4384b9-96e7-4c2e-b341-801728aa7c61\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "target_in_tool_payload": true,
+      "outcomes": [
+        "ok"
+      ],
+      "label": "preflight-good",
+      "client_tool_text": "{\"request_id\": \"aa4384b9-96e7-4c2e-b341-801728aa7c61\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "process_exited": true
+    },
+    {
+      "initialized": true,
+      "tools": [
+        "search_memory"
+      ],
+      "pid": 15916,
+      "authenticated_process": false,
+      "capabilities": {
+        "tools": true,
+        "resources": false,
+        "prompts": false
+      },
+      "server_payload": "{\"request_id\": \"80c4d493-bd7d-4166-a434-26c323370308\", \"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"credential rejected\", \"retryable\": false}}",
+      "target_in_tool_payload": false,
+      "outcomes": [
+        "unauthenticated"
+      ],
+      "label": "preflight-bad",
+      "client_tool_text": "{\"request_id\": \"80c4d493-bd7d-4166-a434-26c323370308\", \"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"credential rejected\", \"retryable\": false}}",
+      "process_exited": true
+    }
+  ],
+  "client_runs": [
+    {
+      "label": "client-good-1",
+      "exit_code": 0,
+      "initialized": true,
+      "tools": [
+        "search_memory"
+      ],
+      "pid": 25024,
+      "process_exited": true,
+      "capabilities": {
+        "tools": true,
+        "resources": false,
+        "prompts": false
+      },
+      "authenticated_process": true,
+      "server_payload": "{\"request_id\": \"7ef4ee4e-090f-4867-8ea6-06378cde6eb8\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "client_tool_uses": [
+        {
+          "name": "zhiwo_search_memory",
+          "input": {
+            "query": "周末是不是骑公路自行车并且单次大约四十公里"
+          }
+        }
+      ],
+      "client_tool_result": "{\"request_id\": \"7ef4ee4e-090f-4867-8ea6-06378cde6eb8\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "model_final_answer": "是的。记忆 m06（运动类）确认：周末喜欢骑公路自行车，单次大约四十公里。",
+      "target_in_server_payload": true,
+      "target_in_client_tool_result": true,
+      "outcomes": [
+        "ok"
+      ],
+      "stderr_excerpt": ""
+    },
+    {
+      "label": "client-good-2",
+      "exit_code": 0,
+      "initialized": true,
+      "tools": [
+        "search_memory"
+      ],
+      "pid": 37788,
+      "process_exited": true,
+      "capabilities": {
+        "tools": true,
+        "resources": false,
+        "prompts": false
+      },
+      "authenticated_process": true,
+      "server_payload": "{\"request_id\": \"ed033315-e71e-4d1d-a49b-66f0614c18e0\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "client_tool_uses": [
+        {
+          "name": "zhiwo_search_memory",
+          "input": {
+            "query": "周末是不是骑公路自行车并且单次大约四十公里"
+          }
+        }
+      ],
+      "client_tool_result": "{\"request_id\": \"ed033315-e71e-4d1d-a49b-66f0614c18e0\", \"items\": [{\"id\": \"m06\", \"revision\": 1, \"content\": \"周末喜欢骑公路自行车，单次大约四十公里。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m12\", \"revision\": 1, \"content\": \"睡觉前不看手机，改听大约二十分钟雨声。\", \"kind\": \"unspecified\", \"category\": \"睡眠\", \"scope\": \"睡眠\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m05\", \"revision\": 1, \"content\": \"每周三晚上到社区游泳池，游大约一千米。\", \"kind\": \"unspecified\", \"category\": \"运动\", \"scope\": \"运动\", \"valid_until\": \"2099-01-01T00:00:00\"}, {\"id\": \"m19\", \"revision\": 1, \"content\": \"冬天室内保持十八度，不把暖气开得很大。\", \"kind\": \"unspecified\", \"category\": \"居住\", \"scope\": \"居住\", \"valid_until\": \"2099-01-01T00:00:00\"}], \"truncated\": false}",
+      "model_final_answer": "符合。记忆 m06（运动，v1）：「周末喜欢骑公路自行车，单次大约四十公里。」",
+      "target_in_server_payload": true,
+      "target_in_client_tool_result": true,
+      "outcomes": [
+        "ok"
+      ],
+      "stderr_excerpt": ""
+    },
+    {
+      "label": "client-bad",
+      "exit_code": 0,
+      "initialized": true,
+      "tools": [
+        "search_memory"
+      ],
+      "pid": 27312,
+      "process_exited": true,
+      "capabilities": {
+        "tools": true,
+        "resources": false,
+        "prompts": false
+      },
+      "authenticated_process": false,
+      "server_payload": "{\"request_id\": \"031b7da4-88d3-44c1-8a0a-86e094d5bbe1\", \"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"credential rejected\", \"retryable\": false}}",
+      "client_tool_uses": [
+        {
+          "name": "zhiwo_search_memory",
+          "input": {
+            "query": "周末是不是骑公路自行车并且单次大约四十公里"
+          }
+        }
+      ],
+      "client_tool_result": "{\"request_id\": \"031b7da4-88d3-44c1-8a0a-86e094d5bbe1\", \"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"credential rejected\", \"retryable\": false}}",
+      "model_final_answer": "工具返回错误：`UNAUTHENTICATED`，`credential rejected`（凭据被拒绝，不可重试）。我没有从工具获得任何记忆内容。",
+      "target_in_server_payload": false,
+      "target_in_client_tool_result": false,
+      "outcomes": [
+        "unauthenticated"
+      ],
+      "stderr_excerpt": ""
+    }
+  ],
+  "client_error": null,
+  "credential": {
+    "transport": "stdio child env ZHIWO_AGENT_CREDENTIAL",
+    "stored_as": "sha256 in runs/p0_4/agent.json",
+    "agent_id": "agent-p04-test",
+    "wrong_credential_rejected": true,
+    "present_in_logs": []
+  },
+  "limits": [
+    "只暴露 search_memory，没有 get_context、propose_memory、explain_memory，也没有完整 Gateway 或 zhiwo.db。",
+    "这一轮没有类别授权。测试凭证通过后能读到该合成库里已登记的记忆；错误凭证拿不到正文。",
+    "MemoryItem.kind 固定为 unspecified。场景来自控制记录，不来自 Kernel memory_type。",
+    "客户端最终回答由 OpenCode 调用的远程模型 opencode-go/deepseek-v4-flash 生成。记忆检索在本机、离线缓存上完成。",
+    "Kernel recall 会更新实验副本里的 recall_count。P0.3 的原始库没有被这轮写入。",
+    "P0.3 首次从 Hugging Face 下载 BAAI/bge-small-zh-v1.5 因 TLS 中断失败。模型文件后来从 Qdrant 的 GCS 压缩包手工放进缓存。安装体验留到产品化阶段。",
+    "改写查询 r07 仍会在字面门槛被丢掉。本轮问题用的是已冻结的直接查询 d06。"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "old_preference": "日常回复偏好简洁。标记 ZW-P02-PREF-OLD。",
+  "new_preference": "日常回复偏好先给结论。标记 ZW-P02-PREF-NEW。",
+  "formal_report": "正式报告需要详细论据。标记 ZW-P02-SCENE-FORMAL。",
+  "event": "2024-03-01 把周报改成书面记录。标记 ZW-P02-EVENT。",
+  "already_expired": "本周试用深色主题，已经到期。标记 ZW-P02-EXPIRE。",
+  "still_valid": "下月前使用浅色主题。标记 ZW-P02-VALID。",
+  "inplace_before": "将被原地覆盖的对照句。标记 ZW-P02-INPLACE-OLD。",
+  "inplace_after": "原地覆盖后的对照句。标记 ZW-P02-INPLACE-NEW。",
+  "idempotent": "幂等重试样本：回复保持礼貌。标记 ZW-P02-IDEM。",
+  "idempotent_other": "同一操作号的不同正文。标记 ZW-P02-IDEM-OTHER。",
+  "delete_me": "待删除正文，含 250ms 超时。标记 ZW-P02-DELETE。",
+  "ttl_old": "应受工作记忆清理影响的句子。标记 ZW-P02-TTL。",
+  "ttl_keeper": "用于触发下一次写入的句子。标记 ZW-P02-TTL-KEEP。",
+  "sleep_source": "睡眠压缩前的原句。标记 ZW-P02-SLEEP。",
+  "same_body": "日常回复偏好简洁。标记 ZW-P02-SAME-BODY。"
+}

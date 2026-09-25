@@ -1,0 +1,62 @@
+{
+  "task": "P1.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "real_cloud_extraction": "NOT_RUN",
+  "extractor_double": "local-http",
+  "rejected_without_embeddings": 503,
+  "rejected_code": "MODEL_UNAVAILABLE",
+  "oversize_status": 400,
+  "invalid_utf8_status": 400,
+  "connect_only_refs": 0,
+  "connect_only_sources": 0,
+  "health_embeddings_loaded": true,
+  "first_status": 200,
+  "second_status": 200,
+  "same_memory_id": true,
+  "same_kernel_id": true,
+  "conflict_status": 409,
+  "conflict_code": "CONFLICT",
+  "unavailable_status": "extractor_unavailable",
+  "unavailable_proposals": 0,
+  "restart_pid_changed": true,
+  "search_after_restart": [
+    "6144ca51-2448-4d20-bab3-5ffb72803789"
+  ],
+  "imports": [
+    {
+      "status": "extracted",
+      "format": "paste",
+      "proposals": 1
+    },
+    {
+      "status": "extracted",
+      "format": "txt",
+      "proposals": 1
+    },
+    {
+      "status": "extracted",
+      "format": "markdown",
+      "proposals": 1
+    }
+  ],
+  "failed_status": "failed",
+  "failed_code": "VALIDATION_ERROR",
+  "retry_status": "failed",
+  "candidate_search_count": 0,
+  "saved_search_count": 1,
+  "active_refs": 1,
+  "sources": 5,
+  "proposals": 3,
+  "operation_status": "completed",
+  "kernel_rows": 1,
+  "candidate_rows": 0,
+  "embedding_rows": 1,
+  "markdown_kept_script": true,
+  "experiment_unchanged": true,
+  "credential_in_logs": false,
+  "published_kind": "fact",
+  "published_category": "preference",
+  "proposal_evidence": true,
+  "pass": true
+}

@@ -1,0 +1,264 @@
+{
+  "task": "P0.2-session",
+  "identity": {
+    "route_ok": true,
+    "daily_id": "d24a7baa507b2212",
+    "formal_id": "f2fbb7e0f992644f",
+    "daily_session": "zhiwo:mem-daily:r1",
+    "formal_session": "zhiwo:mem-formal:r1",
+    "valid_until_after_second_write": {
+      "daily": "2099-01-01T00:00:00",
+      "formal": "2098-06-01T00:00:00"
+    },
+    "version_ids": {
+      "1": "373091ee612bcf76",
+      "2": "8ffa7efc8edf2d93",
+      "3": "61cc51130aa2baa1"
+    },
+    "version_reads_from_one_reader": {
+      "1": "偏好版本甲。标记 ZW-P02-VER-A。",
+      "2": "偏好版本乙。标记 ZW-P02-VER-B。",
+      "3": "偏好版本甲。标记 ZW-P02-VER-A。"
+    },
+    "recall_ids_from_reader_session": [
+      "d24a7baa507b2212",
+      "f2fbb7e0f992644f"
+    ],
+    "db_path": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_2_session\\identity\\mnemosyne.db",
+    "exit_code": 0
+  },
+  "retry": {
+    "crashed": {
+      "exit_code": 86
+    },
+    "conflict": {
+      "status_before_retry": "prepared",
+      "conflicts": {
+        "content": true,
+        "scenario": true,
+        "valid_until": true,
+        "revision": true
+      },
+      "remember_called": false,
+      "rows_in_original_session": 1,
+      "exit_code": 0
+    },
+    "resumed": {
+      "kernel_id": "03ec6cd04890e286",
+      "rows": 1,
+      "status": "published",
+      "exit_code": 0
+    }
+  },
+  "delete": {
+    "setup": {
+      "drop_id": "1d79bc6293bcf3a9",
+      "keep_id": "1aaa547d7da0d0e8",
+      "drop_owned_before": {
+        "gists": [
+          {
+            "id": "gist_1d79bc6293bcf3a9",
+            "text": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "timestamp": "2026-09-24T22:25:49.568815",
+            "participants_json": "[]",
+            "location": null,
+            "emotion": null,
+            "time_scope": null,
+            "memory_id": "1d79bc6293bcf3a9",
+            "created_at": "2026-09-25 02:25:49"
+          }
+        ],
+        "memoria_facts": [
+          {
+            "id": 2,
+            "session_id": "zhiwo:mem-drop:r1",
+            "message_idx": 0,
+            "fact_type": "metric",
+            "key": "同正文删除对照，含_ms",
+            "value": "250ms",
+            "context_snippet": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "importance": 0.65,
+            "timestamp": null,
+            "version_id": 0,
+            "previous_value": null,
+            "updated_msg_idx": null,
+            "valid_from_msg_idx": 0,
+            "valid_to_msg_idx": null,
+            "source_memory_id": "1d79bc6293bcf3a9"
+          }
+        ]
+      },
+      "keep_owned_before": {
+        "gists": [
+          {
+            "id": "gist_1aaa547d7da0d0e8",
+            "text": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "timestamp": "2026-09-24T22:25:49.510744",
+            "participants_json": "[]",
+            "location": null,
+            "emotion": null,
+            "time_scope": null,
+            "memory_id": "1aaa547d7da0d0e8",
+            "created_at": "2026-09-25 02:25:49"
+          }
+        ],
+        "memoria_facts": [
+          {
+            "id": 1,
+            "session_id": "zhiwo:mem-keep:r1",
+            "message_idx": 0,
+            "fact_type": "metric",
+            "key": "同正文删除对照，含_ms",
+            "value": "250ms",
+            "context_snippet": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "importance": 0.65,
+            "timestamp": null,
+            "version_id": 0,
+            "previous_value": null,
+            "updated_msg_idx": null,
+            "valid_from_msg_idx": 0,
+            "valid_to_msg_idx": null,
+            "source_memory_id": "1aaa547d7da0d0e8"
+          }
+        ]
+      },
+      "exit_code": 0
+    },
+    "interrupted": {
+      "exit_code": 86
+    },
+    "resumed": {
+      "body_already_gone": true,
+      "cleaned": {
+        "gists": 1,
+        "memoria_facts": 1
+      },
+      "second_cleanup": {
+        "gists": 0,
+        "memoria_facts": 0
+      },
+      "drop_owned_after": {
+        "gists": [],
+        "memoria_facts": []
+      },
+      "keep_content": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+      "keep_valid_until": "2099-01-01T00:00:00",
+      "keep_owned_after": {
+        "gists": [
+          {
+            "id": "gist_1aaa547d7da0d0e8",
+            "text": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "timestamp": "2026-09-24T22:25:49.510744",
+            "participants_json": "[]",
+            "location": null,
+            "emotion": null,
+            "time_scope": null,
+            "memory_id": "1aaa547d7da0d0e8",
+            "created_at": "2026-09-25 02:25:49"
+          }
+        ],
+        "memoria_facts": [
+          {
+            "id": 1,
+            "session_id": "zhiwo:mem-keep:r1",
+            "message_idx": 0,
+            "fact_type": "metric",
+            "key": "同正文删除对照，含_ms",
+            "value": "250ms",
+            "context_snippet": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "importance": 0.65,
+            "timestamp": null,
+            "version_id": 0,
+            "previous_value": null,
+            "updated_msg_idx": null,
+            "valid_from_msg_idx": 0,
+            "valid_to_msg_idx": null,
+            "source_memory_id": "1aaa547d7da0d0e8"
+          }
+        ]
+      },
+      "other_residue_for_dropped_id": [
+        {
+          "table": "memories",
+          "row": {
+            "id": "1aaa547d7da0d0e8",
+            "content": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "source": "zhiwo",
+            "timestamp": "2026-09-24T22:25:49.515960",
+            "session_id": "zhiwo:mem-keep:r1",
+            "importance": 0.9,
+            "metadata_json": "{}",
+            "created_at": "2026-09-25 02:25:49"
+          }
+        },
+        {
+          "table": "working_memory",
+          "row": {
+            "id": "1aaa547d7da0d0e8",
+            "content": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。",
+            "source": "zhiwo",
+            "timestamp": "2026-09-24T22:25:49.490406",
+            "session_id": "zhiwo:mem-keep:r1",
+            "importance": 0.9,
+            "metadata_json": "{}",
+            "veracity": "unknown",
+            "created_at": "2026-09-25 02:25:49",
+            "memory_type": "fact",
+            "consolidated_at": null,
+            "consolidation_claimed_at": null,
+            "recall_count": 0,
+            "last_recalled": null,
+            "pinned": 0,
+            "valid_until": "2099-01-01T00:00:00",
+            "superseded_by": null,
+            "scope": "global",
+            "author_id": null,
+            "author_type": null,
+            "channel_id": "zhiwo:mem-keep:r1",
+            "trust_tier": "STATED",
+            "validator": null,
+            "validated_at": null,
+            "validation_count": 0,
+            "event_date": null,
+            "event_date_precision": "unknown",
+            "temporal_tags": "[]",
+            "corrected_by": null
+          }
+        },
+        {
+          "table": "fts_working",
+          "row": {
+            "id": "1aaa547d7da0d0e8",
+            "content": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。"
+          }
+        },
+        {
+          "table": "fts_working_content",
+          "row": {
+            "id": 1,
+            "c0": "1aaa547d7da0d0e8",
+            "c1": "同正文删除对照，含 250ms。标记 ZW-P02-DEL-PAIR。"
+          }
+        }
+      ],
+      "exit_code": 0
+    }
+  },
+  "capacity": {
+    "constant": 2,
+    "count_at_refusal": 2,
+    "refused_third": true,
+    "first_two_intact": {
+      "first": true,
+      "second": true
+    },
+    "separate_sessions_kept": true,
+    "exit_code": 0
+  },
+  "schema_guard": {
+    "rejected": true,
+    "error": "missing table gists",
+    "exit_code": 0
+  },
+  "session_route": "PASS"
+}

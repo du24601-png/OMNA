@@ -1,0 +1,81 @@
+{
+  "task": "P0.1",
+  "status": "DONE",
+  "native_windows": true,
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64"
+  },
+  "versions": {
+    "python": "3.12.13",
+    "python_executable": "D:\\zhiwo\\experiments\\kernel_spike\\.venv\\Scripts\\python.exe",
+    "mnemosyne_memory": "3.15.1",
+    "mnemosyne_tag": "v3.15.1",
+    "mnemosyne_commit": "78506708aae344635e01a24f67a7319efc36fce9",
+    "uv": "uv 0.11.17 (a33a629d6 2026-05-28 x86_64-pc-windows-msvc)",
+    "node": "v24.13.0",
+    "pnpm": "11.21.0"
+  },
+  "commands": [
+    "uv python pin 3.12",
+    "uv lock",
+    "uv sync",
+    "uv run python p0_1_roundtrip.py"
+  ],
+  "child_commands": [
+    [
+      "D:\\zhiwo\\experiments\\kernel_spike\\.venv\\Scripts\\python.exe",
+      "p0_1_roundtrip.py",
+      "write",
+      "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1"
+    ],
+    [
+      "D:\\zhiwo\\experiments\\kernel_spike\\.venv\\Scripts\\python.exe",
+      "p0_1_roundtrip.py",
+      "read",
+      "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1"
+    ]
+  ],
+  "exit_codes": {
+    "write": 0,
+    "read": 0
+  },
+  "data_dir": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1",
+  "db_path": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1\\mnemosyne.db",
+  "sample": "知我 P0.1 合成样本：日常回复偏好简洁。标记 ZW-P01-SYNTH-7F3A。",
+  "write": {
+    "memory_id": "5c86efeb7cda7900",
+    "content": "知我 P0.1 合成样本：日常回复偏好简洁。标记 ZW-P01-SYNTH-7F3A。",
+    "db_path": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1\\mnemosyne.db",
+    "mnemosyne_version": "3.15.1"
+  },
+  "read_back": {
+    "memory_id": "5c86efeb7cda7900",
+    "content": "知我 P0.1 合成样本：日常回复偏好简洁。标记 ZW-P01-SYNTH-7F3A。",
+    "match": true,
+    "db_path": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_1\\mnemosyne.db",
+    "found": true
+  },
+  "user_hermes_mtime_unchanged": true,
+  "user_hermes_before": {
+    "exists": 1784558547.289597,
+    "latest_child": 1784558547.4336498
+  },
+  "user_hermes_after": {
+    "exists": 1784558547.289597,
+    "latest_child": 1784558547.4336498
+  },
+  "not_verified": [
+    "semantic recall and Chinese Hit@5 (P0.3)",
+    "local embedding model and offline recall (P0.3)",
+    "version history, delete, expiry, idempotent operation_id (P0.2)",
+    "stdio MCP client (P0.4)",
+    "product UI, zhiwo.db, Electron packaging"
+  ],
+  "stderr": {
+    "write": "",
+    "read": ""
+  }
+}
