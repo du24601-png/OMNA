@@ -1,0 +1,13 @@
+[project]
+name = "zhiwo-server"
+version = "0.0.0"
+description = "知我本地服务（P1 起实现；P0 见 experiments/kernel_spike）"
+readme = "../README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["../tests"]

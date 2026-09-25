@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Local data (never commit user memory, keys, or backups)
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+/data/
+.zhiwo/
+**/local_data/
+experiments/**/runs/
+backups/
+exports/
+
+# Secrets and credentials
+*.pem
+*.key
+credentials.json
+**/access_snapshots/
+
+# Tooling / OS
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+*.swp
+
+# Build outputs
+apps/desktop/out/
+apps/desktop/dist/
+apps/web/dist/
+*.exe
+*.msi
+
+# Model caches (local only)
+**/model_cache/
+.cache/
