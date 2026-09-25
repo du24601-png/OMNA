@@ -110,6 +110,7 @@ def _hit(ref, content: str) -> dict:
         "scope": ref["scope"],
         "valid_until": ref["valid_until"],
         "share_enabled": bool(ref["share_enabled"]),
+        "created_at": ref["created_at"] if "created_at" in ref.keys() else None,
     }
 
 
@@ -131,7 +132,7 @@ def _active_by_kernel(db_path) -> dict[str, sqlite3.Row]:
     try:
         rows = connection.execute(
             """
-            SELECT memory_id, revision, kernel_id, kind, category, scope, valid_until, share_enabled
+            SELECT memory_id, revision, kernel_id, kind, category, scope, valid_until, share_enabled, created_at
             FROM memory_refs
             WHERE lifecycle = 'active' AND kernel_id IS NOT NULL AND kernel_id != ''
             """

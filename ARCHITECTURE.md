@@ -118,7 +118,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 
 ### 6.1 本机 Owner API
 
-前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。`GET /health` 在此前缀之外，只表示进程在运行。`GET /api/v1/health` 返回控制库版本、Kernel 连接、提取模型是否已配置，以及 `test_mode`。`test_mode` 只在 `ZHIWO_TEST_MODE=1` 时为真，页面用它标明演示数据。该接口要求 Owner 凭证。
+前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。`GET /health` 在此前缀之外，只表示进程在运行。`GET /api/v1/health` 返回控制库版本、Kernel 连接、提取模型是否已配置、`test_mode`，以及 `mcp_runtime`。`test_mode` 只在 `ZHIWO_TEST_MODE=1` 时为真，页面用它标明演示数据。`mcp_runtime` 只包含本机 stdio bridge 的启动命令、`PYTHONPATH` 和当前服务地址，不包含 Agent 凭证。该接口要求 Owner 凭证。
 
 | 路由 | 用途 |
 | --- | --- |

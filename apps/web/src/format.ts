@@ -26,9 +26,9 @@ export function lifecycleLabel(value: string) {
 }
 
 export const TOOLS: [string, string][] = [
-  ["get_context", "获取上下文"],
+  ["get_context", "按任务获取记忆"],
   ["search_memory", "搜索记忆"],
-  ["propose_memory", "提出记忆"],
+  ["propose_memory", "提出修改建议"],
   ["explain_memory", "解释记忆"],
 ]
 
@@ -52,8 +52,26 @@ export function deliveryLabel(value: string) {
 }
 
 export function connectionLabel(status: string) {
-  if (status === "verified") return "已连接"
+  if (status === "verified") return "曾验证成功"
   return "待验证"
+}
+
+export function sharingLabel(memory: { share_enabled?: boolean }) {
+  return memory.share_enabled === false ? "仅自己可见" : "允许已授权 Agent 读取"
+}
+
+export function dateLabel(value?: string | null) {
+  if (!value) return "时间未提供"
+  const date = new Date(value)
+  if (!Number.isFinite(date.getTime())) return "时间未提供"
+  return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(date)
+}
+
+export const TOOL_DESCRIPTIONS: Record<string, string> = {
+  get_context: "按当前任务获取相关且获准的记忆。",
+  search_memory: "搜索获准类别内的当前有效记忆。",
+  propose_memory: "提出新增或修改建议，等待你确认。",
+  explain_memory: "查看获准记忆的已审核证据片段。",
 }
 
 export function connectionStatus(agent: { enabled: boolean; client_status: string }) {

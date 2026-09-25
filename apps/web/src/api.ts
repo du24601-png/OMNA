@@ -23,6 +23,7 @@ export type Memory = {
   valid_until?: string | null
   source_ids?: string[]
   readable?: boolean
+  created_at?: string
 }
 
 export type Version = Memory & { lifecycle: string }
@@ -34,7 +35,7 @@ export type Proposal = {
   change_type: string
   target_id: string | null
   base_revision: number | null
-  payload: { content: string; kind: string; category: string; scope: string | null }
+  payload: { content: string; kind: string; category: string; scope: string | null; share_enabled?: boolean; valid_until?: string | null }
   evidence: { text?: string; source_id?: string }
   source: { id: string; kind: string; name: string | null }
   demo: boolean
@@ -89,6 +90,7 @@ export type AccessDetail = AccessEvent & {
 }
 
 export type ImportJob = {
+  source_id?: string
   job_id: string
   status: string
   error_code: string | null
@@ -108,7 +110,7 @@ export function getCredential() {
 }
 
 export function explain(error: unknown): string {
-  if (!(error instanceof ApiError)) return "没有完成，请稍后重试。"
+  if (!(error instanceof ApiError)) return error instanceof Error ? error.message : "没有完成，请稍后重试。"
   if (error.status === 0 || error.code === "UNAVAILABLE") return "本地服务未运行。刚才的内容还在，可以重试。"
   if (error.code === "UNAUTHENTICATED") return "本机凭证不正确。"
   if (error.code === "MODEL_UNAVAILABLE") return "模型还没准备好，这次没有保存。"
@@ -127,6 +129,7 @@ async function request(path: string, init: RequestInit = {}) {
   try {
     response = await fetch(path, { ...init, headers })
   } catch {
+    window.dispatchEvent(new Event("zhiwo:unavailable"))
     throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
   }
   if (response.status === 204) return null
@@ -164,6 +167,7 @@ export const api = {
       embeddings_loaded: boolean
       extractor_configured: boolean
       test_mode: boolean
+      mcp_runtime?: { command: string[]; environment: Record<string, string> }
     }>
   },
   profile() {
@@ -208,7 +212,7 @@ export const api = {
       method: "POST",
       headers: { "Idempotency-Key": key },
       body: JSON.stringify(body),
-    }) as Promise<{ status?: string; decision?: string; revision?: number }>
+    }) as Promise<{ status?: string; decision?: string; revision?: number; memory_id?: string }>
   },
   importSource(body: Record<string, unknown>, key: string) {
     return request("/api/v1/imports", {

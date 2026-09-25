@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import anyio
+from functools import partial
 from datetime import datetime, timezone
 
 from zhiwo.api.errors import ApiError
@@ -40,12 +42,20 @@ _AUDIT = {
 
 async def handoff(db_path, event_id: str, send, *, before=None, transport: str = "") -> None:
     """Re-check, write the HTTP response, then note delivery for this event."""
+    # RLock is thread-owned, not coroutine-owned. The event-loop thread must
+    # never hold it across await: a second task on that thread can re-enter it.
+    # One worker owns the complete critical section; only ASGI writes return
+    # to the event loop. Cancellation is shielded until the worker releases it.
+    await anyio.to_thread.run_sync(partial(_handoff_sync, db_path, event_id, send, before=before, transport=transport))
+
+
+def _handoff_sync(db_path, event_id: str, send, *, before=None, transport: str = "") -> None:
     if before is not None:
         before()
     with commit_lock:
         status, payload, outcome, agent_id, stored = _align(db_path, event_id)
         try:
-            await write_http(send, status, payload)
+            anyio.from_thread.run(write_http, send, status, payload)
         except _INTERRUPTED:
             if stored:
                 _safe_note(db_path, event_id, "failed")

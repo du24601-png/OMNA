@@ -5,6 +5,8 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 import uuid
+import sys
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, Request
@@ -72,6 +74,13 @@ def create_app() -> FastAPI:
             "connect_only": kernel.connect_only,
             "extractor_configured": request.app.state.settings.extractor_configured,
             "test_mode": request.app.state.settings.test_mode,
+            "mcp_runtime": {
+                "command": [sys.executable, "-m", "zhiwo.gateway.stdio_bridge"],
+                "environment": {
+                    "PYTHONPATH": str(Path(__file__).resolve().parents[2]),
+                    "ZHIWO_API_ORIGIN": f"http://127.0.0.1:{request.scope['server'][1]}",
+                },
+            },
             "memory_ref_count": memory_ref_count(db_path),
             "kernel": {
                 "connected": True,

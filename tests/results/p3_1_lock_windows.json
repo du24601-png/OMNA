@@ -1,0 +1,10 @@
+{
+  "same_event_loop_reentered_lock": false,
+  "revocation_waited_for_send": true,
+  "snapshot_equals_second_response": true,
+  "both_delivered": true,
+  "task": "P3.1-send-lock",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "synthetic_recall": true,
+  "pass": true
+}
