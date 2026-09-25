@@ -13,12 +13,16 @@
     },
     "A02": {
       "result": "PASS",
-      "evidence": "Paste went through the page. TXT notes.txt and Markdown plan.md used POST /api/v1/imports, the same request the page sends after reading a file. Partial approve/reject is in tests/results/p1_5_extract.json. Approved memories keep source ids. Replaying the same Idempotency-Key did not add a source, job, or proposal. Screenshot: tests/results/p1_5/p1_5_source.png"
+      "file_picker": "NOT_RUN",
+      "file_picker_label": "接口通过、文件选择框交互未验证",
+      "evidence": "Paste went through the page. TXT notes.txt and Markdown plan.md: 接口通过、文件选择框交互未验证. Both formats were submitted with POST /api/v1/imports. Partial approve/reject is in tests/results/p1_5_extract.json. Approved memories keep source ids. Replaying the same Idempotency-Key did not add a source, job, or proposal. Screenshot: tests/results/p1_5/p1_5_source.png"
     },
     "A03": {
       "result": "PASS_OWNER_READS",
       "mcp": "NOT_RUN",
-      "evidence": "Pending 最近准备转 AI 产品 and rejected 正式报告需要详细论据, 进行面试辅导, 发布说明用完整句子 are absent from the memory list and profile. Search hits, when any, are other confirmed memories and do not contain those bodies. MCP is left for P2."
+      "statement": "待审核、已拒绝正文不进入正式搜索",
+      "citation": "tests/results/a03_owner_search_citation.json",
+      "evidence": "Pending 最近准备转 AI 产品 and rejected 正式报告需要详细论据, 进行面试辅导, 发布说明用完整句子 are absent from the memory list and profile. Search hits, when any, are other confirmed memories and do not contain those bodies. Reused; not re-run. MCP is NOT_RUN."
     },
     "A04": {
       "result": "PASS_CITED",
@@ -35,7 +39,9 @@
     },
     "A12": {
       "result": "PASS",
-      "offline": "Process HTTPS_PROXY/HTTP_PROXY pointed at 127.0.0.1:9. curl to the cloud host returned HTTP 000. Local save, read, and search of 断网探针：书桌靠窗 succeeded. Screenshot: tests/results/p1_5/p1_5_offline_search.png",
+      "full_disconnect": "NOT_RUN",
+      "egress_recheck": "tests/results/p1_egress_windows.json",
+      "offline": "Process HTTPS_PROXY/HTTP_PROXY pointed at 127.0.0.1:9. curl to the cloud host returned HTTP 000. Local save, read, and search of 断网探针：书桌靠窗 succeeded. This proxy check is not a NIC-down full disconnect. Screenshot: tests/results/p1_5/p1_5_offline_search.png",
       "unconfigured": "Import while no extractor was configured. Status extractor_unavailable, zero proposals, source kept. Screenshot: tests/results/p1_5/p1_5_import_unconfigured.png",
       "timeout": "Local test endpoint, not the real model. Job error_code TIMEOUT. UI: 提取超时。来源仍在，可以重试。 Retry kept one source and zero proposals. Screenshot: tests/results/p1_5/p1_5_timeout.png",
       "invalid_format": "Local test endpoint, not the real model. Job error_code VALIDATION_ERROR. UI: 提取结果格式无效。来源仍在，可以重试。 Retry kept one source and zero proposals. Screenshot: tests/results/p1_5/p1_5_invalid.png",

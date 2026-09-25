@@ -1,0 +1,9 @@
+{
+  "task": "A12",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "attempt": "New-NetFirewallRule outbound block to 1.1.1.1:443",
+  "result": "NOT_RUN",
+  "reason": "Access is denied. The process is not elevated, so a firewall rule that blocks external traffic was not created. No rule was left behind. The earlier proxy blackhole is not a full disconnect, and a previous raw TCP connection to 1.1.1.1:443 succeeded.",
+  "rule_created": false,
+  "pass": false
+}

@@ -134,6 +134,37 @@ CREATE TABLE IF NOT EXISTS operations (
 UPDATE settings SET value = '2' WHERE key = 'schema_version';
 """
 
+def _apply_agent_identity(connection: sqlite3.Connection) -> None:
+    connection.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS agents (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            credential_hash TEXT NOT NULL UNIQUE,
+            enabled INTEGER NOT NULL CHECK (enabled IN (0, 1)),
+            policy_version INTEGER NOT NULL CHECK (policy_version >= 1),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS agent_permissions (
+            agent_id TEXT PRIMARY KEY REFERENCES agents(id),
+            allowed_tools TEXT NOT NULL,
+            allowed_categories TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS agent_commands (
+            id TEXT PRIMARY KEY,
+            agent_id TEXT NOT NULL,
+            action TEXT NOT NULL,
+            payload_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        """
+    )
+    connection.execute("UPDATE settings SET value = '5' WHERE key = 'schema_version'")
+
+
 def _apply_review_intent(connection: sqlite3.Connection) -> None:
     columns = {row[1] for row in connection.execute("PRAGMA table_info(proposals)")}
     if "intent_json" not in columns:
@@ -150,11 +181,52 @@ def _apply_operation_payload(connection: sqlite3.Connection) -> None:
     connection.execute("UPDATE settings SET value = '3' WHERE key = 'schema_version'")
 
 
+def _apply_access_ledger(connection: sqlite3.Connection) -> None:
+    proposal_columns = {row[1] for row in connection.execute("PRAGMA table_info(proposals)")}
+    if "agent_id" not in proposal_columns:
+        connection.execute("ALTER TABLE proposals ADD COLUMN agent_id TEXT")
+    if "client_request_id" not in proposal_columns:
+        connection.execute("ALTER TABLE proposals ADD COLUMN client_request_id TEXT")
+    connection.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS proposals_agent_request
+        ON proposals(agent_id, client_request_id)
+        WHERE agent_id IS NOT NULL AND client_request_id IS NOT NULL
+        """
+    )
+    agent_columns = {row[1] for row in connection.execute("PRAGMA table_info(agents)")}
+    if "client_status" not in agent_columns:
+        connection.execute("ALTER TABLE agents ADD COLUMN client_status TEXT NOT NULL DEFAULT 'pending'")
+    connection.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS access_events (
+            id TEXT PRIMARY KEY,
+            request_id TEXT NOT NULL,
+            agent_id TEXT,
+            tool TEXT NOT NULL,
+            outcome TEXT NOT NULL CHECK (outcome IN ('success', 'empty', 'rejected')),
+            policy_version INTEGER,
+            response_snapshot TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            delivery_state TEXT NOT NULL CHECK (
+                delivery_state IN ('prepared', 'sent', 'failed', 'unknown')
+            )
+        );
+
+        CREATE INDEX IF NOT EXISTS access_events_agent
+        ON access_events(agent_id, created_at);
+        """
+    )
+    connection.execute("UPDATE settings SET value = '6' WHERE key = 'schema_version'")
+
+
 MIGRATIONS: tuple[tuple[int, str, object], ...] = (
     (1, "control_identity", _MIGRATION_1),
     (2, "sources_and_publish", _MIGRATION_2),
     (3, "operation_payload", _apply_operation_payload),
     (4, "review_intent", _apply_review_intent),
+    (5, "agent_identity", _apply_agent_identity),
+    (6, "access_ledger", _apply_access_ledger),
 )
 
 

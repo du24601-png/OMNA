@@ -13,11 +13,22 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from zhiwo.adapters.kernel_client import KernelHandle, connect
-from zhiwo.api.auth import OwnerAuthError, install_redaction, owner_auth_error, require_owner
+from zhiwo.api.auth import OwnerAuthError, bearer_token, install_redaction, owner_auth_error, require_owner
+from zhiwo.api.channel import ChannelApp
 from zhiwo.api.errors import ApiError, api_error
 from zhiwo.config import load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
+from zhiwo.services.access import get_access_event, list_access_events
+from zhiwo.services.agent_tools import explain_memory, get_context, propose_memory, search_memory
+from zhiwo.services.agents import (
+    AgentPrincipal,
+    create_agent,
+    list_agents,
+    require_agent,
+    rotate_credential,
+    update_agent,
+)
 from zhiwo.services.imports import import_source, retry_import
 from zhiwo.services.memories import build_profile, get_memory, get_source, list_memories, update_memory
 from zhiwo.services.publish import operation_status, publish_memory
@@ -97,10 +108,13 @@ def create_app() -> FastAPI:
         db_path = request.app.state.settings.control_db
         kernel = request.app.state.kernel
         if query and query.strip() and state == "current":
-            found = search_memories(db_path, kernel, query, min(max(limit, 1), 20))
-            if category:
-                found["items"] = [item for item in found["items"] if item["category"] == category]
-            return found
+            return search_memories(
+                db_path,
+                kernel,
+                query,
+                min(max(limit, 1), 20),
+                category=category,
+            )
         return list_memories(
             db_path,
             kernel,
@@ -165,12 +179,124 @@ def create_app() -> FastAPI:
             request.app.state.kernel,
             proposal_id,
             _request_id(idempotency_key),
-            body.model_dump(),
+            body.model_dump(exclude_unset=True),
         )
 
     @app.get("/api/v1/operations/{operation_id}", dependencies=[Depends(require_owner)])
     def operation(request: Request, operation_id: str) -> dict:
         return operation_status(request.app.state.settings.control_db, _request_id(operation_id))
+
+    @app.get("/api/v1/agents", dependencies=[Depends(require_owner)])
+    def agents(request: Request) -> dict:
+        return list_agents(request.app.state.settings.control_db)
+
+    @app.post("/api/v1/agents", dependencies=[Depends(require_owner)])
+    def add_agent(
+        request: Request,
+        body: AgentCreate,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        return create_agent(
+            request.app.state.settings.control_db,
+            _request_id(idempotency_key),
+            body.name,
+        )
+
+    @app.patch("/api/v1/agents/{agent_id}", dependencies=[Depends(require_owner)])
+    def patch_agent(
+        request: Request,
+        agent_id: str,
+        body: AgentPatch,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        return update_agent(
+            request.app.state.settings.control_db,
+            agent_id,
+            _request_id(idempotency_key),
+            body.model_dump(),
+        )
+
+    @app.post("/api/v1/agents/{agent_id}/rotate-credential", dependencies=[Depends(require_owner)])
+    def rotate_agent(
+        request: Request,
+        agent_id: str,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        return rotate_credential(
+            request.app.state.settings.control_db,
+            agent_id,
+            _request_id(idempotency_key),
+        )
+
+    @app.get("/api/v1/agent/session")
+    def agent_session(
+        principal: Annotated[AgentPrincipal, Depends(require_agent)],
+        agent_id: str | None = None,
+        name: str | None = None,
+        x_agent_name: Annotated[str | None, Header(alias="X-Agent-Name")] = None,
+    ) -> dict:
+        del agent_id, name, x_agent_name
+        return {
+            "agent_id": principal.agent_id,
+            "name": principal.name,
+            "enabled": principal.enabled,
+            "policy_version": principal.policy_version,
+            "allowed_tools": list(principal.allowed_tools),
+            "allowed_categories": list(principal.allowed_categories),
+            "identity_source": "credential",
+        }
+
+    @app.get("/api/v1/access-events", dependencies=[Depends(require_owner)])
+    def access_events(request: Request, agent_id: str | None = None) -> dict:
+        return list_access_events(request.app.state.settings.control_db, agent_id)
+
+    @app.get("/api/v1/access-events/{event_id}", dependencies=[Depends(require_owner)])
+    def access_event(request: Request, event_id: str) -> dict:
+        return get_access_event(request.app.state.settings.control_db, event_id)
+
+    @app.post("/api/v1/agent/tools/get_context")
+    def agent_get_context(request: Request, body: GetContextBody) -> dict:
+        return get_context(
+            request.app.state.settings.control_db,
+            request.app.state.kernel,
+            bearer_token(request.headers.get("authorization")),
+            body.task,
+            max_items=body.max_items,
+            request_id=body.request_id,
+        )
+
+    @app.post("/api/v1/agent/tools/search_memory")
+    def agent_search_memory(request: Request, body: SearchToolBody) -> dict:
+        return search_memory(
+            request.app.state.settings.control_db,
+            request.app.state.kernel,
+            bearer_token(request.headers.get("authorization")),
+            body.query,
+            categories=body.categories,
+            limit=body.limit,
+            request_id=body.request_id,
+        )
+
+    @app.post("/api/v1/agent/tools/propose_memory")
+    def agent_propose_memory(request: Request, body: ProposeToolBody) -> dict:
+        return propose_memory(
+            request.app.state.settings.control_db,
+            request.app.state.kernel,
+            bearer_token(request.headers.get("authorization")),
+            body.request_id,
+            body.change.model_dump(exclude_unset=True),
+            body.evidence.model_dump(exclude_unset=True),
+        )
+
+    @app.post("/api/v1/agent/tools/explain_memory")
+    def agent_explain_memory(request: Request, body: ExplainToolBody) -> dict:
+        return explain_memory(
+            request.app.state.settings.control_db,
+            request.app.state.kernel,
+            bearer_token(request.headers.get("authorization")),
+            body.id,
+            request_id=body.request_id,
+        )
 
     @app.post("/api/v1/imports", dependencies=[Depends(require_owner)])
     def create_import(
@@ -189,7 +315,7 @@ def create_app() -> FastAPI:
     def retry_job(request: Request, job_id: str) -> dict:
         return retry_import(request.app.state.settings.control_db, request.app.state.settings, _request_id(job_id))
 
-    return app
+    return ChannelApp(app)
 
 
 class MemoryBody(BaseModel):
@@ -229,6 +355,72 @@ class DecisionBody(BaseModel):
     scope: str | None = None
     valid_until: str | None = None
     share_enabled: bool | None = None
+
+
+class AgentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+
+
+class AgentPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = None
+    enabled: bool | None = None
+    allowed_tools: list[str] | None = None
+    allowed_categories: list[str] | None = None
+
+
+class GetContextBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    task: str
+    max_items: int = 5
+    request_id: str | None = None
+
+
+class SearchToolBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str
+    categories: list[str] | None = None
+    limit: int = 10
+    request_id: str | None = None
+
+
+class ProposeChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    type: str
+    content: str
+    kind: Kind
+    category: Category
+    scope: str | None = None
+    target_id: str | None = None
+    base_revision: int | None = None
+
+
+class ProposeEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    text: str
+    source_ref: str | None = None
+
+
+class ProposeToolBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    request_id: str
+    change: ProposeChange
+    evidence: ProposeEvidence
+
+
+class ExplainToolBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    request_id: str | None = None
 
 
 class ImportBody(BaseModel):

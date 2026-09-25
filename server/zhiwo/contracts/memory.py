@@ -12,7 +12,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Kind = Literal["fact", "event"]
 Category = Literal["identity", "goal", "preference", "project", "event", "other"]
+Tool = Literal["get_context", "search_memory", "propose_memory", "explain_memory"]
 Lifecycle = Literal["active", "superseded", "deleting"]
+TOOLS = ("get_context", "search_memory", "propose_memory", "explain_memory")
+CATEGORIES = ("identity", "goal", "preference", "project", "event", "other")
 
 
 class MemoryRef(BaseModel):

@@ -1,0 +1,125 @@
+{
+  "task": "P2.1",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "service": "official FastAPI on 127.0.0.1",
+  "connect_only": true,
+  "memory_filter": "NOT_RUN",
+  "mcp": "NOT_RUN",
+  "access_log": "NOT_RUN",
+  "pid_changed": true,
+  "create_status": 200,
+  "default_tools": [],
+  "default_categories": [],
+  "default_enabled": true,
+  "default_policy_version": 1,
+  "replay_status": 200,
+  "replay_same_id": true,
+  "replay_has_credential": false,
+  "create_conflict_status": 409,
+  "create_conflict_code": "CONFLICT",
+  "independent_ids": true,
+  "list_status": 200,
+  "list_count": 2,
+  "list_has_credential": false,
+  "forged_status": 200,
+  "forged_agent_id": "ecd5b075-3f19-45e7-aaa9-efa2785c54ec",
+  "forged_name": "合成连接甲",
+  "forged_identity_source": "credential",
+  "other_agent_status": 200,
+  "other_agent_id": "64c57af1-a294-4949-988a-c09366f34e7e",
+  "owner_token_on_session": 401,
+  "agent_on_owner_api": {
+    "GET /api/v1/memories": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "GET /api/v1/proposals": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "GET /api/v1/agents": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "GET /api/v1/sources/e292821b-9ad3-4365-a3b5-92acc5031dd1": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "POST /api/v1/memories": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "PATCH /api/v1/agents/ecd5b075-3f19-45e7-aaa9-efa2785c54ec": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    },
+    "POST /api/v1/agents/ecd5b075-3f19-45e7-aaa9-efa2785c54ec/rotate-credential": {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "has_items": false
+    }
+  },
+  "unknown_tool_status": 400,
+  "unknown_tool_code": "VALIDATION_ERROR",
+  "unknown_category_status": 400,
+  "unknown_category_code": "VALIDATION_ERROR",
+  "after_denied_owner_calls_status": 200,
+  "after_denied_owner_calls_policy_version": 1,
+  "after_denied_owner_calls_enabled": true,
+  "grant_policy_version": 2,
+  "grant_tools": [
+    "search_memory"
+  ],
+  "grant_categories": [
+    "preference"
+  ],
+  "grant_replay_status": 200,
+  "grant_replay_policy_version": 2,
+  "rename_policy_version": 2,
+  "disable_status": 200,
+  "disable_policy_version": 3,
+  "disable_enabled": false,
+  "disabled_session_status": 403,
+  "disabled_session_code": "FORBIDDEN",
+  "rotate_status": 200,
+  "rotate_enabled": false,
+  "rotate_policy_version": 4,
+  "rotate_replay_status": 200,
+  "rotate_replay_has_credential": false,
+  "rotate_replay_policy_version": 4,
+  "old_credential_after_rotate": 401,
+  "old_credential_code": "UNAUTHENTICATED",
+  "new_credential_while_disabled": 403,
+  "new_credential_disabled_code": "FORBIDDEN",
+  "enable_policy_version": 5,
+  "enable_enabled": true,
+  "new_credential_after_enable": 200,
+  "old_credential_after_enable": 401,
+  "restart_list_status": 200,
+  "restart_enabled": true,
+  "restart_policy_version": 5,
+  "restart_tools": [
+    "search_memory"
+  ],
+  "restart_categories": [
+    "preference"
+  ],
+  "restart_name": "合成连接甲改名",
+  "restart_session_status": 200,
+  "restart_old_credential_status": 401,
+  "agent_count": 2,
+  "distinct_hashes": true,
+  "memory_ref_count": 0,
+  "credential_in_database": false,
+  "credential_in_logs": false,
+  "owner_credential_in_logs": false,
+  "pass": true,
+  "credential_in_result": false
+}

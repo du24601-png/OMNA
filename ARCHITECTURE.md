@@ -60,11 +60,12 @@ flowchart TD
 | --- | --- |
 | `sources` | `id, kind, name, content, content_hash, imported_at`；`kind=manual/paste/file/agent_claim` |
 | `import_jobs` | `id, source_id, status, extractor_config, error_code`；提取状态与重试，不存密钥 |
-| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json`；`intent_json` 保存已提交的审核意图，用于判断重放或冲突 |
+| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用 |
 | `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文 |
-| `agents` | `id, name, credential_hash, enabled, policy_version`；凭证可重置 |
+| `agents` | `id, name, credential_hash, enabled, policy_version, client_status, created_at, updated_at`；`credential_hash` 是 sha256，明文不入库。凭证可重置。`client_status` 新建为 `pending`，只有 stdio 通道成功交付一次工具响应后才变为 `verified`。已停用的连接不会被标成已连接。迁移版本是 6 |
 | `agent_permissions` | `agent_id, allowed_tools, allowed_categories`；空集即无权限 |
-| `access_events` | `request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state` |
+| `agent_commands` | `id, agent_id, action, payload_hash, created_at`；管理请求的幂等记录。不存凭证明文，不存记忆正文 |
+| `access_events` | `id, request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state`；`id` 由服务生成，每次调用或重试各有一行。`outcome` 是 `success`、`empty` 或 `rejected`。`response_snapshot` 就是那一次返回的业务载荷。`delivery_state` 从 `prepared` 只能变为 `sent`、`failed` 或 `unknown`，之后不再改。交付按 `id` 更新，不按请求号批量更新 |
 | `operations` | `id, action, target_id, base_revision, revision, payload_hash, payload_json, kernel_id, status, error_code`；跨库写入恢复及幂等。`payload_json` 只用于核对和恢复，不作为正式检索正文 |
 | `settings` | 非敏感设置、schema 版本、选定模型；密钥使用系统凭据存储或开发环境变量 |
 
@@ -107,7 +108,9 @@ Profile 首版用模板组合已确认内容，不从原文再次推断。事件
 
 P1.2 的正式新增只经过 `services/publish.py` 的 `publish_memory()`。它先写操作记录，再写 Kernel；本地向量和正文都核对之后，才在同一事务里登记唯一的 `active` 版本。导入与提取不调用这个入口。`ZHIWO_KERNEL_CONNECT_ONLY=1` 只用于不加载向量的连接测试。
 
-P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 的决定是 `accept`、`update`、`keep_both`、`edit`、`reject`。拒绝不写 Kernel。更新另写一条 Kernel 记录，并在控制库的同一事务里把新版本标为当前、旧版本标为 `superseded`、提案标为 `accepted`。`base_revision` 与当前版本不一致时返回 `CONFLICT`，提案留在 `pending`。两者保留必须带 `scope`，并新建 `memory_id`。同一提案再次提交时比较已保存的审核意图：决定、编辑内容、场景、目标记忆和目标版本。意图相同则返回第一次的结果，即使 `Idempotency-Key` 不同；意图不同返回 `409 CONFLICT`，说明实际状态，正式记忆不变。恢复时用操作记录里的原始载荷和版本 session 中已有的 Kernel 行补完控制库，不另建任务调度。故障注入只在 `ZHIWO_TEST_MODE=1` 且数据目录位于系统临时目录时生效。正式检索只认已提交的 `active` 版本。`GET /api/v1/memories/{id}/versions` 按控制库中的版本读取 Kernel 正文。`GET /api/v1/operations/{id}` 只返回操作状态。
+更新或带目标记忆的编辑，缺省的共享状态和有效期继承当前版本。请求里没有这两个字段，与明确提交不同；候选里的默认值不能把未共享的记忆打开。明确传入 `share_enabled` 必须是布尔值，明确传入空的 `valid_until` 才清除有效期。新增、两者保留，以及不指向已有记忆的编辑，仍按候选和现有新增规则处理。
+
+P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 的决定是 `accept`、`update`、`keep_both`、`edit`、`reject`。拒绝不写 Kernel。更新另写一条 Kernel 记录，并在控制库的同一事务里把新版本标为当前、旧版本标为 `superseded`、提案标为 `accepted`。`base_revision` 与当前版本不一致时返回 `CONFLICT`，提案留在 `pending`。两者保留必须带 `scope`，并新建 `memory_id`。同一提案再次提交时比较已保存的审核意图：决定、编辑内容、场景、目标记忆、目标版本，以及共享状态、有效期和这两个字段是否被提交。意图相同则返回第一次的结果，即使 `Idempotency-Key` 不同；意图不同返回 `409 CONFLICT`，说明实际状态，正式记忆不变。缺省字段不会被请求模型写成明确清空。恢复时用操作记录里的原始载荷和版本 session 中已有的 Kernel 行补完控制库，不另建任务调度。故障注入只在 `ZHIWO_TEST_MODE=1` 且数据目录位于系统临时目录时生效。正式检索只认已提交的 `active` 版本。`GET /api/v1/memories/{id}/versions` 按控制库中的版本读取 Kernel 正文。`GET /api/v1/operations/{id}` 只返回操作状态。
 
 删除先在业务库标记不可见，再逐项清理 Kernel 版本、索引和业务内容副本；未完成时为“删除处理中”，重启继续。不能仅删 `memory_refs` 就声称永久删除成功。
 
@@ -125,12 +128,16 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}` | 查询、添加、修改、永久删除 |
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
-| `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置 |
+| `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回 |
 | `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照 |
 | `GET/PATCH /settings`；`POST /settings/test-model` | 非敏感设置及模型连通测试，响应不回显密钥 |
 | `POST /exports`；`POST /backups`；`POST /restores`；`POST /data/reset` | 导出、备份、恢复、清空；破坏性操作必须带确认 |
 
 写操作携带 `Idempotency-Key`；异步工作返回 `operation_id`，通过 `GET /operations/{id}` 查看最终状态。`PATCH /memories/{id}` 必须带 `base_revision`。
+
+`GET /api/v1/agent/session` 不属于上表的 Owner 路由，也不是 MCP 工具。它只根据凭证返回连接身份、启用状态、`policy_version` 和已授权的工具、类别，不返回记忆。客户端另外提交的名称或 `agent_id` 不参与识别。
+
+P2.1 的权限变更在 `services/agents.py`。新连接的工具和类别为空，`policy_version` 从 1 开始。允许的工具是 `get_context`、`search_memory`、`propose_memory`、`explain_memory`；类别是 `identity`、`goal`、`preference`、`project`、`event`、`other`。未知值拒绝。`enabled`、工具、类别或凭证实际变化时 `policy_version` 加 1；只改名称不加。停用后的后续请求立即拒绝。重置使旧凭证立即失效，递增权限版本，并且不恢复已停用的连接。身份和权限用 `fetch_principal()` 一次连接查询读出。这个模块不读取、不写入记忆。
 
 ### 6.2 MCP：只暴露四个工具
 
@@ -151,7 +158,11 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 
 每条连接由 Owner 创建随机专用凭证，数据库只存凭证哈希；stdio 启动配置通过环境变量交给 bridge。服务根据凭证解析 `agent_id`，忽略客户端自报名称作为身份的做法。Owner 凭证不得出现在 Agent 配置中。
 
-完整读取路径：鉴权 → 检查工具 → 检索 → 逐条检查精确版本、类别、共享、有效期 → 限量并构造响应 → 再检查权限版本 → 写返回快照 → 发出。权限变更与响应提交在单服务内串行化；撤销完成后提交的新响应不能使用旧权限。
+P2.2 的四个工具在 `services/agent_tools.py`，可见性在 `services/policy.py`。缺少生命周期状态的行不可见。超过 2000 字的单条被跳过，后面的合格条目继续过滤。`server/zhiwo/mcp_bridge.py` 的 `forward()` 是本进程内的分发函数，只转发这四个名称，并拒绝未知工具和多余参数；它不做第二次过滤。独立 stdio 进程是 `zhiwo.gateway.stdio_bridge`。它携带 Agent 凭证，用 HTTP 调用现有服务，并带上 `X-Zhiwo-Transport: stdio`。它不打开数据库或 Kernel。协议库是 `mcp==2.2.0`，只负责 stdio 报文。
+
+读取先确认连接启用且工具获准，再在锁外召回，最后进入 `commit_gate.commit_lock`。锁内先做最终检查、过滤并限量，把这一份载荷写入访问快照并提交。`record_prepared()` 返回服务生成的 `event_id`，经请求内的交付上下文交给发送方，不放进业务载荷。快照插入或这次提交失败时返回 `AUDIT_UNAVAILABLE`，不带记忆正文，也不留下半成品记录。HTTP 发送在 `api/channel.py`：交给通道之前，仍在同一把锁里按当前授权改写快照，使快照等于即将写出的字节；写出成功才把该 `event_id` 标为 `sent`。连接中断标 `failed`，结果无法判断标 `unknown`，这两种都不会标成 `sent`。这些状态都不表示模型已经阅读或采用。`propose_memory` 只写待确认提案，幂等范围是创建它的 Agent。`explain_memory` 只返回当前获准版本的来源类型、确认时间和已审核证据片段。
+
+完整读取路径：鉴权 → 检查工具 → 检索 → 最终检查精确版本、类别、共享、有效期和权限版本 → 限量并冻结响应 → 写入并提交访问快照 → 交给发送通道前再核对一次 → 写出 HTTP 响应 → 按 `event_id` 记录交付。权限变更与这次提交、这次写出使用同一把锁。撤销若先完成，随后提交的响应不能包含已失去授权的内容。
 
 提交响应的锁内还要重新检查每条记忆的共享、有效期与当前版本，覆盖检索期间发生的变化。检索支持时先限定范围，否则分批补取再过滤，不能因第一批都是无权结果就返回全库兜底。正式条目正文最多 2000 字符；上下文/搜索累计返回正文最多 8000 字符，按完整条目限量并设置 `truncated`，不拼接半条事实。
 

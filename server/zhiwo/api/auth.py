@@ -48,6 +48,14 @@ def _bearer(header: str | None) -> str:
     return token.strip()
 
 
+def bearer_token(header: str | None) -> str:
+    return _bearer(header)
+
+
+def credential_digest(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
 def _matches(presented: str, expected: str) -> bool:
     if not presented or not expected:
         return False

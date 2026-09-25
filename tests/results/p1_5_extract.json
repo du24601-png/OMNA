@@ -45,6 +45,8 @@
     }
   ],
   "overgeneralization_all_scenes_concise": false,
+  "file_picker": "NOT_RUN",
+  "file_picker_label": "接口通过、文件选择框交互未验证",
   "file_imports": [
     {
       "format": "txt",

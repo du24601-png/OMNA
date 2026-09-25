@@ -8,11 +8,11 @@
 | 项目 | 状态 |
 | --- | --- |
 | 已有输入 | 产品方案、四份启动文档、P0.1 原生 Windows 存取证据 |
-| 工程完成情况 | P0 验收结论为 GO。P1.1 至 P1.5 已通过 |
-| 当前阶段 | **P1 · 核心闭环，已通过** |
-| 当前任务 | **P2.1 · 连接与授权** |
-| 下一阶段 | P2；P1.5 已通过 |
-| 当前风险 | 改写查询 `r07` 未进前五。检索会带回目标以外的记忆。模型首次下载需手工缓存。A03 的 MCP 查询和 A11 的删除恢复尚未验 |
+| 工程完成情况 | P0 验收结论为 GO。P1.1 至 P1.5 已通过。P2.1 至 P2.4 已通过各自范围。只验收了 OpenCode 一个真实客户端 |
+| 当前阶段 | **P2 · 真实接入，任务已完成** |
+| 当前任务 | **P3.1 · 界面收尾** |
+| 下一阶段 | P3；本轮没有开始 Electron 打包 |
+| 当前风险 | 改写查询 `r07` 未进前五。检索会带回目标以外的记忆。模型首次下载需手工缓存。A11 的删除恢复、A12 的完全断网，以及 TXT/Markdown 文件选择框仍未验 |
 
 P0.1 使用 uv 管理的 CPython 3.12.13。本机自带 Python 3.9.10 不满足 `mnemosyne-memory` 的 `>=3.10` 要求。
 
@@ -65,10 +65,10 @@ P0 不开始完整 UI 和安装包；P1 不打磨动效；P2 不扩展多个客�
 
 **前置：P1 通过。首版只验收一个真实客户端。**
 
-- [ ] **P2.1** 实现连接创建、专用凭证、类别/工具授权、停用及重置；Agent 不能访问 Owner API。
-- [ ] **P2.2** 实现四个 MCP 工具与统一 PolicyEngine；任何读取，包括解释入口，都执行相同可见性检查。
-- [ ] **P2.3** 实现访问快照与“我的 Agent”页面，核对实际返回载荷；审核记录与访问记录分开。
-- [ ] **P2.4** 在真实客户端完成查询、提案、用户审核、再次查询；通过 A06–A10，并重跑 A03 的拒绝隔离。
+- [x] **P2.1** 实现连接创建、专用凭证、类别/工具授权、停用及重置；Agent 不能访问 Owner API。本轮只成立身份和权限管理。记忆逐条过滤、真实 MCP 和访问记录留在 P2.2–P2.4。证据 `tests/results/p2_1_windows.json`。
+- [x] **P2.2** 实现四个工具与统一权限检查。读取先过滤再限量；提案只生成候选；解释只返回获准版本的已审核片段。访问记录留在 P2.3，真实客户端留在 P2.4。证据 `tests/results/p2_2_windows.json`。这不是 Agent 接入全部通过。
+- [x] **P2.3** 实现访问快照与“我的 Agent”页面。快照与返回载荷是同一份；写入失败不返回记忆正文。交付按服务生成的事件号更新。新建连接显示待验证，已停用优先显示。证据 `tests/results/p2_3_windows.json` 与 `tests/results/p2_3_delivery_windows.json`。
+- [x] **P2.4** 用 OpenCode 1.18.16 完成查询、提案、用户审核、再次查询和停用后拒绝。stdio bridge 调用现有服务。A03 的 MCP 部分与 A06–A10 通过，样本沿用 P0.3。证据 `tests/results/p2_4_windows.json`。A12 完全断网仍是 `NOT_RUN`。这不是安装包验收。
 
 **交付：** 能展示“这个 Agent 本次得到这几条信息，其他类别没有提供”，并能证明停用后下一次调用被拒绝。无需第二个客户端才能验收。
 
@@ -108,9 +108,101 @@ P0 不开始完整 UI 和安装包；P1 不打磨动效；P2 不扩展多个客�
 
 导入“林舟做产品运营，最近准备转 AI 产品，平时希望回复简短，正式报告需要详细论据”，再加入一条无关私人信息。审核后查看画像，只授权“目标/偏好”给 Agent；Agent 查询后提议“所有回答都越短越好”；用户拒绝，再次查询应仍保留原场景偏好；最后停用连接验证拒绝访问。
 
-## 8. 当前任务卡：P2.1
+## 8. 当前任务卡：P3.1
 
-P0 验收结论为 **GO**。P1.5 已通过，证据见 `tests/results/p1_5_windows.json` 和 `tests/results/p1_5_extract.json`。下一步是 P2.1。本轮没有做 Agent 连接、删除、设置页或 Electron。
+P2.4 已通过。证据是 `tests/results/p2_4_windows.json`。只验收了 OpenCode 一个真实客户端。A12 完全断网仍是 `NOT_RUN`，本轮没有再试代理或防火墙。本轮没有做删除、设置页或 Electron 打包。下一步才是 P3.1，本轮没有开始。
+
+### P2.4 结果
+
+OpenCode 1.18.16，模型 `opencode-go/deepseek-v4-flash`。独立进程 `zhiwo.gateway.stdio_bridge` 携带 Agent 凭证调用本机 HTTP 服务，环境里没有数据目录。临时数据目录，本地模型缓存，`HF_HUB_OFFLINE=1`。结果文件不含凭证。`a12` 与 `electron` 都是 `NOT_RUN`。`pass` 是 true。
+
+| 检查 | 结果 |
+| --- | --- |
+| 工具 | stdio 只列出 `get_context`、`search_memory`、`propose_memory`、`explain_memory` |
+| 真实客户端 | 调用前 `client_status` 是 `pending`，响应里没有「已连接」。搜索成功后变为 `verified`。客户端收到的载荷与访问快照一致，交付状态是 `sent`，命中「周末喜欢骑公路自行车，单次大约四十公里。」 |
+| 提案与再查 | `propose_memory` 返回 `pending`。Owner 拒绝后再次搜索仍有原句，不含「所有回答都越短越好。」快照与载荷一致 |
+| 停用 | 停用后下一次搜索是 `FORBIDDEN`，载荷与快照一致，不含原句。页面状态优先显示「已停用」 |
+| A03 MCP | 待审「紫水晶计划」和已拒绝「青金石口令」不在 MCP 搜索、Owner 搜索和画像里 |
+| A06 | 固定样本 Hit@5 为 19/20。漏召回是 `r07`。无关查询返回 0 条。过期句子没有混进这些结果 |
+| A07 | 只有偏好权限的连接能看到偏好句，看不到项目句。无权限是 `FORBIDDEN`，伪造凭证是 `UNAUTHENTICATED`，直调 Owner API 是 `401`。这些响应都没有对应正文 |
+| A08 | 停止共享和已过期的句子不再返回。检索进行中的撤销见 `tests/results/p2_3_delivery_windows.json`：最终检查后、交给通道前撤销的响应不含原文；锁被占用时撤销会等待 |
+| A09 | 解释只返回「已审核片段：只解释这一句。」来源里的其他句子和旧版本句子不在响应里。未获准与不存在都是 `memory not found` |
+| A10 | 客户端载荷与快照一致。日志失败是 `AUDIT_UNAVAILABLE` 且不留下快照。发送中断是 `failed`，结果不确定是 `unknown`，都没有标成 `sent`，也没有「已阅读」「已采用」 |
+
+### P2.3 交付收尾
+
+证据是 `tests/results/p2_3_delivery_windows.json`。`pass` 是 true。
+
+| 检查 | 结果 |
+| --- | --- |
+| 事件号 | 不同 Agent 使用同一请求号得到不同事件。一次交付通知只改变对应的一条。同一 Agent 重试再产生一条，不影响前一条 |
+| 状态转换 | `prepared` 可以变成 `failed`。之后再标 `sent` 是 409，记录保持 `failed` |
+| 提交失败 | 快照事务的 `commit()` 失败返回 `AUDIT_UNAVAILABLE`，不返回记忆正文，也不留下记录 |
+| 发送 | HTTP 写出被连接中断时状态是 `failed`。结果无法判断时是 `unknown`。快照字节不变 |
+| 撤销顺序 | 最终检查已经写入含原文的快照后、交给通道前完成撤销，发出的响应和快照都不含原文。撤销若抢不到锁，会等到这次写出结束；下一次响应不再含原文 |
+| 连接状态 | 不带 stdio 标记的成功调用仍是 `pending`。stdio 成功交付后是 `verified`。已停用连接不会因此变成已验证 |
+
+### P2.3 结果
+
+进程内函数加真实 Owner HTTP。临时数据目录，本地模型缓存，`HF_HUB_OFFLINE=1`。schema 版本 6。结果文件不含凭证。`real_client` 和 `a12` 都是 `NOT_RUN`。`stage_complete` 是 false。
+
+| 检查 | 结果 |
+| --- | --- |
+| 审核意图 | 私有且有有效期的记忆，HTTP 请求不带共享和有效期字段时，两项限制仍在。保存的意图里这两个字段都标为未提供。相同意图重放返回原版本。明确清空或明确提交共享状态是 409，版本不变 |
+| 提案归属 | 两个 Agent 使用同一个请求号，得到不同提案。一方变成已通过后，另一方重试仍是自己的待确认。同一 Agent 的相同载荷重放，不同载荷 409 |
+| 过滤 | 超长单条被跳过，后面的短句仍返回。缺少生命周期状态的行不返回 |
+| 提交顺序 | 快照插入尚未提交时，另一连接看不到这行；函数返回后，快照与返回的是同一个对象。状态先是已准备。标成发送失败后，载荷不变，也不会被改成已交给发送通道 |
+| 撤销之后的响应 | 检索中关闭共享，当次返回空列表。撤销完成后再检索，返回和快照都不含已失去共享的正文 |
+| 凭证重置 | 请求期间重置返回 401，权限版本加 1，错误里没有记忆正文。已停用连接再重置仍停用，版本从 3 变为 4 |
+| 快照失败 | `AUDIT_UNAVAILABLE`，不返回正文，也不留下快照 |
+| HTTP 交付 | 搜索响应与快照一致，交付状态是 `sent`。列表不含整份响应，详情里的响应与快照一致。新建连接的 `client_status` 是 `pending`，响应里没有「已连接」 |
+
+P2.2 已通过统一权限检查和四个工具。证据是 `tests/results/p2_2_windows.json`。真实客户端已由 P2.4 补上。
+
+### P2.2 结果
+
+进程内调用正式函数，临时数据目录，本地模型缓存，`HF_HUB_OFFLINE=1`。合成句子只用于探针。结果文件不含凭证。
+
+| 检查 | 结果 |
+| --- | --- |
+| 控制属性继承 | 私有且有效期为 `2099-06-01T00:00:00+00:00` 的记忆，只批准正文后仍是私有，有效期不变。明确打开共享并清空有效期后才改变。只改有效期时共享仍关闭。带目标的编辑同样继承。`share_enabled: null` 是 400，版本不变 |
+| 新增 | 接受候选时共享默认为开，有效期取候选 `2097-03-01T00:00:00+00:00`。请求明确关闭共享时保持私有 |
+| 同一过滤 | `get_context` 与 `search_memory` 对同一召回窗口只返回可共享的当前版本。私有、未授权类别和未发布行不出现。无权工具不触发召回 |
+| 限量 | 超过 2000 字的条目整条丢弃并标 `truncated`，不截成半条。`limit=1` 只返回一条并标截断。召回只调用一次 |
+| 真实召回与 bridge | 精确句子“权限探针：橙色文件夹放在第二层。”由正式召回和 `mcp_bridge.forward` 命中。未知工具和多余参数是 400 |
+| 解释 | 证据是“已审核片段。”，来源类型是 `paste`。响应没有整份来源后半、旧正文、新正文或旧片段。无权与不存在都是 404，消息同为 `memory not found` |
+| 提案 | 状态保持 `pending`，`memory_refs` 数量不变。相同载荷重放，不同载荷 409。私有目标和缺失目标都是 `memory not found`。能核对的片段标 `matched`；对不上的说明是“Agent 提供，未核实”。声明来源只存片段 |
+| 请求期间撤销 | 检索完成后、提交前分别关闭共享、更新正文、停用连接、重置凭证。前两种返回空列表，不含新正文。停用是 403 `agent is disabled`。重置是 401 `agent credential rejected`，`policy_version` 加 1。已停用连接再重置仍停用，版本变为 4。本人仍能读到私有记忆 |
+
+`access_log` 与 `real_client` 都是 `NOT_RUN`。`stage_complete` 是 false。
+
+P2.1 已通过，范围只限连接身份和权限管理。证据是 `tests/results/p2_1_windows.json`。凭证重置改为递增 `policy_version` 后，这份结果已重跑。记忆逐条过滤已在 P2.2 完成。真实 MCP 客户端和访问记录仍按 P2.3–P2.4 推进。本轮没有做 Agent 页面、删除、设置页或 Electron。
+
+### P2.1 结果
+
+正式 FastAPI，监听 `127.0.0.1`，`ZHIWO_KERNEL_CONNECT_ONLY=1`，临时数据目录。合成名称是“合成连接甲”和“合成连接乙”。明文凭证只在创建或重置的当次响应里返回；列表、日志、数据库字节和 `tests/results/p2_1_windows.json` 都不含明文。
+
+| 检查 | 结果 |
+| --- | --- |
+| 独立凭证 | 两条连接的 ID 不同，凭证哈希不同。库里只存 sha256 |
+| 默认无权限 | 工具和类别都是空数组，启用，`policy_version` 为 1 |
+| 伪造身份 | 查询参数中的 `agent_id`、`name` 和请求头 `X-Agent-Name` 不改变身份。返回 `identity_source=credential` |
+| Agent 调用 Owner API | 读取记忆、提案、来源和连接，以及写入记忆、停用连接、重置凭证，都是 `401 UNAUTHENTICATED`，响应没有记忆条目。这些调用之后连接仍启用，`policy_version` 仍是 1。`memory_refs` 仍是 0 |
+| 未知值 | 未知工具和未知类别都是 `400 VALIDATION_ERROR`，权限版本不变 |
+| 权限版本 | 授予 `search_memory` 和 `preference` 后为 2。只改名称仍是 2。同一请求重放不重复增加。停用后为 3。重置凭证同样加 1，变为 4，并且不把已停用连接重新启用。再次启用后为 5 |
+| 停用与重置 | 停用后会话是 `403 FORBIDDEN`。重置后旧凭证是 `401`，新凭证在连接仍停用时是 `403`。重放重置不返回第二次明文 |
+| 重启 | 进程号变化。启用、名称、工具、类别和 `policy_version=5` 不变。新凭证仍可识别，旧凭证仍是 `401` |
+
+`tests/results/p2_1_windows.json` 里的 `memory_filter`、`mcp`、`access_log` 仍是 `NOT_RUN`。过滤和四个工具由 P2.2 另测；真实客户端和访问记录仍未做。
+
+### P1 有限补验
+
+| 检查 | 结果 |
+| --- | --- |
+| 外网受限、保留回环 | `tests/results/p1_egress_windows.json`。新进程；启动前模型缓存已在 `experiments/kernel_spike/runs/p0_3/fastembed-cache`。`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 指向 `http://127.0.0.1:9`，`NO_PROXY` 保留 `127.0.0.1,localhost`，`HF_HUB_OFFLINE=1`。访问 `https://example.com` 得到 `URLError`。保存、读取和搜索“外网受限探针：回环仍可保存这条合成偏好。”成功 |
+| A12 完全断网 | `NOT_RUN`。本轮尝试 `New-NetFirewallRule` 拦截出站，返回 `Access is denied`，进程没有管理员权限，规则没有创建。见 `tests/results/a12_full_disconnect.json`。先前到 `1.1.1.1:443` 的原始 TCP 仍然连通。代理黑洞不是完全断网 |
+| A03 | 不重跑。待审核、已拒绝正文不进入正式搜索。引用 `tests/results/a03_owner_search_citation.json`。MCP 仍是 `NOT_RUN` |
+| TXT、Markdown | 接口通过、文件选择框交互未验证 |
 
 ### P1.5 结果
 
@@ -119,14 +211,14 @@ P0 验收结论为 **GO**。P1.5 已通过，证据见 `tests/results/p1_5_windo
 | 检查 | 结果 |
 | --- | --- |
 | A01、A05 直接编辑 | 添加“日常回复偏好简洁”后，在详情里改为“日常回复偏好先给结论”并勾选“仅自己可见”。页面说明这次修改直接生效、没有进入待确认。版本 1 为历史，版本 2 为当前。画像同步为新正文。重启后仍是版本 2。截图 `tests/results/p1_5/p1_5_direct_edit.png`、`p1_5_restart.png`、`p1_5_profile_after_review.png` |
-| A02 粘贴、TXT、Markdown | 粘贴在页面完成。TXT `notes.txt` 与 Markdown `plan.md` 走页面相同的 `POST /api/v1/imports`。只批准部分候选。批准项带来源。同一 `Idempotency-Key` 再提交不增加来源或候选。样本见 `tests/results/p1_5_extract.json` |
-| A03 未批准内容 | 待确认“最近准备转 AI 产品”和已拒绝的“正式报告需要详细论据”等正文，不在记忆列表和画像中。搜索若有结果，也是其他已确认记忆，不含这些正文。MCP 查询 `NOT_RUN`，留到 P2 |
+| A02 粘贴、TXT、Markdown | 粘贴在页面完成。TXT `notes.txt` 与 Markdown `plan.md`：接口通过、文件选择框交互未验证。样本提交的是 `POST /api/v1/imports`。只批准部分候选。批准项带来源。同一 `Idempotency-Key` 再提交不增加来源或候选。样本见 `tests/results/p1_5_extract.json` |
+| A03 未批准内容 | 待审核、已拒绝正文不进入正式搜索。待确认“最近准备转 AI 产品”，以及已拒绝的“正式报告需要详细论据”“周宁每周三晚上进行面试辅导。”“发布说明用完整句子。”，不在记忆列表和画像中，搜索命中不含这些正文。证据直接复用，不重跑，汇录在 `tests/results/a03_owner_search_citation.json`。`tests/results/p1_2_windows.json` 的 `candidate_search_count` 为 0，是另一份样本。MCP 查询 `NOT_RUN` |
 | A04、A11 | 沿用 `tests/results/p1_3_windows.json`：`update_conflict`、`keep_both`、审核重放，以及 kernel/commit 两处中断恢复均为通过。本轮没有重跑。删除中断仍是 P3，`NOT_RUN` |
 | 真实提取 | 服务商 DeepSeek，模型 `deepseek-flash`。原文、四条候选和证据见 `tests/results/p1_5_extract.json`。人工核对后，“日常回复希望简洁”没有被写成“所有场景都简洁”。批准身份和这条偏好，拒绝“正式报告需要详细论据”，目标留在待确认。画像只有已批准内容 |
 | A12 未配置 | 来源保留，状态 `extractor_unavailable`，提案 0 条。页面写明提取模型未配置。截图 `p1_5_import_unconfigured.png` |
 | A12 超时 | 本机测试端点，不是真实模型。`error_code=TIMEOUT`。页面写明提取超时、来源仍在、可以重试。重试后仍是一条来源、零条提案。截图 `p1_5_timeout.png` |
 | A12 无效格式 | 本机测试端点，不是真实模型。`error_code=VALIDATION_ERROR`。页面写明格式无效、来源仍在、可以重试。重试后仍是一条来源、零条提案。截图 `p1_5_invalid.png` |
-| A12 断网 | 进程的 `HTTPS_PROXY` 指向 `127.0.0.1:9`，对外请求没有 HTTP 响应。本地仍能保存、读取并搜索“断网探针：书桌靠窗”。同一进程里的云提取返回 `MODEL_UNAVAILABLE`，来源保留，正式检索没有该正文。截图 `p1_5_offline_search.png`、`p1_5_offline_extract.png` |
+| A12 断网 | P1.5 把 `HTTPS_PROXY` 指向 `127.0.0.1:9`，对外请求没有 HTTP 响应。本地仍能保存、读取并搜索“断网探针：书桌靠窗”。同一进程里的云提取返回 `MODEL_UNAVAILABLE`，来源保留，正式检索没有该正文。截图 `p1_5_offline_search.png`、`p1_5_offline_extract.png`。2026-09-25 的正式服务补验见 `tests/results/p1_egress_windows.json`：回环保留，保存、读取和搜索成功。完全断网仍是 `NOT_RUN` / 待补验；该次到 `1.1.1.1:443` 的原始 TCP 仍然连通 |
 
 截图在 `tests/results/p1_5/`。复核入口：`services/publish.py` 的 `publish_memory()`，`services/review.py` 的 `decide_proposal()`，`services/extract.py` 的 `extract_candidates()`，`services/memories.py` 的 `update_memory()`，`apps/web/src/Detail.tsx`。
 
@@ -297,6 +389,12 @@ P0 验收结论为 **GO**。上述限制保留，不在 P1.1 里重跑或扩实�
 | 2026-09-25 | P1.3 | DONE | `tests/results/p1_3_windows.json` | 审核、版本冲突和两处中断恢复已验证。相同意图才重放；不同意图返回冲突。云模型提取仍 `NOT_RUN` |
 | 2026-09-25 | P1.4 | DONE | `tests/results/p1_4_windows.json`；截图 `tests/results/p1_4/` | 三个页面连到真实服务。云模型提取仍 `NOT_RUN`。下一步是 P1.5 |
 | 2026-09-25 | P1.5 | DONE | `tests/results/p1_5_windows.json`；`tests/results/p1_5_extract.json`；截图 `tests/results/p1_5/` | 直接编辑、部分批准和 DeepSeek `deepseek-flash` 提取已验证。A03 的 MCP、A11 的删除恢复未跑。下一步是 P2.1 |
+| 2026-09-25 | Owner 闭环修正 | DONE | `tests/test_owner_search_filter.py` | 当前搜索先按已发布版本、类别和有效期过滤再截断；仅自己可见仍留在本人列表。待确认的更新和编辑后保存提交修改后的正文，并带上所选记忆。同一段来源文本复用同一个导入键。 |
+| 2026-09-25 | P2.1 | DONE | `tests/results/p2_1_windows.json` | 连接身份和权限管理通过。凭证重置现已递增 `policy_version`，结果已重跑。真实 MCP 和访问记录未做。下一步已进入 P2.3 |
+| 2026-09-25 | P2.2 | DONE | `tests/results/p2_2_windows.json` | 四个工具和统一权限检查通过。访问记录与真实客户端当时是 `NOT_RUN`。不是 Agent 接入全部通过 |
+| 2026-09-25 | P2.3 | DONE | `tests/results/p2_3_windows.json`；`tests/results/p2_3_delivery_windows.json` | 访问快照与“我的 Agent”页面通过。交付改为按事件号更新，提交失败和发送中断已补验。真实客户端当时留在 P2.4 |
+| 2026-09-25 | P2.4 | DONE | `tests/results/p2_4_windows.json` | OpenCode 1.18.16 走通查询、提案、拒绝、再查和停用。A06 为 19/20，漏召回 `r07`。A12 完全断网与 Electron 仍是 `NOT_RUN`。下一步是 P3.1 |
+| 2026-09-25 | P1 有限补验 | DONE | `tests/results/p1_egress_windows.json`；`tests/results/a03_owner_search_citation.json` | 外网 HTTP 受限且回环保留时，保存、读取、搜索成功。A12 完全断网仍待补验。A03 复用已有结果，MCP 未跑。TXT/Markdown 文件选择框未验证 |
 
 待验证能力记录：
 
@@ -305,12 +403,15 @@ P0 验收结论为 **GO**。上述限制保留，不在 P1.1 里重跑或扩实�
 | 精确依赖 + Windows 原生存取 | DONE | Windows 10.0.26200；CPython 3.12.13（`.python-version` 与 `uv.lock` 均为 `==3.12.13`）；`mnemosyne-memory==3.15.1`。见 `experiments/kernel_spike/results/p0_1_windows.json` |
 | 自动整理隔离、历史/删除、幂等定位 | DONE | 版本 session 与派生表清理见 `experiments/kernel_spike/results/p0_2_session.json`。条数上限是单个 session 内未巩固行，不是全库容量。向量索引删除见 `p0_3_windows.json` |
 | 中文本地召回 + 断网 | DONE | 模型 `BAAI/bge-small-zh-v1.5`，`fastembed==0.8.1`，`sqlite-vec==0.1.9`。统一 `recall()` Hit@5 为 19/20。见 `experiments/kernel_spike/results/p0_3_windows.json` |
-| 一个真实客户端 + stdio 凭证链路 | DONE | OpenCode 1.18.16。服务端 `mcp==2.2.0`，只注册 `search_memory`。凭证经环境变量传入，库存 sha256。见 `experiments/kernel_spike/results/p0_4_windows.json` |
+| 一个真实客户端 + stdio 凭证链路 | DONE | P0 实验只注册 `search_memory`，见 `experiments/kernel_spike/results/p0_4_windows.json`。P2.4 的正式 bridge 注册四个工具并调用现有服务，见 `tests/results/p2_4_windows.json`。OpenCode 1.18.16，`mcp==2.2.0` |
 | 本机服务、控制库、Owner 认证、Adapter 连接 | DONE | `tests/results/p1_1_windows.json`。连接测试不加载向量模型 |
 | 手动保存、来源、导入候选 | DONE | `tests/results/p1_2_windows.json`。云模型提取 `NOT_RUN` |
 | 审核、版本冲突、失败恢复 | DONE | `tests/results/p1_3_windows.json`。云模型提取仍 `NOT_RUN` |
 | 关于我、记忆、待确认 | DONE | `tests/results/p1_4_windows.json`。云模型提取仍 `NOT_RUN` |
 | Owner 验收与真实提取 | DONE | `tests/results/p1_5_windows.json`；`tests/results/p1_5_extract.json`。DeepSeek `deepseek-flash`。MCP 与删除恢复未跑 |
+| 四个工具与统一权限检查 | DONE | `tests/results/p2_2_windows.json`。后续收口见 P2.3 |
+| 访问快照与我的 Agent | DONE | `tests/results/p2_3_windows.json`；交付收尾 `tests/results/p2_3_delivery_windows.json`。A12 完全断网仍是 `NOT_RUN`，见 `tests/results/a12_full_disconnect.json` |
+| 真实客户端查询、提案、审核、停用 | DONE | `tests/results/p2_4_windows.json`。A06 为 19/20，漏召回 `r07`。只验收 OpenCode |
 
 范围或架构变更先记录：**问题证据 → 最小可行选项 → 推荐方案 → 对范围/数据/计划的影响 → 用户决定**。决策通过后再同步相关文档，不在实现中悄悄改变基线。
 

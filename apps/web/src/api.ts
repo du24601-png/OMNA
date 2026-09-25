@@ -53,6 +53,41 @@ export type Source = {
   imported_at: string
 }
 
+export type AgentConnection = {
+  id: string
+  name: string
+  enabled: boolean
+  policy_version: number
+  allowed_tools: string[]
+  allowed_categories: string[]
+  client_status: string
+  credential?: string
+}
+
+export type AccessVersion = { id: string; revision: number }
+
+export type AccessEvent = {
+  id: string
+  request_id: string
+  agent_id: string | null
+  tool: string
+  outcome: string
+  policy_version: number | null
+  created_at: string
+  delivery_state: string
+  versions: AccessVersion[]
+}
+
+export type AccessDetail = AccessEvent & {
+  response: {
+    items?: Memory[]
+    result?: { id?: string; revision?: number; evidence?: string | null; source_kind?: string | null }
+    error?: { code?: string; message?: string }
+    proposal_id?: string
+    status?: string
+  }
+}
+
 export type ImportJob = {
   job_id: string
   status: string
@@ -184,6 +219,35 @@ export const api = {
   },
   retryImport(jobId: string) {
     return request(`/api/v1/imports/${jobId}/retry`, { method: "POST", body: "{}" }) as Promise<ImportJob>
+  },
+  agents() {
+    return request("/api/v1/agents") as Promise<{ agents: AgentConnection[] }>
+  },
+  createAgent(name: string, key: string) {
+    return request("/api/v1/agents", {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify({ name }),
+    }) as Promise<AgentConnection>
+  },
+  updateAgent(id: string, body: Record<string, unknown>, key: string) {
+    return request(`/api/v1/agents/${id}`, {
+      method: "PATCH",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify(body),
+    }) as Promise<AgentConnection>
+  },
+  rotateAgent(id: string, key: string) {
+    return request(`/api/v1/agents/${id}/rotate-credential`, {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+    }) as Promise<AgentConnection>
+  },
+  accessEvents(agentId: string) {
+    return request(`/api/v1/access-events?agent_id=${encodeURIComponent(agentId)}`) as Promise<{ events: AccessEvent[] }>
+  },
+  accessEvent(id: string) {
+    return request(`/api/v1/access-events/${id}`) as Promise<AccessDetail>
   },
 }
 

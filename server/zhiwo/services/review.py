@@ -1,9 +1,9 @@
 """Owner review. Every approval publishes through publish_memory.
 
 Reject does not write the Kernel. A repeated review is compared with the
-stored intent. The same decision and payload return the original result.
-A different decision or payload returns CONFLICT and leaves official memory
-unchanged.
+stored intent, including whether share state and expiry were submitted.
+The same intent returns the original result. A different intent returns
+CONFLICT and leaves official memory unchanged.
 """
 
 from __future__ import annotations
@@ -165,7 +165,7 @@ def _resume(db_path, handle: KernelHandle, connection: sqlite3.Connection, propo
 
 
 def _replay(db_path, handle: KernelHandle, connection: sqlite3.Connection, proposal, incoming: dict) -> dict:
-    if _stored_intent(proposal) != incoming:
+    if not _same_intent(_stored_intent(proposal), incoming):
         raise ApiError(409, "CONFLICT", _replay_message(proposal))
     if proposal["status"] == "rejected":
         return _decision_view(proposal, None)
@@ -237,13 +237,11 @@ def _review_record(connection: sqlite3.Connection, proposal, body: dict, decisio
             content = body.get("content")
         kind = body.get("kind") or kind
         category = body.get("category") or category
-    share_enabled = True if stored.get("share_enabled") is None else bool(stored.get("share_enabled"))
-    if isinstance(body.get("share_enabled"), bool):
-        share_enabled = body["share_enabled"]
+    active = None
     if target_id:
         active = connection.execute(
             """
-            SELECT revision FROM memory_refs
+            SELECT revision, share_enabled, valid_until FROM memory_refs
             WHERE memory_id = ? AND lifecycle = 'active'
             """,
             (target_id,),
@@ -252,12 +250,28 @@ def _review_record(connection: sqlite3.Connection, proposal, body: dict, decisio
             raise ApiError(404, "NOT_FOUND", "memory not found")
         if active["revision"] != base_revision:
             raise ApiError(409, "CONFLICT", VERSION_CONFLICT)
+    # An update, or an edit aimed at an existing memory, keeps the current
+    # share flag and expiry unless this decision sets them. A missing
+    # candidate value must not turn sharing on. A new memory still defaults
+    # to shared and takes its expiry from the candidate.
+    if decision == "update" or (decision == "edit" and target_id):
+        share_enabled = bool(active["share_enabled"])
+        valid_until = active["valid_until"]
+        if "share_enabled" in body:
+            share_enabled = _required_bool(body.get("share_enabled"))
+        if "valid_until" in body:
+            valid_until = _expiry(body.get("valid_until"))
+    else:
+        share_enabled = True if stored.get("share_enabled") is None else bool(stored.get("share_enabled"))
+        if "share_enabled" in body:
+            share_enabled = _required_bool(body.get("share_enabled"))
+        valid_until = stored.get("valid_until")
     return {
         "content": content,
         "kind": kind,
         "category": category,
         "scope": scope,
-        "valid_until": stored.get("valid_until"),
+        "valid_until": valid_until,
         "share_enabled": share_enabled,
         "source_refs": [proposal["source_id"]],
         "target_id": target_id,
@@ -310,6 +324,7 @@ def _reopen(connection: sqlite3.Connection, proposal_id: str, operation_id: str,
 
 def _intent(body: dict) -> dict:
     decision = body.get("decision")
+    control = _control_intent(body)
     if decision == "reject":
         return {
             "base_revision": None,
@@ -319,6 +334,7 @@ def _intent(body: dict) -> dict:
             "kind": None,
             "scope": None,
             "target_id": None,
+            **control,
         }
     return {
         "base_revision": _revision(body.get("base_revision")),
@@ -328,7 +344,41 @@ def _intent(body: dict) -> dict:
         "kind": _label(body.get("kind")),
         "scope": _text(body.get("scope")),
         "target_id": _text(body.get("target_id")),
+        **control,
     }
+
+
+def _control_intent(body: dict) -> dict:
+    """Record the submitted share flag and expiry, including whether each was sent.
+
+    A missing key is not the same intent as an explicit null. The resolved
+    inheritance is stored on the operation, not copied into this intent.
+    """
+    share_provided = "share_enabled" in body
+    until_provided = "valid_until" in body
+    share_value = body.get("share_enabled") if share_provided else None
+    if not isinstance(share_value, bool):
+        share_value = None
+    until_value = None
+    if until_provided and isinstance(body.get("valid_until"), str) and body.get("valid_until").strip():
+        until_value = body.get("valid_until").strip()
+    return {
+        "share_enabled": share_value,
+        "share_provided": share_provided,
+        "valid_until": until_value,
+        "valid_until_provided": until_provided,
+    }
+
+
+def _same_intent(stored: dict | None, incoming: dict) -> bool:
+    if not isinstance(stored, dict):
+        return False
+    left = dict(stored)
+    left.setdefault("share_enabled", None)
+    left.setdefault("share_provided", False)
+    left.setdefault("valid_until", None)
+    left.setdefault("valid_until_provided", False)
+    return left == incoming
 
 
 def _stored_intent(proposal) -> dict | None:
@@ -356,6 +406,20 @@ def _replay_message(proposal) -> str:
 
 def _dump(intent: dict) -> str:
     return json.dumps(intent, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _required_bool(value) -> bool:
+    if not isinstance(value, bool):
+        raise ApiError(400, "VALIDATION_ERROR", "share_enabled must be a boolean")
+    return value
+
+
+def _expiry(value) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ApiError(400, "VALIDATION_ERROR", "valid_until is invalid")
+    return value.strip()
 
 
 def _text(value) -> str | None:

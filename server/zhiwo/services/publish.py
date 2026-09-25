@@ -13,7 +13,6 @@ import json
 import os
 import sqlite3
 import tempfile
-import threading
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,15 +26,17 @@ from zhiwo.adapters.kernel_client import (
     write_version,
 )
 from zhiwo.api.errors import ApiError
+from zhiwo.services.commit_gate import commit_lock
 
-_lock = threading.RLock()
+_lock = commit_lock
 _MAX_CONTENT = 2000
 _KINDS = {"fact", "event"}
 _CATEGORIES = {"identity", "goal", "preference", "project", "event", "other"}
 VERSION_CONFLICT = "the memory changed since this review; the proposal is still pending"
 
 
-def publish_lock() -> threading.RLock:
+def publish_lock():
+    """Lock shared with agent control changes and tool responses."""
     return _lock
 
 

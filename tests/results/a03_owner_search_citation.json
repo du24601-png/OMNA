@@ -1,0 +1,42 @@
+{
+  "task": "A03",
+  "rerun": false,
+  "statement": "待审核、已拒绝正文不进入正式搜索",
+  "mcp": "NOT_RUN",
+  "owner_reads": {
+    "path": "tests/results/p1_5_windows.json",
+    "item": "A03",
+    "result": "PASS_OWNER_READS",
+    "evidence": "Pending 最近准备转 AI 产品 and rejected 正式报告需要详细论据, 进行面试辅导, 发布说明用完整句子 are absent from the memory list and profile. Search hits, when any, are other confirmed memories and do not contain those bodies. MCP is left for P2."
+  },
+  "decisions": {
+    "path": "tests/results/p1_5_extract.json",
+    "items": [
+      {
+        "content": "最近准备转 AI 产品",
+        "decision": "left_pending",
+        "search": "不进入正式搜索"
+      },
+      {
+        "content": "正式报告需要详细论据",
+        "decision": "reject",
+        "search": "不进入正式搜索"
+      },
+      {
+        "content": "周宁每周三晚上进行面试辅导。",
+        "decision": "reject",
+        "search": "不进入正式搜索"
+      },
+      {
+        "content": "发布说明用完整句子。",
+        "decision": "reject",
+        "search": "不进入正式搜索"
+      }
+    ]
+  },
+  "separate_sample": {
+    "path": "tests/results/p1_2_windows.json",
+    "candidate_search_count": 0,
+    "note": "另一份样本。candidate_search_count 为 0 只说明该次候选检索为空，不拿来重计 P1.5 的四句正文。"
+  }
+}
