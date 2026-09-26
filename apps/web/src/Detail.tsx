@@ -1,7 +1,9 @@
+import { Dialog } from "@base-ui/react/dialog"
+import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { ApiError, api, explain, type Memory, type Source, type Version } from "./api"
 import { categoryLabel, dateLabel, lifecycleLabel, sharingLabel, sourceLabel } from "./format"
-import { canLeave, Icon, Notice, ResourceNotice, usePanel, useResource, useUnsaved } from "./ui"
+import { canLeave, Icon, Notice, ResourceNotice, useResource, useUnsaved } from "./ui"
 
 export function Detail({ memoryId, onClose, onSaved, online }: { memoryId: string; onClose: () => void; onSaved: () => void; online: boolean }) {
   const resource = useResource(async () => {
@@ -18,12 +20,18 @@ export function Detail({ memoryId, onClose, onSaved, online }: { memoryId: strin
   const [notice, setNotice] = useState("")
   const [conflict, setConflict] = useState(false)
   const [busy, setBusy] = useState(false)
-  const panel = useRef<HTMLElement>(null)
   const attempt = useRef<{ sig: string; key: string } | null>(null)
+  const reduce = useReducedMotion()
+  const [narrow, setNarrow] = useState(() => window.matchMedia("(max-width: 1200px)").matches)
   const dirty = editing && !!memory && (draft !== memory.content || scope !== (memory.scope || "") || onlySelf !== (memory.share_enabled === false))
   useUnsaved(dirty, busy)
   const close = () => { if (canLeave()) onClose() }
-  usePanel(panel, close, false)
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1200px)")
+    const sync = () => setNarrow(media.matches)
+    media.addEventListener("change", sync)
+    return () => media.removeEventListener("change", sync)
+  }, [])
   useEffect(() => {
     if (!resource.data) return
     setMemory(resource.data.memory); setVersions(resource.data.versions)
@@ -52,7 +60,10 @@ export function Detail({ memoryId, onClose, onSaved, online }: { memoryId: strin
     } catch (err) { setError(explain(err)); setConflict(err instanceof ApiError && err.code === "CONFLICT") }
     finally { setBusy(false) }
   }
-  return <><button className="drawer-backdrop" tabIndex={-1} aria-label="关闭详情遮罩" onClick={close}/><aside ref={panel} className="detail-pane" aria-label="记忆详情">
+  return <Dialog.Root open modal={narrow} disablePointerDismissal={!narrow} onOpenChange={(open, details) => { if (!open) { if (!canLeave()) details.cancel(); else onClose() } }}>
+    <Dialog.Portal>
+      {narrow && <Dialog.Backdrop className="dialog-backdrop"/>}
+      <Dialog.Popup className="detail-pane material" aria-label="记忆详情" render={<motion.div initial={reduce ? false : { x: 28, opacity: 0.7 }} animate={{ x: 0, opacity: 1 }} transition={reduce ? { duration: 0.2 } : { type: "spring", bounce: 0, duration: 0.4 }}/>}>
     <header className="panel-heading"><div><span className="eyebrow">每一条，都有依据</span><h2>记忆详情</h2></div><button className="icon-button" aria-label="关闭详情" onClick={close}><Icon name="close"/></button></header>
     <div className="panel-body">
       <ResourceNotice resource={resource}/>
@@ -73,7 +84,9 @@ export function Detail({ memoryId, onClose, onSaved, online }: { memoryId: strin
         <section className="detail-section"><h3>历史版本 <span className="count">{versions.length}</span></h3><p className="helper">旧版本仅供回看，不作为当前记忆提供给 Agent。</p>{versions.map(v => <details className="version-item" key={v.revision}><summary>版本 {v.revision}<span>{lifecycleLabel(v.lifecycle)}</span></summary><p className="prose">{v.content || "正文暂时无法读取。"}</p>{v.scope && <p className="helper">适用场景：{v.scope}</p>}</details>)}</section>
       </>}
     </div>
-  </aside></>
+      </Dialog.Popup>
+    </Dialog.Portal>
+  </Dialog.Root>
 }
 export function SourceContent({ id }: { id: string }) {
   const source = useResource<Source>(() => api.source(id), [id])

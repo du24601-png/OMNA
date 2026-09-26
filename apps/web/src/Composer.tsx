@@ -1,7 +1,9 @@
+import { Dialog } from "@base-ui/react/dialog"
+import { motion, useReducedMotion } from "motion/react"
 import { useRef, useState } from "react"
 import { api, explain, importMessage, type ImportJob } from "./api"
 import { CATEGORIES } from "./format"
-import { canLeave, Icon, Notice, usePanel, useUnsaved } from "./ui"
+import { canLeave, Icon, Notice, useUnsaved } from "./ui"
 import type { Service } from "./App"
 
 export function Composer({ kind, service, onClose, onRefresh, onSaved, onReview }: { kind: "add" | "import"; service: Service; onClose: () => void; onRefresh: () => void; onSaved: (id?: string) => void; onReview: () => void }) {
@@ -15,14 +17,14 @@ export function Composer({ kind, service, onClose, onRefresh, onSaved, onReview 
   const [reading, setReading] = useState(false)
   const [job, setJob] = useState<{ value: ImportJob; signature: string } | null>(null)
   const attempts = useRef(new Map<string, string>())
-  const submitting = useRef(false), readId = useRef(0), panel = useRef<HTMLFormElement>(null)
+  const submitting = useRef(false), readId = useRef(0)
+  const reduce = useReducedMotion()
   const importBody = fileName ? { kind: "file", name: fileName, text: content } : { kind: "paste", text: content }
   const signature = JSON.stringify(importBody)
   const sameJob = job?.signature === signature
   const online = service.status === "online"
   useUnsaved(!!content.trim() && !(kind === "import" && sameJob), busy || reading)
   const close = () => { if (canLeave()) onClose() }
-  usePanel(panel, close)
   function keyFor(sig: string) { let key = attempts.current.get(sig); if (!key) { key = crypto.randomUUID(); attempts.current.set(sig, key) }; return key }
   async function selectFile(file?: File) {
     if (!file) return
@@ -57,7 +59,11 @@ export function Composer({ kind, service, onClose, onRefresh, onSaved, onReview 
     } catch (err) { setError(explain(err)) }
     finally { submitting.current = false; setBusy(false) }
   }
-  return <div className="modal-backdrop"><form className="modal" ref={panel} role="dialog" aria-modal="true" aria-labelledby="composer-title" onSubmit={e => { e.preventDefault(); void submit() }}>
+  return <Dialog.Root open modal onOpenChange={(open, details) => { if (!open) { if (!canLeave()) details.cancel(); else onClose() } }}>
+    <Dialog.Portal>
+      <Dialog.Backdrop className="dialog-backdrop"/>
+      <Dialog.Popup className="modal material" render={<motion.div initial={reduce ? false : { y: 16, opacity: 0.7 }} animate={{ y: 0, opacity: 1 }} transition={reduce ? { duration: 0.2 } : { type: "spring", bounce: 0, duration: 0.4 }}/>}>
+        <form aria-labelledby="composer-title" onSubmit={e => { e.preventDefault(); void submit() }}>
     <header className="panel-heading"><div><span className="eyebrow">{kind === "add" ? "由你确认，即刻生效" : "先保存来源，再由你确认"}</span><h2 id="composer-title">{kind === "add" ? "添加记忆" : "导入文本"}</h2></div><button className="icon-button" aria-label="关闭添加或导入" type="button" disabled={busy || reading} onClick={close}><Icon name="close"/></button></header>
     <div className="modal-body">
       {!online && <Notice tone="warning">本地服务不可用。草稿已保留，请恢复连接后重试。</Notice>}
@@ -73,5 +79,8 @@ export function Composer({ kind, service, onClose, onRefresh, onSaved, onReview 
       {sameJob && job && <Notice tone={job.value.status === "extracted" ? "success" : "warning"}>{importMessage(job.value, service.testMode)}</Notice>}
     </div>
     <footer className="modal-footer"><button className="button secondary" type="button" onClick={close} disabled={busy || reading}>{sameJob ? "完成" : "取消"}</button><div className="actions">{sameJob && job?.value.status === "extracted" ? <button className="button primary" type="button" onClick={onReview}>前往待确认</button> : <button className="button primary" type={sameJob ? "button" : "submit"} onClick={sameJob ? () => void submit(true) : undefined} disabled={!online || busy || reading || !content.trim()}>{busy ? (kind === "add" ? "保存中…" : "正在保存与提取…") : kind === "add" ? "确认保存" : sameJob ? "重试提取" : "保存来源并提取"}</button>}</div></footer>
-  </form></div>
+  </form>
+      </Dialog.Popup>
+    </Dialog.Portal>
+  </Dialog.Root>
 }
