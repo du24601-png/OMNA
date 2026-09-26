@@ -1,10 +1,8 @@
 import { Tooltip } from "@base-ui/react/tooltip"
-import { Tabs } from "@base-ui/react/tabs"
-import { Select } from "@base-ui/react/select"
 import { useEffect, useRef, useState } from "react"
 import { ApiError, api, explain, getCredential, setCredential, type Memory } from "./api"
 import { Detail } from "./Detail"
-import { CATEGORIES, categoryLabel, dateLabel, sharingLabel } from "./format"
+import { CATEGORIES, categoryLabel, dateLabel, relativeTime, sharingLabel } from "./format"
 import { canLeave, Empty, Icon, Notice, ResourceNotice, useResource } from "./ui"
 import { Composer } from "./Composer"
 import { ReviewPage } from "./Review"
@@ -123,14 +121,30 @@ function ProfilePage({ tick, onOpen, onAdd, onImport }: { tick: number; onOpen: 
 function MemoryCard({ memory, onOpen }: { memory: Memory; onOpen: (id: string) => void }) {
   return <button className="memory-card" onClick={() => onOpen(memory.id)}><span className="card-chip">{categoryLabel(memory.category)}</span><p>{memory.content || "正文暂时无法读取。"}</p><span className="card-caption">{memory.scope && <span>{memory.scope}</span>}<span className="card-share">{sharingLabel(memory)}</span><span>版本 {memory.revision}</span><time>{dateLabel(memory.created_at)}</time></span></button>
 }
+function MemoCard({ memory, onOpen }: { memory: Memory; onOpen: (id: string) => void }) {
+  return <button className="memo-card" onClick={() => onOpen(memory.id)}><time dateTime={memory.created_at}>{relativeTime(memory.created_at)}</time><p>{memory.content || "正文暂时无法读取。"}</p><span className="memo-tags"><span>{categoryLabel(memory.category)}</span>{memory.scope && <span>{memory.scope}</span>}<span>{sharingLabel(memory)}</span><span>版本 {memory.revision}</span></span></button>
+}
 function MemoryPage({ tick, query, draft, onDraft, onSearch, onClear, onOpen, onAdd }: { tick: number; query: string; draft: string; onDraft: (value: string) => void; onSearch: () => void; onClear: () => void; onOpen: (id: string) => void; onAdd: () => void }) {
   const [state, setState] = useState("current"), [category, setCategory] = useState("")
   const resource = useResource(() => api.memories({ state, category, query, limit: 50 }), [state, category, query, tick])
   const filtered = !!query || !!category || state !== "current"
   const clear = () => { setState("current"); setCategory(""); onClear() }
-  const topic = category || "all"
-  return <div className="page library-page"><form className="library-search material" onSubmit={e => { e.preventDefault(); onSearch() }}><Icon name="search"/><input aria-label="搜索记忆" placeholder="搜索已确认的记忆" value={draft} onChange={e => onDraft(e.target.value)}/></form><div className="filter-bar"><Tabs.Root value={state} onValueChange={value => setState(String(value))}><Tabs.List className="segmented" aria-label="记忆状态">{[["current", "当前"], ["expired", "过期"], ["history", "历史"]].map(([id, label]) => <Tabs.Tab key={id} value={id}>{label}</Tabs.Tab>)}</Tabs.List></Tabs.Root><Select.Root modal={false} value={topic} onValueChange={value => setCategory(!value || value === "all" ? "" : String(value))}><Select.Trigger className="select-trigger" aria-label="主题筛选"><Select.Value>{value => value === "all" || value == null ? "全部主题" : CATEGORIES.find(([id]) => id === value)?.[1] || "全部主题"}</Select.Value></Select.Trigger><Select.Portal><Select.Positioner sideOffset={6}><Select.Popup className="select-popup"><Select.List><Select.Item className="select-item" value="all">全部主题</Select.Item>{CATEGORIES.map(([id, label]) => <Select.Item className="select-item" key={id} value={id}>{label}</Select.Item>)}</Select.List></Select.Popup></Select.Positioner></Select.Portal></Select.Root>{filtered && <button className="text-button" onClick={clear}>清除筛选</button>}<span className="quiet-label">{resource.data ? `${resource.data.items.length} 条` : ""}</span></div>{query && <p className="helper search-caption">搜索“{query}”，仅包含已确认内容</p>}<ResourceNotice resource={resource}/>
-    {resource.data && !resource.data.items.length && !resource.loading && !resource.error && <Empty title={filtered ? "没有符合筛选条件的记忆" : "还没有已确认的记忆"} action={<button className="button secondary" onClick={filtered ? clear : onAdd}>{filtered ? "清除筛选" : "添加记忆"}</button>}>{filtered ? "换个关键词或类别再试试。" : "从一条偏好、目标或近期事件开始。"}</Empty>}
-    {!!resource.data?.items.length && <div className="card-wall">{resource.data.items.map(item => <MemoryCard key={`${item.id}-${item.revision}`} memory={item} onOpen={onOpen}/>)}</div>}
+  const statuses: [string, string][] = [["current", "当前"], ["expired", "过期"], ["history", "历史"]]
+  return <div className="page library-page">
+    <aside className="library-filters" aria-label="筛选">
+      <form className="library-search" onSubmit={e => { e.preventDefault(); onSearch() }}><Icon name="search"/><input aria-label="搜索记忆" placeholder="搜索已确认的记忆" value={draft} onChange={e => onDraft(e.target.value)}/></form>
+      <p className="filter-label">状态</p>
+      <div className="filter-list" role="group" aria-label="记忆状态">{statuses.map(([id, label]) => <button key={id} type="button" className="filter-item" aria-pressed={state === id} onClick={() => setState(id)}>{label}</button>)}</div>
+      <p className="filter-label">主题</p>
+      <div className="filter-list" role="group" aria-label="主题筛选"><button type="button" className="filter-item" aria-pressed={!category} onClick={() => setCategory("")}>全部</button>{CATEGORIES.map(([id, label]) => <button key={id} type="button" className="filter-item" aria-pressed={category === id} onClick={() => setCategory(id)}>{label}</button>)}</div>
+      {filtered && <button className="text-button filter-clear" type="button" onClick={clear}>清除筛选</button>}
+    </aside>
+    <div className="library-feed">
+      <p className="quiet-label feed-count">{resource.data ? `${resource.data.items.length} 条` : ""}</p>
+      {query && <p className="helper search-caption">搜索“{query}”，仅包含已确认内容</p>}
+      <ResourceNotice resource={resource}/>
+      {resource.data && !resource.data.items.length && !resource.loading && !resource.error && <Empty title={filtered ? "没有符合筛选条件的记忆" : "还没有已确认的记忆"} action={<button className="button secondary" onClick={filtered ? clear : onAdd}>{filtered ? "清除筛选" : "添加记忆"}</button>}>{filtered ? "换个关键词或类别再试试。" : "从一条偏好、目标或近期事件开始。"}</Empty>}
+      {!!resource.data?.items.length && <div className="memo-list">{resource.data.items.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} onOpen={onOpen}/>)}</div>}
+    </div>
   </div>
 }

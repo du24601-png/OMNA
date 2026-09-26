@@ -2,11 +2,18 @@ import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObjec
 import { explain } from "./api"
 
 export function useResource<T>(load: () => Promise<T>, keys: unknown[]) {
+  const key = JSON.stringify(keys)
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [retry, setRetry] = useState(0)
+  const [seen, setSeen] = useState(key)
   const sequence = useRef(0)
+  if (seen !== key) {
+    setSeen(key)
+    setLoading(true)
+    setError("")
+  }
   useEffect(() => {
     const current = ++sequence.current
     setLoading(true); setError("")
@@ -14,7 +21,7 @@ export function useResource<T>(load: () => Promise<T>, keys: unknown[]) {
       .catch(err => { if (current === sequence.current) setError(explain(err)) })
       .finally(() => { if (current === sequence.current) setLoading(false) })
     return () => { sequence.current++ }
-  }, [...keys, retry])
+  }, [key, retry])
   return { data, loading, error, reload: useCallback(() => setRetry(n => n + 1), []) }
 }
 export function ResourceNotice({ resource }: { resource: { data: unknown; loading: boolean; error: string; reload: () => void } }) {

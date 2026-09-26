@@ -112,6 +112,8 @@ P0 不开始完整 UI 和安装包；P1 不打磨动效；P2 不扩展多个客�
 
 P3.1 已通过。证据是 `tests/results/p3_1_windows.json`，截图在 `tests/results/p3_1/`。四页连到真实服务。1024 px 与 1440 px 没有横向溢出。A12 完全断网仍是 `NOT_RUN`。本轮没有做删除、设置页或 Electron 打包。下一步才是 P3.2，本轮没有开始。
 
+P3.1 之后，记忆页改成左侧筛选加右侧单列卡片，颜色改为白底浅灰边。约定写在 `PRODUCT.md` 第 5.1 节。这次只改版式，没有新功能，也没有把 P3.2 标成开始。
+
 ### P3.1 结果
 
 合成数据，独立测试库，本地模型缓存。页面标明「合成演示数据」。结果文件不含凭证。`pass` 是 true。
@@ -408,6 +410,7 @@ P0 验收结论为 **GO**。上述限制保留，不在 P1.1 里重跑或扩实�
 | 2026-09-25 | P2.3 | DONE | `tests/results/p2_3_windows.json`；`tests/results/p2_3_delivery_windows.json` | 访问快照与“我的 Agent”页面通过。交付改为按事件号更新，提交失败和发送中断已补验。真实客户端当时留在 P2.4 |
 | 2026-09-25 | P2.4 | DONE | `tests/results/p2_4_windows.json` | OpenCode 1.18.16 走通查询、提案、拒绝、再查和停用。A06 为 19/20，漏召回 `r07`。A12 完全断网与 Electron 仍是 `NOT_RUN`。下一步是 P3.1 |
 | 2026-09-25 | P3.1 | DONE | `tests/results/p3_1_windows.json`；截图 `tests/results/p3_1/`；`tests/results/p3_1_lock_windows.json` | 四页视觉与交互收尾通过。1024 px 与 1440 px 无横向溢出。A12 完全断网与 Electron 仍未做。下一步是 P3.2 |
+| 2026-09-25 | 记忆页版式 | DONE | 预览走查：主题筛选、搜索、详情、过期空态；`apps/web` 下 `tsc --noEmit` | 未另存验收文件。当前任务仍是 P3.2，Electron 未开始 |
 | 2026-09-25 | P1 有限补验 | DONE | `tests/results/p1_egress_windows.json`；`tests/results/a03_owner_search_citation.json` | 外网 HTTP 受限且回环保留时，保存、读取、搜索成功。A12 完全断网仍待补验。A03 复用已有结果，MCP 未跑。TXT/Markdown 文件选择框未验证 |
 
 待验证能力记录：
