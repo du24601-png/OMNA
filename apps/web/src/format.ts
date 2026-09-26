@@ -7,6 +7,12 @@ export const CATEGORIES: [string, string][] = [
   ["other", "其他"],
 ]
 
+export function sourceAsset(id: string, dark = false) {
+  if (id === "workbuddy") return "/sources/workbuddy.png"
+  if (id === "codex") return dark ? "/sources/codex-dark.png" : "/sources/codex.png"
+  return `/sources/${id}${dark ? "-dark" : ""}.svg`
+}
+
 export function categoryLabel(value: string) {
   return CATEGORIES.find(([id]) => id === value)?.[1] || value
 }
@@ -67,18 +73,17 @@ export function dateLabel(value?: string | null) {
   return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(date)
 }
 
-export function relativeTime(value?: string | null) {
+export function listTime(value?: string | null, now = new Date()) {
   if (!value) return "时间未提供"
   const date = new Date(value)
   if (!Number.isFinite(date.getTime())) return "时间未提供"
-  const minutes = Math.round((Date.now() - date.getTime()) / 60000)
-  if (minutes < 1) return "刚刚"
-  if (minutes < 60) return `${minutes} 分钟前`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours} 小时前`
-  const days = Math.round(hours / 24)
-  if (days < 7) return `${days} 天前`
-  return dateLabel(value)
+  const dayStart = (item: Date) => new Date(item.getFullYear(), item.getMonth(), item.getDate()).getTime()
+  const day = Math.round((dayStart(now) - dayStart(date)) / 86400000)
+  const clock = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+  if (day === 0) return `今天 ${clock}`
+  if (day === 1) return `昨天 ${clock}`
+  if (date.getFullYear() === now.getFullYear()) return `${date.getMonth() + 1}月${date.getDate()}日`
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 }
 
 export const TOOL_DESCRIPTIONS: Record<string, string> = {

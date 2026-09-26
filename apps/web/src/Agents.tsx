@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { api, explain, type AccessDetail, type AgentConnection } from "./api"
 import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, connectionStatus, dateLabel, deliveryLabel, outcomeLabel, toolLabel } from "./format"
+import { ClientBoard } from "./Clients"
 import { canLeave, Empty, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
 import type { Service } from "./App"
 
@@ -45,11 +46,13 @@ export function AgentPage({ tick, online, runtime }: { tick: number; online: boo
     catch(err) {setError(explain(err))}
     finally {running.current=false;setBusy(false)}
   }
-  return <div className="page"><PageTitle title="我的 Agent" description="让熟悉你的工具，只读取你允许的内容。"><button className="button primary" disabled={busy} onClick={() => setShowCreate(!showCreate)}>创建连接</button></PageTitle><ResourceNotice resource={resource}/>
+  return <div className="page"><PageTitle title="我的 Agent" description="从已安装的客户端里选一个写入配置，它只能读取你允许的内容。"><button className="button primary" disabled={busy} onClick={() => setShowCreate(!showCreate)}>创建连接</button></PageTitle>
+    <ClientBoard online={online && !resource.error} onConnected={id => { setSelected(id); setLocalTick(value => value + 1) }} />
+    <ResourceNotice resource={resource}/>
     {(showCreate || (resource.data && !agents.length && !resource.loading && !resource.error)) && <form className="create-connection surface" onSubmit={e => {e.preventDefault();void create()}}><div><h2>给这个连接起个名字</h2><p className="helper">例如“林舟的写作助手”。新连接默认没有任何权限。</p></div><div className="actions"><input aria-label="连接名称" placeholder="连接名称" value={name} maxLength={80} onChange={e => setName(e.target.value)} disabled={busy}/><button className="button primary" disabled={!online || busy || !name.trim()}>{busy ? "创建中…" : "确认创建"}</button></div></form>}
     {error && <Notice tone="error">{error}</Notice>}{notice && <Notice tone="success">{notice}</Notice>}
     {issued?.credential && <IssuedCredential agent={issued} runtime={runtime} onDone={() => setIssued(null)}/>}
-    {resource.data && !agents.length && !resource.loading && !resource.error && <Empty title="你来决定谁能了解你">创建连接 → 选择权限并复制配置 → 在客户端发起验证请求。</Empty>}
+    {resource.data && !agents.length && !resource.loading && !resource.error && <Empty title="你来决定谁能了解你">在上方选择已安装的客户端并写入配置，或创建一条自定义连接。</Empty>}
     {!!agents.length && <div className="agent-layout"><div className="agent-list">{agents.map(agent => <button key={agent.id} className={`agent-card ${agent.id===current?.id ? "selected" : ""}`} onClick={() => {if(agent.id!==current?.id && canLeave()) setSelected(agent.id)}}><span className="agent-avatar">{Array.from(agent.name)[0]}</span><strong>{agent.name}</strong><span className={`status-pill ${!agent.enabled ? "disabled" : agent.client_status==="verified" ? "verified" : ""}`}>{connectionStatus(agent)}</span><p>{agent.enabled ? "已启用" : "已停止访问"} · {agent.client_status==="verified" ? "曾验证成功" : "尚未验证"}</p><span className="helper">可读取：{agent.allowed_categories.length ? agent.allowed_categories.map(categoryLabel).join("、") : "未授权任何类别"}</span></button>)}</div>{current && <AgentEditor key={current.id} agent={current} online={online && !resource.error} busy={busy} tick={tick+localTick} onSave={body=>patch(current,body)} onRotate={()=>void rotate(current)}/>}</div>}
   </div>
 }
@@ -69,7 +72,7 @@ function AgentEditor({agent,online,busy,tick,onSave,onRotate}:{agent:AgentConnec
   const detail=useResource(()=>eventId ? api.accessEvent(eventId) : Promise.resolve(null),[eventId,tick])
   function toggle(list:string[],value:string,set:(next:string[])=>void){set(list.includes(value)?list.filter(x=>x!==value):[...list,value])}
   return <section className="agent-editor surface"><header><div><span className="eyebrow">连接与权限</span><h2>{agent.name}</h2></div><span className={`status-pill ${!agent.enabled?"disabled":""}`}>{connectionStatus(agent)}</span></header><p className="helper">验证成功仅表示曾完成一次客户端调用，不代表客户端此刻在线。</p>
-    <details className="disclosure connection-guide"><summary>连接与验证指引</summary><ol><li>选择下面的内容类别与操作，点击“保存授权”。</li><li>将创建或重置时提供的配置添加到 OpenCode 的 MCP 设置。</li><li>在客户端请求一次已获准的记忆查询，然后刷新本页查看验证结果。</li></ol><p className="helper">复制配置、创建连接和打开页面都不会标记验证成功。已隐藏的凭证需重置后重新配置。</p><button className="button secondary" disabled={!online} onClick={()=>events.reload()}>刷新访问记录</button></details>
+    <details className="disclosure connection-guide"><summary>连接与验证指引</summary><ol><li>在上方列表里选择已安装的客户端，确认权限后写入配置。</li><li>打开那个客户端，请求一次已获准的记忆。</li><li>回到这里刷新访问记录。配置已写入还不代表验证成功。</li></ol><p className="helper">刷新连接只重读配置文件还在不在。已隐藏的凭证需重新写入后才会更新到客户端。</p><button className="button secondary" disabled={!online} onClick={()=>events.reload()}>刷新访问记录</button></details>
     <fieldset className="permissions" disabled={busy || !online}><legend>允许读取哪些内容</legend><p className="helper">只提供已确认、当前有效且允许 Agent 读取的记忆。</p><div className="category-permissions">{CATEGORIES.map(([id,label])=><label key={id}><input type="checkbox" checked={categories.includes(id)} onChange={()=>toggle(categories,id,setCategories)}/>{label}</label>)}</div></fieldset>
     <fieldset className="permissions" disabled={busy || !online}><legend>允许执行哪些操作</legend><div className="tool-permissions">{TOOLS.map(([id,label])=><label key={id}><input type="checkbox" checked={tools.includes(id)} onChange={()=>toggle(tools,id,setTools)}/><span><strong>{label}</strong><small>{TOOL_DESCRIPTIONS[id]}</small></span></label>)}</div></fieldset>
     <p className="permission-note">提出的修改建议需要你确认后才会生效。</p><div className="actions"><button className="button primary" disabled={busy || !online || !dirty} onClick={async()=>{const value=await onSave({allowed_tools:tools,allowed_categories:categories});if(value){setTools(value.allowed_tools);setCategories(value.allowed_categories);setBaseline(JSON.stringify([value.allowed_tools,value.allowed_categories]))}}}>{busy?"保存中…":"保存授权"}</button>{dirty && <span className="helper">有尚未保存的权限修改</span>}</div>

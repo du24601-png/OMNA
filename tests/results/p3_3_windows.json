@@ -1,0 +1,16 @@
+{
+  "task": "P3.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "pass": true,
+  "settings_key_hidden": true,
+  "export_has_no_key": true,
+  "restore_invalidates_agent": true,
+  "wipe_removes_memories": true,
+  "outside_backup_kept": true,
+  "preview_lists_source": true,
+  "other_memory_id_present_before_wipe": true,
+  "delete_process_exit": 86,
+  "delete_resumed": true,
+  "other_memory_kept": true,
+  "source_removed": true
+}

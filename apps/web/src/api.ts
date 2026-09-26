@@ -22,6 +22,7 @@ export type Memory = {
   share_enabled?: boolean
   valid_until?: string | null
   source_ids?: string[]
+  origin?: { client: string; name: string }
   readable?: boolean
   created_at?: string
 }
@@ -52,6 +53,14 @@ export type Source = {
   name: string | null
   content: string
   imported_at: string
+}
+
+export type AgentClient = {
+  id: string
+  name: string
+  installed: boolean
+  configured: boolean
+  config_path: string
 }
 
 export type AgentConnection = {
@@ -173,13 +182,14 @@ export const api = {
   profile() {
     return request("/api/v1/profile") as Promise<Profile>
   },
-  memories(params: { query?: string; state?: string; category?: string; limit?: number }) {
+  memories(params: { query?: string; state?: string; category?: string; origin?: string; limit?: number }) {
     const search = new URLSearchParams()
     if (params.query) search.set("query", params.query)
     if (params.state) search.set("state", params.state)
     if (params.category) search.set("category", params.category)
+    if (params.origin) search.set("origin", params.origin)
     search.set("limit", String(params.limit || 50))
-    return request(`/api/v1/memories?${search}`) as Promise<{ items: Memory[] }>
+    return request(`/api/v1/memories?${search}`) as Promise<{ items: Memory[]; origins?: { id: string; name: string }[] }>
   },
   memory(id: string) {
     return request(`/api/v1/memories/${id}`) as Promise<Memory>
@@ -227,6 +237,16 @@ export const api = {
   agents() {
     return request("/api/v1/agents") as Promise<{ agents: AgentConnection[] }>
   },
+  agentClients() {
+    return request("/api/v1/agent-clients") as Promise<{ clients: AgentClient[] }>
+  },
+  connectClient(id: string, preset: "read" | "propose", key: string) {
+    return request(`/api/v1/agent-clients/${encodeURIComponent(id)}/connect`, {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify({ preset, confirm: true }),
+    }) as Promise<{ client_id: string; name: string; agent_id: string; preset: string; config_path: string; configured: boolean }>
+  },
   createAgent(name: string, key: string) {
     return request("/api/v1/agents", {
       method: "POST",
@@ -253,6 +273,92 @@ export const api = {
   accessEvent(id: string) {
     return request(`/api/v1/access-events/${id}`) as Promise<AccessDetail>
   },
+  settings() {
+    return request("/api/v1/settings") as Promise<SettingsView>
+  },
+  saveSettings(body: { extractor_base_url: string; extractor_model: string; extractor_api_key?: string }, key: string) {
+    return request("/api/v1/settings", {
+      method: "PATCH",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify(body),
+    }) as Promise<SettingsView>
+  },
+  testModel(key: string) {
+    return request("/api/v1/settings/test-model", {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+    }) as Promise<{ ok: boolean }>
+  },
+  downloadExport() {
+    return download("/api/v1/exports", "zhiwo-export.zip")
+  },
+  downloadBackup() {
+    return download("/api/v1/backups", "zhiwo-backup.zip")
+  },
+  restoreBackup(file: ArrayBuffer, key: string) {
+    return request(`/api/v1/restores?confirm=${encodeURIComponent("恢复备份")}`, {
+      method: "POST",
+      headers: {
+        "Idempotency-Key": key,
+        "Content-Type": "application/zip",
+      },
+      body: file,
+    }) as Promise<{ status: string }>
+  },
+  resetData(key: string) {
+    return request("/api/v1/data/reset", {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify({ confirm: "清空数据" }),
+    }) as Promise<{ status: string }>
+  },
+  deletionPreview(id: string) {
+    return request(`/api/v1/memories/${id}/deletion-preview`) as Promise<{
+      memory_id: string
+      version_count: number
+      sources: { id: string; kind: string; name: string | null }[]
+    }>
+  },
+  deleteMemory(id: string, key: string) {
+    return request(`/api/v1/memories/${id}`, {
+      method: "DELETE",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify({ confirm: true }),
+    }) as Promise<{ memory_id: string; status: string }>
+  },
+}
+
+export type SettingsView = {
+  data_dir: string
+  extractor: { base_url: string; model: string; key_saved: boolean; configured: boolean }
+}
+
+async function download(path: string, fallback: string) {
+  const headers = new Headers()
+  if (credential) headers.set("Authorization", `Bearer ${credential}`)
+  headers.set("Idempotency-Key", crypto.randomUUID())
+  let response: Response
+  try {
+    response = await fetch(path, { method: "POST", headers })
+  } catch {
+    window.dispatchEvent(new Event("zhiwo:unavailable"))
+    throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
+  }
+  if (!response.ok) {
+    const text = await response.text()
+    let body: { error?: { code?: string; message?: string; retryable?: boolean } } | null = null
+    try { body = text ? JSON.parse(text) : null } catch { body = null }
+    const error = body?.error
+    throw new ApiError(response.status, error?.code || "REQUEST_FAILED", error?.message || "下载没有完成", Boolean(error?.retryable))
+  }
+  const blob = await response.blob()
+  const match = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")
+  const link = document.createElement("a")
+  const url = URL.createObjectURL(blob)
+  link.href = url
+  link.download = match?.[1] || fallback
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 export function importMessage(job: ImportJob, demo: boolean) {

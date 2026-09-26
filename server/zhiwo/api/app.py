@@ -5,13 +5,11 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 import uuid
-import sys
-from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, Header, Request
+from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from zhiwo.adapters.kernel_client import KernelHandle, connect
@@ -31,8 +29,22 @@ from zhiwo.services.agents import (
     rotate_credential,
     update_agent,
 )
+from zhiwo.services.client_connect import bridge_launch, client_home, connect_client, list_clients
+from zhiwo.services.deletion import delete_memory, preview_deletion, resume_deletions
 from zhiwo.services.imports import import_source, retry_import
-from zhiwo.services.memories import build_profile, get_memory, get_source, list_memories, update_memory
+from zhiwo.services.library import backup_archive, export_archive, reset_library, restore_archive
+from zhiwo.services.memories import (
+    attach_origins,
+    build_profile,
+    get_memory,
+    get_source,
+    list_memories,
+    list_origin_choices,
+    origin_key,
+    parse_origin,
+    update_memory,
+)
+from zhiwo.services.runtime_settings import public_settings, resolve_extractor, save_extractor, test_extractor
 from zhiwo.services.publish import operation_status, publish_memory
 from zhiwo.services.review import decide_proposal, get_proposal, list_proposals
 from zhiwo.services.search import list_versions, search_memories
@@ -41,14 +53,16 @@ from zhiwo.services.search import list_versions, search_memories
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     settings = load_settings()
-    install_redaction(settings.owner_credential, settings.extractor_api_key)
-    app.state.settings = settings
     app.state.schema_version = migrate(settings.control_db)
     app.state.kernel = connect(
         settings.kernel_dir,
         cache_dir=settings.fastembed_cache,
         connect_only=settings.connect_only,
     )
+    settings = resolve_extractor(settings)
+    install_redaction(settings.owner_credential, settings.extractor_api_key)
+    app.state.settings = settings
+    resume_deletions(settings.control_db, app.state.kernel)
     yield
 
 
@@ -74,13 +88,7 @@ def create_app() -> FastAPI:
             "connect_only": kernel.connect_only,
             "extractor_configured": request.app.state.settings.extractor_configured,
             "test_mode": request.app.state.settings.test_mode,
-            "mcp_runtime": {
-                "command": [sys.executable, "-m", "zhiwo.gateway.stdio_bridge"],
-                "environment": {
-                    "PYTHONPATH": str(Path(__file__).resolve().parents[2]),
-                    "ZHIWO_API_ORIGIN": f"http://127.0.0.1:{request.scope['server'][1]}",
-                },
-            },
+            "mcp_runtime": _mcp_runtime(request),
             "memory_ref_count": memory_ref_count(db_path),
             "kernel": {
                 "connected": True,
@@ -112,23 +120,32 @@ def create_app() -> FastAPI:
         query: str | None = None,
         state: str = "current",
         category: str | None = None,
+        origin: str | None = None,
         limit: int = 20,
     ) -> dict:
         db_path = request.app.state.settings.control_db
         kernel = request.app.state.kernel
+        selected = parse_origin(origin)
         if query and query.strip() and state == "current":
-            return search_memories(
+            found = search_memories(
                 db_path,
                 kernel,
                 query,
                 min(max(limit, 1), 20),
                 category=category,
             )
+            items = found.get("items") or []
+            attach_origins(db_path, items)
+            if selected:
+                found["items"] = [item for item in items if origin_key(item.get("origin")) == selected]
+            found["origins"] = list_origin_choices(db_path)
+            return found
         return list_memories(
             db_path,
             kernel,
             state=state,
             category=category,
+            origin=selected,
             query=query,
             limit=min(max(limit, 1), 50),
         )
@@ -237,6 +254,28 @@ def create_app() -> FastAPI:
             _request_id(idempotency_key),
         )
 
+    @app.get("/api/v1/agent-clients", dependencies=[Depends(require_owner)])
+    def agent_clients() -> dict:
+        return list_clients(client_home())
+
+    @app.post("/api/v1/agent-clients/{client_id}/connect", dependencies=[Depends(require_owner)])
+    def connect_agent_client(
+        request: Request,
+        client_id: str,
+        body: ClientConnectBody,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        if body.confirm is not True:
+            raise ApiError(400, "VALIDATION_ERROR", "需要确认后才会写入客户端配置。")
+        return connect_client(
+            request.app.state.settings.control_db,
+            client_home(),
+            client_id,
+            body.preset,
+            _request_id(idempotency_key),
+            port=int(request.scope["server"][1]),
+        )
+
     @app.get("/api/v1/agent/session")
     def agent_session(
         principal: Annotated[AgentPrincipal, Depends(require_agent)],
@@ -324,7 +363,130 @@ def create_app() -> FastAPI:
     def retry_job(request: Request, job_id: str) -> dict:
         return retry_import(request.app.state.settings.control_db, request.app.state.settings, _request_id(job_id))
 
+    @app.get("/api/v1/settings", dependencies=[Depends(require_owner)])
+    def read_settings(request: Request) -> dict:
+        return public_settings(request.app.state.settings)
+
+    @app.patch("/api/v1/settings", dependencies=[Depends(require_owner)])
+    def patch_settings(
+        request: Request,
+        body: SettingsBody,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        updated = save_extractor(
+            request.app.state.settings,
+            _request_id(idempotency_key),
+            body.extractor_base_url,
+            body.extractor_model,
+            body.extractor_api_key,
+        )
+        _use_settings(request, updated)
+        return public_settings(updated)
+
+    @app.post("/api/v1/settings/test-model", dependencies=[Depends(require_owner)])
+    def check_model(
+        request: Request,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        _request_id(idempotency_key)
+        return test_extractor(request.app.state.settings)
+
+    @app.post("/api/v1/exports", dependencies=[Depends(require_owner)])
+    def export_library(
+        request: Request,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> Response:
+        _request_id(idempotency_key)
+        payload = export_archive(request.app.state.settings.control_db, request.app.state.kernel)
+        return _zip(payload, "zhiwo-export.zip")
+
+    @app.post("/api/v1/backups", dependencies=[Depends(require_owner)])
+    def backup_library(
+        request: Request,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> Response:
+        _request_id(idempotency_key)
+        payload = backup_archive(request.app.state.settings, request.app.state.kernel)
+        return _zip(payload, "zhiwo-backup.zip")
+
+    @app.post("/api/v1/restores", dependencies=[Depends(require_owner)])
+    async def restore_library(
+        request: Request,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+        confirm: Annotated[str, Query()],
+    ) -> dict:
+        if confirm != "恢复备份":
+            raise ApiError(400, "VALIDATION_ERROR", "请用「恢复备份」确认后再恢复。")
+        payload = await request.body()
+        updated, _replayed = restore_archive(
+            request.app.state.settings,
+            request.app.state.kernel,
+            payload,
+            _request_id(idempotency_key),
+            reopen=lambda: _reconnect(request),
+        )
+        _use_settings(request, updated)
+        return {"status": "restored", "extractor": public_settings(updated)["extractor"]}
+
+    @app.post("/api/v1/data/reset", dependencies=[Depends(require_owner)])
+    def reset_data(
+        request: Request,
+        body: ResetBody,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        updated, _replayed = reset_library(
+            request.app.state.settings,
+            request.app.state.kernel,
+            _request_id(idempotency_key),
+            body.confirm,
+        )
+        _use_settings(request, updated)
+        _reconnect(request)
+        return {"status": "reset"}
+
+    @app.get("/api/v1/memories/{memory_id}/deletion-preview", dependencies=[Depends(require_owner)])
+    def deletion_preview(request: Request, memory_id: str) -> dict:
+        return preview_deletion(request.app.state.settings.control_db, request.app.state.kernel, memory_id)
+
+    @app.delete("/api/v1/memories/{memory_id}", dependencies=[Depends(require_owner)])
+    def remove_memory(
+        request: Request,
+        memory_id: str,
+        body: DeleteBody,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+    ) -> dict:
+        if body.confirm is not True:
+            raise ApiError(400, "VALIDATION_ERROR", "confirm must be true")
+        return delete_memory(
+            request.app.state.settings.control_db,
+            request.app.state.kernel,
+            memory_id,
+            _request_id(idempotency_key),
+        )
+
     return ChannelApp(app)
+
+
+def _use_settings(request: Request, settings) -> None:
+    install_redaction(settings.owner_credential, settings.extractor_api_key)
+    request.app.state.settings = settings
+
+
+def _reconnect(request: Request) -> None:
+    settings = request.app.state.settings
+    request.app.state.kernel = connect(
+        settings.kernel_dir,
+        cache_dir=settings.fastembed_cache,
+        connect_only=settings.connect_only,
+    )
+
+
+def _zip(payload: bytes, filename: str) -> Response:
+    return Response(
+        content=payload,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 class MemoryBody(BaseModel):
@@ -370,6 +532,13 @@ class AgentCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+
+
+class ClientConnectBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    preset: Literal["read", "propose"]
+    confirm: bool = False
 
 
 class AgentPatch(BaseModel):
@@ -432,6 +601,26 @@ class ExplainToolBody(BaseModel):
     request_id: str | None = None
 
 
+class SettingsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    extractor_base_url: str = ""
+    extractor_model: str = ""
+    extractor_api_key: str | None = None
+
+
+class ResetBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    confirm: str
+
+
+class DeleteBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    confirm: bool
+
+
 class ImportBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -452,6 +641,14 @@ def _validation_error(_request: Request, _exc: RequestValidationError) -> JSONRe
             }
         },
     )
+
+
+def _mcp_runtime(request: Request) -> dict:
+    launch = bridge_launch(int(request.scope["server"][1]))
+    return {
+        "command": [launch["command"], *launch["args"]],
+        "environment": launch["env"],
+    }
 
 
 def _request_id(value: str) -> str:

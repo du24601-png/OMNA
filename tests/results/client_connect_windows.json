@@ -1,0 +1,14 @@
+{
+  "pass": true,
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "clients": [
+    "workbuddy",
+    "zcode",
+    "opencode",
+    "codex",
+    "claude",
+    "claude-code"
+  ]
+}

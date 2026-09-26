@@ -133,38 +133,81 @@ def write_version(db_path: Path, session_id: str, content: str, valid_until: str
     from mnemosyne import Mnemosyne
 
     memory = Mnemosyne(session_id=session_id, db_path=db_path)
-    kwargs = {}
-    if valid_until:
-        kwargs["valid_until"] = valid_until
-    kernel_id = remember_within_cap(
-        memory,
-        db_path,
-        session_id,
-        content,
-        SESSION_CAP,
-        **kwargs,
-    )
-    if not kernel_id:
-        raise KernelConnectError("kernel did not accept the memory")
-    return str(kernel_id)
+    try:
+        kwargs = {}
+        if valid_until:
+            kwargs["valid_until"] = valid_until
+        kernel_id = remember_within_cap(
+            memory,
+            db_path,
+            session_id,
+            content,
+            SESSION_CAP,
+            **kwargs,
+        )
+        if not kernel_id:
+            raise KernelConnectError("kernel did not accept the memory")
+        return str(kernel_id)
+    finally:
+        _close_transient(memory)
 
 
 def read_version(db_path: Path, session_id: str, kernel_id: str) -> str | None:
     from mnemosyne import Mnemosyne
 
     memory = Mnemosyne(session_id=session_id, db_path=db_path)
-    row = memory.get(kernel_id)
-    if not row:
-        return None
-    return str(row.get("content") or "")
+    try:
+        row = memory.get(kernel_id)
+        if not row:
+            return None
+        return str(row.get("content") or "")
+    finally:
+        _close_transient(memory)
 
 
 def discard_version(db_path: Path, session_id: str, kernel_id: str) -> None:
     from mnemosyne import Mnemosyne
 
     memory = Mnemosyne(session_id=session_id, db_path=db_path)
-    memory.forget(kernel_id)
-    cleanup_derived_rows(db_path, kernel_id)
+    try:
+        memory.forget(kernel_id)
+        cleanup_derived_rows(db_path, kernel_id)
+    finally:
+        _close_transient(memory)
+
+
+def _close_transient(memory) -> None:
+    """Drop the short-lived Kernel connection on this thread.
+
+    Mnemosyne keeps that connection in thread-local storage. Leaving it open
+    holds the database file, and Windows then refuses to replace a backup.
+    """
+    import mnemosyne.core.beam as beam
+    import mnemosyne.core.memory as memory_module
+
+    for connection in (
+        getattr(memory, "conn", None),
+        getattr(getattr(memory, "beam", None), "conn", None),
+    ):
+        if connection is None:
+            continue
+        try:
+            connection.close()
+        except sqlite3.Error:
+            pass
+    memory.conn = None
+    beam_memory = getattr(memory, "beam", None)
+    if beam_memory is not None:
+        beam_memory.conn = None
+    for module in (memory_module, beam):
+        local = getattr(module, "_thread_local", None)
+        if local is None or getattr(local, "conn", None) is None:
+            continue
+        try:
+            local.conn.close()
+        except sqlite3.Error:
+            pass
+        local.conn = None
 
 
 def _probe_embeddings(embedding_module) -> bool:

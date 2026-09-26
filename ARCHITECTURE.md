@@ -1,13 +1,13 @@
 # 知我 · ARCHITECTURE
 
-> V1.0 启动基线｜2026-09-25  
+> V1.0 启动基线｜2026-09-26  
 > 范围以 [PRODUCT.md](PRODUCT.md) 为准。以下是知我的设计契约；底层实际接口、版本及平台兼容性在 [PLAN.md](PLAN.md) 的 P0 验证。
 
 ## 1. 架构决策
 
 | 层 | 首版选择 | 边界 |
 | --- | --- | --- |
-| 界面 | React + TypeScript + Vite；Tailwind CSS | P1 先跑本地 Web，P3 复用同一界面装入 Electron |
+| 界面 | React + TypeScript + Vite；Tailwind CSS；`@base-ui/react` 提供无样式的可访问控件，`motion` 只做反馈动效 | P1 先跑本地 Web，P3 复用同一界面装入 Electron |
 | 桌面壳 | Electron，Windows 原生环境优先 | 管理窗口、受限文件操作和本地服务生命周期 |
 | 本地服务 | Python + FastAPI，单进程服务 | 审核、发布、权限、画像、导出；模块化单体 |
 | MCP | Python MCP SDK，stdio bridge | 客户端只连接知我 Gateway，不连接原生 Kernel MCP |
@@ -61,7 +61,7 @@ flowchart TD
 | `sources` | `id, kind, name, content, content_hash, imported_at`；`kind=manual/paste/file/agent_claim` |
 | `import_jobs` | `id, source_id, status, extractor_config, error_code`；提取状态与重试，不存密钥 |
 | `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用 |
-| `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文 |
+| `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文。所有者列表另附 `origin`，由该版本的来源和提案上的 `agent_id` 推出，不另存一列。`GET /api/v1/memories` 的 `origin` 按这个来源筛选，取值是已知客户端 id，或 `agent:` 加自定义连接名称 |
 | `agents` | `id, name, credential_hash, enabled, policy_version, client_status, created_at, updated_at`；`credential_hash` 是 sha256，明文不入库。凭证可重置。`client_status` 新建为 `pending`，只有 stdio 通道成功交付一次工具响应后才变为 `verified`。已停用的连接不会被标成已连接。迁移版本是 6 |
 | `agent_permissions` | `agent_id, allowed_tools, allowed_categories`；空集即无权限 |
 | `agent_commands` | `id, agent_id, action, payload_hash, created_at`；管理请求的幂等记录。不存凭证明文，不存记忆正文 |
@@ -125,17 +125,20 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET /health`；`GET /profile` | 运行状态；画像 |
 | `POST /imports`；`GET /imports/{id}`；`POST /imports/{id}/retry` | 提取任务及失败重试 |
 | `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核，批量审核可逐项调用并汇总结果 |
-| `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}` | 查询、添加、修改、永久删除 |
+| `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除 |
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
 | `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回 |
+| `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表只报告是否安装、配置文件里是否已有 `zhiwo`。确认后合并写入该客户端自己的配置，响应不回显凭证 |
 | `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照 |
 | `GET/PATCH /settings`；`POST /settings/test-model` | 非敏感设置及模型连通测试，响应不回显密钥 |
-| `POST /exports`；`POST /backups`；`POST /restores`；`POST /data/reset` | 导出、备份、恢复、清空；破坏性操作必须带确认 |
+| `POST /exports`；`POST /backups`；`POST /restores?confirm=恢复备份`；`POST /data/reset` | 导出、备份、恢复、清空。恢复的确认词放在查询参数里，因为这四个字放不进 HTTP 头。清空的确认词在 JSON 里 |
 
 写操作携带 `Idempotency-Key`；异步工作返回 `operation_id`，通过 `GET /operations/{id}` 查看最终状态。`PATCH /memories/{id}` 必须带 `base_revision`。
 
 `GET /api/v1/agent/session` 不属于上表的 Owner 路由，也不是 MCP 工具。它只根据凭证返回连接身份、启用状态、`policy_version` 和已授权的工具、类别，不返回记忆。客户端另外提交的名称或 `agent_id` 不参与识别。
+
+第一版客户端接入在 `services/client_connect.py`。名单是 WorkBuddy（`~/.workbuddy/mcp.json` 的 `mcpServers`）、ZCode（`~/.zcode/cli/config.json` 的 `mcp.servers`）、OpenCode（`~/.config/opencode/opencode.json` 的 `mcp`，`type: local`）、ChatGPT（桌面端、命令行和编辑器扩展共用 `~/.codex/config.toml` 的 `[mcp_servers.zhiwo]`）、Claude 桌面版（Windows 的 `%APPDATA%\Claude\claude_desktop_config.json` 的 `mcpServers`）和 Claude Code（`~/.claude.json` 用户级 `mcpServers`，`type: stdio`）。检测只看这些目录、配置文件或同名命令是否存在，不扫描进程。写入是合并一条 `zhiwo`，不替换文件里的其他服务。启动命令是当前 Python 的绝对路径加 `-m zhiwo.gateway.stdio_bridge`。凭证只放进该文件的环境变量。配置路径若经符号链接或目录联接跑到用户目录以外，拒绝写入。`ZHIWO_CLIENT_HOME` 只在 `ZHIWO_TEST_MODE=1` 时改写目标目录。
 
 P2.1 的权限变更在 `services/agents.py`。新连接的工具和类别为空，`policy_version` 从 1 开始。允许的工具是 `get_context`、`search_memory`、`propose_memory`、`explain_memory`；类别是 `identity`、`goal`、`preference`、`project`、`event`、`other`。未知值拒绝。`enabled`、工具、类别或凭证实际变化时 `policy_version` 加 1；只改名称不加。停用后的后续请求立即拒绝。重置使旧凭证立即失效，递增权限版本，并且不恢复已停用的连接。身份和权限用 `fetch_principal()` 一次连接查询读出。这个模块不读取、不写入记忆。
 
@@ -183,12 +186,14 @@ P2.2 的四个工具在 `services/agent_tools.py`，可见性在 `services/polic
 
 所有成功状态须以实际存取结果为依据；“删除”指应用与数据库逻辑清除，不承诺存储介质取证级擦除。
 
+P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windows DPAPI 写到数据目录的 `extractor.key`，不进 `zhiwo.db`，接口也不回显。页面还没保存过时，进程继续使用启动时的环境变量。保存后当前进程立刻改用新配置。恢复会删掉这个密钥文件，并记 `extractor_requires_setup`，避免环境变量里的旧密钥自动生效；清空则去掉这个标记，重新读取环境变量。测试连接只发送一句不含记忆的请求。schema 仍是 6。永久删除先把版本标成 `deleting` 并写下操作，再清理 Kernel、派生行和业务库里的正文；`ZHIWO_CRASH_AFTER=delete_marked` 只在测试模式且数据目录位于系统临时目录时，于标记之后退出。重启从 `prepared` 的删除操作继续。短生命周期的 Kernel 连接在用完后关闭，否则 Windows 会因文件占用而无法替换备份。
+
 ## 8. 目录与实现约束
 
 | 目录 | 内容 |
 | --- | --- |
 | 根目录四份 `.md` | 唯一常驻项目文档，不额外维护另一套 PRD/架构/进度 |
-| `apps/web/` | 四页界面、设置、公共组件、API client |
+| `apps/web/` | 四页界面、圆角顶栏、设置弹窗、客户端连接 UI、来源标志、`Skeleton` 加载占位、API client；品牌资源在 `brand/` 与 `apps/web/public/sources/` |
 | `apps/desktop/` | Electron main/preload、打包与服务启动 |
 | `server/zhiwo/api/`、`gateway/` | Owner HTTP API、MCP bridge 与 Agent 入口 |
 | `server/zhiwo/services/`、`adapters/` | 产品逻辑、Mnemosyne 和提取模型适配 |

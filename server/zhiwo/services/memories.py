@@ -13,7 +13,7 @@ from zhiwo.adapters.kernel_client import KernelHandle, read_version
 from zhiwo.api.errors import ApiError
 from zhiwo.services.publish import publish_memory
 
-_STATES = {"current", "expired", "history"}
+_STATES = {"all", "current", "expired", "history"}
 
 
 def list_memories(
@@ -22,23 +22,28 @@ def list_memories(
     *,
     state: str = "current",
     category: str | None = None,
+    origin: str | None = None,
     query: str | None = None,
     limit: int = 50,
 ) -> dict:
     if state not in _STATES:
-        raise ApiError(400, "VALIDATION_ERROR", "state must be current, expired, or history")
+        raise ApiError(400, "VALIDATION_ERROR", "state must be all, current, expired, or history")
     if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > 50:
         raise ApiError(400, "VALIDATION_ERROR", "limit must be an integer from 1 to 50")
+    selected = parse_origin(origin)
     text = query.strip() if isinstance(query, str) else ""
     if len(text) > 2000:
         raise ApiError(400, "VALIDATION_ERROR", "query must contain at most 2000 characters")
+    sources, proposals, agents, clients = _origin_context(db_path)
     now = datetime.now(timezone.utc)
     items = []
     for row in _rows(db_path):
         if category and row["category"] != category:
             continue
         expired = _expired(row["valid_until"], now)
-        if state == "history":
+        if state == "all":
+            pass
+        elif state == "history":
             if row["lifecycle"] != "superseded":
                 continue
         elif row["lifecycle"] != "active":
@@ -47,12 +52,17 @@ def list_memories(
             continue
         elif state == "current" and expired:
             continue
+        label = _origin(row["source_refs"], sources, proposals, agents, clients)
+        if selected and origin_key(label) != selected:
+            continue
         content = read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
         if text and text not in (content or ""):
             continue
-        items.append(_item(row, content))
+        item = _item(row, content)
+        item["origin"] = label
+        items.append(item)
     items.sort(key=lambda item: item["created_at"], reverse=True)
-    return {"items": items[:limit]}
+    return {"items": items[:limit], "origins": list_origin_choices(db_path)}
 
 
 def get_memory(db_path, handle: KernelHandle, memory_id: str) -> dict:
@@ -154,6 +164,119 @@ def _item(row, content: str | None) -> dict:
         "created_at": row["created_at"],
         "readable": content is not None,
     }
+
+
+_CLIENT_NAMES = {
+    "WorkBuddy": "workbuddy",
+    "ZCode": "zcode",
+    "OpenCode": "opencode",
+    "ChatGPT": "codex",
+    "Codex": "codex",
+    "Claude": "claude",
+    "Claude Code": "claude-code",
+}
+_KNOWN_CLIENTS = set(_CLIENT_NAMES.values())
+_ORIGIN_IDS = ("omna", "workbuddy", "zcode", "opencode", "codex", "claude", "claude-code")
+
+
+def parse_origin(value: str | None) -> str | None:
+    """Accept a known client id, or agent:<name> for a custom connection."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ApiError(400, "VALIDATION_ERROR", "来源筛选无效。")
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    if cleaned in _ORIGIN_IDS:
+        return cleaned
+    name = cleaned[6:] if cleaned.startswith("agent:") else ""
+    if name and len(name) <= 200 and "\n" not in name and "\r" not in name and "\x00" not in name:
+        return cleaned
+    raise ApiError(400, "VALIDATION_ERROR", "来源筛选无效。")
+
+
+def origin_key(origin: dict | None) -> str:
+    if not isinstance(origin, dict):
+        return "omna"
+    client = origin.get("client")
+    if client in _ORIGIN_IDS:
+        return str(client)
+    name = origin.get("name") if isinstance(origin.get("name"), str) else ""
+    return "agent:" + (name or "Agent 提案")
+
+
+def list_origin_choices(db_path) -> list[dict]:
+    """Distinct sources across the library, in the same order as the filter."""
+    sources, proposals, agents, clients = _origin_context(db_path)
+    seen: dict[str, dict] = {}
+    for row in _rows(db_path):
+        label = _origin(row["source_refs"], sources, proposals, agents, clients)
+        key = origin_key(label)
+        if key not in seen:
+            seen[key] = {"id": key, "name": label["name"]}
+    ordered = [seen[key] for key in _ORIGIN_IDS if key in seen]
+    rest = [seen[key] for key in seen if key not in _ORIGIN_IDS]
+    rest.sort(key=lambda item: item["name"])
+    return ordered + rest
+
+
+def attach_origins(db_path, items: list[dict]) -> None:
+    """Label each listed memory with the client that proposed it, or OMNA."""
+    if not items:
+        return
+    connection = sqlite3.connect(db_path)
+    connection.row_factory = sqlite3.Row
+    try:
+        ids = [item["id"] for item in items if isinstance(item.get("id"), str)]
+        refs = []
+        if ids:
+            marks = ",".join("?" for _ in ids)
+            refs = connection.execute(
+                f"SELECT memory_id, revision, source_refs FROM memory_refs WHERE memory_id IN ({marks})",
+                ids,
+            ).fetchall()
+    finally:
+        connection.close()
+    sources, proposals, agents, clients = _origin_context(db_path)
+    by_version = {(row["memory_id"], row["revision"]): row["source_refs"] for row in refs}
+    for item in items:
+        item["origin"] = _origin(by_version.get((item.get("id"), item.get("revision"))), sources, proposals, agents, clients)
+
+
+def _origin_context(db_path):
+    connection = sqlite3.connect(db_path)
+    connection.row_factory = sqlite3.Row
+    try:
+        sources = {row["id"]: row["kind"] for row in connection.execute("SELECT id, kind FROM sources")}
+        proposals = {
+            row["source_id"]: row["agent_id"]
+            for row in connection.execute("SELECT source_id, agent_id FROM proposals WHERE agent_id IS NOT NULL")
+        }
+        agents = {row["id"]: row["name"] for row in connection.execute("SELECT id, name FROM agents")}
+        clients: dict[str, str] = {}
+        for row in connection.execute("SELECT key, value FROM settings WHERE key LIKE 'client_agent:%'"):
+            client_id = row["key"].split(":", 1)[1]
+            if client_id in _KNOWN_CLIENTS and isinstance(row["value"], str):
+                clients[row["value"]] = client_id
+        return sources, proposals, agents, clients
+    finally:
+        connection.close()
+
+
+def _origin(raw, sources: dict, proposals: dict, agents: dict, clients: dict) -> dict:
+    for source_id in _source_ids(raw):
+        if sources.get(source_id) != "agent_claim":
+            continue
+        agent_id = proposals.get(source_id)
+        name = agents.get(agent_id) if agent_id else None
+        if not name:
+            return {"client": "agent", "name": "Agent 提案"}
+        client = clients.get(agent_id) or _CLIENT_NAMES.get(name, "agent")
+        if client not in _KNOWN_CLIENTS:
+            client = "agent"
+        return {"client": client, "name": name}
+    return {"client": "omna", "name": "OMNA"}
 
 
 def _source_ids(raw) -> list[str]:

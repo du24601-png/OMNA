@@ -280,6 +280,30 @@ def setting(db_path: Path, key: str) -> str | None:
         connection.close()
 
 
+def put_setting(db_path: Path, key: str, value: str) -> None:
+    connection = sqlite3.connect(db_path)
+    try:
+        connection.execute(
+            """
+            INSERT INTO settings (key, value) VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """,
+            (key, value),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+
+def drop_setting(db_path: Path, key: str) -> None:
+    connection = sqlite3.connect(db_path)
+    try:
+        connection.execute("DELETE FROM settings WHERE key = ?", (key,))
+        connection.commit()
+    finally:
+        connection.close()
+
+
 def memory_ref_count(db_path: Path) -> int:
     connection = sqlite3.connect(db_path)
     try:

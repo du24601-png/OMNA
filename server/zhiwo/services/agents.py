@@ -186,6 +186,7 @@ def create_agent(db_path, request_id: str, name: str) -> dict:
 
 
 def list_agents(db_path) -> dict:
+    _rename_chatgpt(db_path)
     connection = _connect(db_path)
     try:
         rows = connection.execute("SELECT id FROM agents ORDER BY created_at, id").fetchall()
@@ -304,6 +305,23 @@ def rotate_credential(db_path, agent_id: str, request_id: str) -> dict:
             raise
         finally:
             connection.close()
+
+
+def _rename_chatgpt(db_path) -> None:
+    """The built-in row is ChatGPT. Older connects stored the name Codex."""
+    connection = _connect(db_path)
+    try:
+        row = connection.execute("SELECT value FROM settings WHERE key = ?", ("client_agent:codex",)).fetchone()
+        if row is None:
+            return
+        updated = connection.execute(
+            "UPDATE agents SET name = ? WHERE id = ? AND name = ?",
+            ("ChatGPT", row["value"], "Codex"),
+        )
+        if updated.rowcount:
+            connection.commit()
+    finally:
+        connection.close()
 
 
 def _connect(db_path) -> sqlite3.Connection:
