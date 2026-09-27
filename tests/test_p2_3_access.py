@@ -552,7 +552,7 @@ def test_access_and_followup() -> None:
         result["credential_in_result"] = any(secret and secret in blob for secret in secrets)
         result["pass"] = all(
             [
-                result.get("schema_version") == 6,
+                result.get("schema_version") == 7,
                 result.get("inherited_share") is False and result.get("inherited_until") == UNTIL,
                 result.get("replay_revision") == result.get("inherited_revision"),
                 result.get("intent_conflict") == 409 and result.get("conflict_revision") == result.get("inherited_revision"),

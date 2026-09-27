@@ -84,6 +84,7 @@ export function Icon({ name }: { name: string }) {
     sort: <><path d="M8 19V5M8 5 5 8M8 5l3 3"/><path d="M16 5v14M16 19l-3-3M16 19l3-3"/></>,
     chevron: <path d="m6 9 6 6 6-6"/>,
     plus: <path d="M12 5v14M5 12h14"/>, close: <path d="m6 6 12 12M6 18 18 6"/>,
+    import: <><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></>,
     arrow: <path d="M5 12h14m-5-5 5 5-5 5"/>,
     lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></>,
     refresh: <><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></>,

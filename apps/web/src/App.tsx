@@ -1,10 +1,11 @@
+import { Dialog } from "@base-ui/react/dialog"
 import { Menu } from "@base-ui/react/menu"
 import { Popover } from "@base-ui/react/popover"
 import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { ApiError, api, explain, getCredential, setCredential, type Memory } from "./api"
 import { Detail } from "./Detail"
-import { CATEGORIES, categoryLabel, dateLabel, listTime, sharingLabel } from "./format"
+import { CATEGORIES, categoryLabel, dateLabel, listTime } from "./format"
 import { canLeave, Empty, Icon, Notice, ResourceNotice, Skeleton, SourceMark, useResource } from "./ui"
 import { Composer } from "./Composer"
 import { ReviewPage } from "./Review"
@@ -171,8 +172,21 @@ function ProfilePage({ tick, service, serviceLabel, onRetry, openLayout, onOpen,
         {!online && service.status !== "checking" && <button className="text-button" onClick={onRetry}>重试</button>}
       </div>
       <div className="home-actions">
-        <button className="button secondary" onClick={onImport}>导入</button>
-        <button className="button primary" onClick={onAdd}><Icon name="plus"/>添加记忆</button>
+        <Menu.Root>
+          <Menu.Trigger className="add-trigger">
+            <Icon name="plus"/>
+            添加
+            <span className="add-trigger-chevron"><Icon name="chevron"/></span>
+          </Menu.Trigger>
+          <Menu.Portal>
+            <Menu.Positioner className="add-menu-positioner" side="bottom" align="end" sideOffset={8}>
+              <Menu.Popup className="add-menu-popup">
+                <Menu.Item className="add-menu-item" onClick={onAdd}><Icon name="plus"/>添加记忆</Menu.Item>
+                <Menu.Item className="add-menu-item" onClick={onImport}><Icon name="import"/>导入</Menu.Item>
+              </Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        </Menu.Root>
       </div>
     </div>
     <ResourceNotice resource={resource} pending={false}/>
@@ -182,14 +196,123 @@ function ProfilePage({ tick, service, serviceLabel, onRetry, openLayout, onOpen,
         {empty && !resource.loading && !resource.error ? <Empty title="从一条真实的记忆开始" action={<><button className="button primary" onClick={onAdd}>添加第一条记忆</button><button className="button secondary" onClick={onImport}>导入已有文本</button></>}>记录你的偏好、目标或正在做的事。只有你确认过的内容，才会出现在这里。</Empty> : <NightWall cards={filled} vacant={vacant} openLayout={openLayout} onOpen={onOpen} onAdd={onAdd}/>}
       </section>
       <div className="profile-side">
-        <section className="side-pane recent-pane" aria-labelledby="recent-title">
-          <header className="pane-head"><div><h2 id="recent-title">近期变化</h2><p>{count} 条已确认</p></div></header>
-          {data.recent.length > 0 ? <div className="recent-list">{data.recent.map(card => <button key={card.id} type="button" className="recent-row" onClick={() => onOpen(card.id, undefined, card.content || undefined)}><span className="card-chip">{categoryLabel(card.category)}</span><span className="recent-text">{card.content || "正文暂时无法读取。"}</span><time>{dateLabel(card.created_at)}</time></button>)}</div> : <p className="trend-empty">最近没有变化</p>}
-        </section>
+        <ProfileSummaryPanel tick={tick} online={online}/>
         <ReadTrend tick={tick}/>
       </div>
     </div>}
   </div>
+}
+function summaryBlocks(text: string) {
+  const blocks: { heading: string | null; body: string }[] = []
+  let heading: string | null = null
+  let lines: string[] = []
+  const flush = () => {
+    const body = lines.join("\n").trim()
+    if (heading || body) blocks.push({ heading, body })
+    heading = null
+    lines = []
+  }
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim()
+    if (!trimmed) {
+      if (lines.length) lines.push("")
+      continue
+    }
+    const match = trimmed.match(/^([^：:]{1,12})[：:]\s*(.*)$/)
+    if (match && !/[。！？，,.!?]/.test(match[1])) {
+      flush()
+      heading = match[1].trim()
+      if (match[2].trim()) lines.push(match[2].trim())
+      continue
+    }
+    lines.push(trimmed)
+  }
+  flush()
+  return blocks
+}
+const SUMMARY_GLOW = ["#0894FF", "#C959DD", "#FF2E54", "#FF9004"]
+
+function summaryGlowFrames(colors: string[]) {
+  return colors.map((color, index) => {
+    const next = colors[(index + 1) % colors.length]
+    return `conic-gradient(from 0deg at 50% 50%, ${color} 0%, ${next} 50%, ${color} 100%)`
+  })
+}
+
+function SummaryDialogGlow({ active }: { active: boolean }) {
+  const reduce = useReducedMotion()
+  const frames = summaryGlowFrames(SUMMARY_GLOW)
+  return <motion.div className="summary-dialog-glow" aria-hidden="true" initial={{ opacity: 0 }} animate={{ opacity: active ? 1 : 0 }} transition={{ duration: 0.2, ease: "easeOut" }}>
+    <motion.div className="summary-dialog-glow-shift" style={{ background: frames[0] }} animate={reduce ? undefined : { background: frames }} transition={{ duration: 4, ease: "linear", repeat: Infinity, repeatType: "mirror" }} />
+  </motion.div>
+}
+
+function ProfileSummaryPanel({ tick, online }: { tick: number; online: boolean }) {
+  const [summaryTick, setSummaryTick] = useState(0)
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  const resource = useResource(() => api.profileSummary(), [tick, summaryTick])
+  const summary = resource.data
+  const text = summary?.text || ""
+  const disabled = busy || !online || !summary?.extractor_configured || !summary.current_memory_count
+  useEffect(() => { if (!text) setOpen(false) }, [text])
+  async function generate() {
+    if (disabled) return
+    setBusy(true); setError("")
+    try {
+      await api.generateProfileSummary()
+      setSummaryTick(value => value + 1)
+    } catch (err) {
+      setError(explain(err))
+      if (err instanceof ApiError && err.code === "CONFLICT") setSummaryTick(value => value + 1)
+    } finally {
+      setBusy(false)
+    }
+  }
+  const notice = error || (resource.error ? explain(resource.error) : "")
+  const meta = summary?.status === "stale" ? "记忆有变化，摘要待更新" : summary?.status === "current" ? `${summary.memory_count} 条记忆 · ${dateLabel(summary.generated_at || undefined)}` : summary ? `${summary.current_memory_count} 条当前记忆` : ""
+  return <section className={`profile-summary ${text ? "has-text" : "is-empty"} ${summary?.status === "stale" ? "is-stale" : ""}`} aria-label="AI 摘要">
+    {resource.loading && !summary && <div className="summary-loading"><Skeleton className="skeleton-line" style={{ width: "92%" }}/><Skeleton className="skeleton-line" style={{ width: "68%", marginTop: 10 }}/></div>}
+    {text ? <button type="button" className="profile-summary-open" onClick={() => setOpen(true)} aria-haspopup="dialog">
+      <header className="profile-summary-head"><span className="summary-kicker">AI 摘要</span></header>
+      <p className="profile-summary-text">{text}</p>
+      {meta && <p className={`profile-summary-meta${summary?.status === "stale" ? " is-stale" : ""}`}>{meta}</p>}
+    </button> : !resource.loading && <div className="profile-summary-empty-state">
+      <header className="profile-summary-head"><span className="summary-kicker">AI 摘要</span></header>
+      <button type="button" className="button primary" disabled={disabled} onClick={generate}>{busy ? "正在生成…" : "生成摘要"}</button>
+      {!summary?.extractor_configured && summary && <strong>请先在设置中配置提取模型</strong>}
+      <p className="profile-summary-disclosure">生成时会将当前已确认记忆和上一版摘要发送给已配置模型。</p>
+      {notice && <p className="profile-summary-error" role="alert">{notice}</p>}
+    </div>}
+    {text && notice && <p className="profile-summary-error" role="alert">{notice}</p>}
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="dialog-backdrop" />
+        <Dialog.Popup className="summary-dialog" aria-busy={busy || undefined}>
+          <SummaryDialogGlow active={busy} />
+          <div className="summary-dialog-sheet material">
+            <header className="summary-dialog-head">
+              <div>
+                <Dialog.Title>记忆摘要</Dialog.Title>
+                <p>{summary?.generated_at ? `更新于 ${dateLabel(summary.generated_at)}` : "尚未生成"}</p>
+              </div>
+              <Dialog.Close className="icon-button" aria-label="关闭摘要"><Icon name="close" /></Dialog.Close>
+            </header>
+            {summary?.status === "stale" && <p className="summary-dialog-stale">记忆有变化，摘要待更新</p>}
+            <div className="summary-dialog-body">
+              {summaryBlocks(text).map((block, index) => <div key={index}>{block.heading && <h3>{block.heading}</h3>}{block.body && <p>{block.body}</p>}</div>)}
+            </div>
+            {notice && <p className="profile-summary-error summary-dialog-error" role="alert">{notice}</p>}
+            <footer className="summary-dialog-foot">
+              {!summary?.extractor_configured && <strong>请先在设置中配置提取模型</strong>}
+              <button type="button" className="button primary summary-update" disabled={disabled} onClick={generate}>{busy ? "正在更新…" : "更新摘要"}</button>
+            </footer>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  </section>
 }
 function NightWall({ cards, vacant, openLayout, onOpen, onAdd }: { cards: Memory[]; vacant: { id: string; title: string }[]; openLayout?: string; onOpen: (id: string, layoutId?: string, seed?: string) => void; onAdd: () => void }) {
   const [hot, setHot] = useState<string | null>(null)
@@ -203,7 +326,7 @@ function MemoryCard({ memory, layoutId, openLayout, hot, onHot, onOpen }: { memo
   const reduce = useReducedMotion()
   const source = openLayout === layoutId
   const brief = (memory.content || "").length > 0 && (memory.content || "").length <= 40
-  return <motion.button type="button" layoutId={reduce ? undefined : layoutId} className={`memory-card${hot ? " is-hot" : ""}`} data-brief={brief ? "1" : undefined} data-morph-source={source || undefined} style={{ borderRadius: 12 }} transition={morphSpring} aria-expanded={source} onClick={() => onOpen(memory.id, layoutId, memory.content || undefined)} onMouseEnter={() => onHot(memory.id)} onMouseLeave={() => onHot(null)} onMouseMove={moveSpot} onFocus={() => onHot(memory.id)} onBlur={() => onHot(null)}><span className="night-spot" aria-hidden="true"/><span className="card-chip">{categoryLabel(memory.category)}</span><p>{memory.content || "正文暂时无法读取。"}</p><span className="card-caption">{memory.scope && <span>{memory.scope}</span>}<span className="card-share">{sharingLabel(memory)}</span><span>版本 {memory.revision}</span><time>{dateLabel(memory.created_at)}</time></span></motion.button>
+  return <motion.button type="button" layoutId={reduce ? undefined : layoutId} className={`memory-card${hot ? " is-hot" : ""}`} data-brief={brief ? "1" : undefined} data-morph-source={source || undefined} style={{ borderRadius: 12 }} transition={morphSpring} aria-expanded={source} onClick={() => onOpen(memory.id, layoutId, memory.content || undefined)} onMouseEnter={() => onHot(memory.id)} onMouseLeave={() => onHot(null)} onMouseMove={moveSpot} onFocus={() => onHot(memory.id)} onBlur={() => onHot(null)}><span className="night-spot" aria-hidden="true"/><span className="card-chip">{categoryLabel(memory.category)}</span><p>{memory.content || "正文暂时无法读取。"}</p><span className="card-caption">{memory.scope && <span>{memory.scope}</span>}{memory.share_enabled === false && <span className="card-share">仅自己可见</span>}<span>版本 {memory.revision}</span><time>{dateLabel(memory.created_at)}</time></span></motion.button>
 }
 function MemoCard({ memory, open, onOpen }: { memory: Memory; open: boolean; onOpen: (id: string, layoutId?: string, seed?: string, origin?: { client: string; name: string }) => void }) {
   const privateOnly = memory.share_enabled === false

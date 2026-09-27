@@ -108,6 +108,7 @@ def _finish(db_path, handle: KernelHandle, request_id: str) -> None:
             _discard(handle, row)
         _scrub_control(connection, memory_id, texts, source_ids)
         connection.execute("DELETE FROM memory_refs WHERE memory_id = ?", (memory_id,))
+        connection.execute("DELETE FROM profile_summary")
         done = {"memory_id": memory_id, "source_ids": source_ids, "texts": []}
         connection.execute(
             """

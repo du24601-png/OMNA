@@ -57,10 +57,6 @@ export function deliveryLabel(value: string) {
   return value
 }
 
-export function sharingLabel(memory: { share_enabled?: boolean }) {
-  return memory.share_enabled === false ? "仅自己可见" : "允许已授权 Agent 读取"
-}
-
 export function dateLabel(value?: string | null) {
   if (!value) return "时间未提供"
   const date = new Date(value)

@@ -140,8 +140,8 @@ def test_repeat_migration_and_control_contract() -> None:
         raise AssertionError("P1.1 requires native Windows")
     with tempfile.TemporaryDirectory(prefix="zhiwo-p11-migrate-") as raw:
         db_path = Path(raw) / "zhiwo.db"
-        assert migrate(db_path) == 6
-        assert migrate(db_path) == 6
+        assert migrate(db_path) == 7
+        assert migrate(db_path) == 7
         connection = sqlite3.connect(db_path)
         try:
             versions = connection.execute("SELECT version, name FROM schema_migrations").fetchall()
@@ -152,6 +152,7 @@ def test_repeat_migration_and_control_contract() -> None:
                 (4, "review_intent"),
                 (5, "agent_identity"),
                 (6, "access_ledger"),
+                (7, "profile_summary"),
             ]
             columns = [row[1] for row in connection.execute("PRAGMA table_info(memory_refs)")]
             assert "content" not in columns
@@ -329,9 +330,9 @@ def test_service_start_restart_auth_and_adapter() -> None:
                 public_status == 200,
                 result["pid_changed"],
                 restart_status == 200,
-                good["schema_version"] == 6,
-                restarted["schema_version"] == 6,
-                migration_rows == 6,
+                good["schema_version"] == 7,
+                restarted["schema_version"] == 7,
+                migration_rows == 7,
                 ref_rows == 0,
                 wrong_status == 401,
                 missing_status == 401,

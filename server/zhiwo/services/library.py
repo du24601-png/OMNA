@@ -127,6 +127,7 @@ def reset_library(settings, handle: KernelHandle, request_id: str, confirm: str)
         connection = _connect(settings.control_db)
         try:
             for table in (
+                "profile_summary",
                 "proposals",
                 "import_jobs",
                 "sources",

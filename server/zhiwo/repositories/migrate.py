@@ -220,6 +220,22 @@ def _apply_access_ledger(connection: sqlite3.Connection) -> None:
     connection.execute("UPDATE settings SET value = '6' WHERE key = 'schema_version'")
 
 
+def _apply_profile_summary(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS profile_summary (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            text TEXT NOT NULL,
+            input_hash TEXT NOT NULL,
+            generated_at TEXT NOT NULL,
+            model TEXT NOT NULL,
+            memory_count INTEGER NOT NULL CHECK (memory_count >= 0)
+        )
+        """
+    )
+    connection.execute("UPDATE settings SET value = '7' WHERE key = 'schema_version'")
+
+
 MIGRATIONS: tuple[tuple[int, str, object], ...] = (
     (1, "control_identity", _MIGRATION_1),
     (2, "sources_and_publish", _MIGRATION_2),
@@ -227,6 +243,7 @@ MIGRATIONS: tuple[tuple[int, str, object], ...] = (
     (4, "review_intent", _apply_review_intent),
     (5, "agent_identity", _apply_agent_identity),
     (6, "access_ledger", _apply_access_ledger),
+    (7, "profile_summary", _apply_profile_summary),
 )
 
 

@@ -349,7 +349,7 @@ def test_delivery_followup() -> None:
         result["credential_in_result"] = any(secret and secret in blob for secret in secrets)
         result["pass"] = all(
             [
-                result.get("schema_version") == 6,
+                result.get("schema_version") == 7,
                 result.get("distinct_events") is True and result.get("same_request_id") is True,
                 result.get("different_agents") is True and result.get("one_notice_changes_one_row") is True,
                 result.get("other_snapshot_unchanged") is True and result.get("retry_leaves_previous") is True,

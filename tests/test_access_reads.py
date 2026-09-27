@@ -95,7 +95,8 @@ class ReadCountsTest(unittest.TestCase):
         self.assertNotIn("agent-propose", by_id)
         self.assertEqual(view["series"][0]["id"], "agent-opencode")
         self.assertNotIn(SECRET, json.dumps(view, ensure_ascii=False))
-        self.assertEqual(set(view), {"days", "series"})
+        self.assertEqual(set(view), {"days", "series", "last_24h"})
+        self.assertEqual(len(view["last_24h"]["hours"]), 24)
 
     def test_fourteen_days_include_the_older_read(self) -> None:
         view = read_counts(self.db, 14, OFFSET, now=NOW)
@@ -112,6 +113,27 @@ class ReadCountsTest(unittest.TestCase):
             view = read_counts(db, 7, 0, now=NOW)
         self.assertEqual(len(view["days"]), 7)
         self.assertEqual(view["series"], [])
+        self.assertEqual(len(view["last_24h"]["hours"]), 24)
+        self.assertEqual(view["last_24h"]["series"], [])
+
+    def test_last_24_hours_bucket_by_local_hour(self) -> None:
+        _agent(self.db, "agent-edge", "边界")
+        _event(self.db, "agent-edge", "search_memory", "2026-09-25T15:00:00+00:00")
+        _event(self.db, "agent-edge", "get_context", "2026-09-25T16:00:00+00:00")
+        view = read_counts(self.db, 7, OFFSET, now=NOW)
+        hours = view["last_24h"]
+        self.assertEqual(hours["hours"][0], "2026-09-25T12:00")
+        self.assertEqual(hours["hours"][-1], "2026-09-26T11:00")
+        by_id = {item["id"]: item for item in hours["series"]}
+        self.assertEqual(by_id["agent-opencode"]["counts"][11], 1)
+        self.assertEqual(by_id["agent-opencode"]["counts"][23], 1)
+        self.assertEqual(sum(by_id["agent-opencode"]["counts"]), 2)
+        self.assertEqual(by_id["gone"]["counts"][23], 1)
+        self.assertEqual(by_id["agent-edge"]["counts"][0], 1)
+        self.assertEqual(sum(by_id["agent-edge"]["counts"]), 1)
+        self.assertNotIn("agent-claude", by_id)
+        self.assertNotIn("agent-propose", by_id)
+        self.assertNotIn(SECRET, json.dumps(hours, ensure_ascii=False))
 
     def test_rejects_unknown_window_and_offset(self) -> None:
         with self.assertRaises(ApiError) as days_error:

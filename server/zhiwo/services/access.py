@@ -157,12 +157,32 @@ def list_access_events(db_path, agent_id: str | None = None) -> dict:
 _READ_TOOLS = ("get_context", "search_memory", "explain_memory")
 
 
+def _count_series(buckets: dict[str, dict[str, int]], names: dict[str, str], keys: list[str]) -> list[dict]:
+    bases = {agent_id: names.get(agent_id) or "已移除的连接" for agent_id in buckets}
+    repeated = {name for name in bases.values() if list(bases.values()).count(name) > 1}
+    series = []
+    for agent_id, counts in buckets.items():
+        name = bases[agent_id]
+        if name in repeated:
+            name = f"{name} · {agent_id[:4]}"
+        series.append(
+            {
+                "id": agent_id or "removed",
+                "name": name,
+                "counts": [counts.get(key, 0) for key in keys],
+            }
+        )
+    series.sort(key=lambda item: (-sum(item["counts"]), item["name"], item["id"]))
+    return series
+
+
 def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | None = None) -> dict:
-    """Daily read counts for the owner chart.
+    """Daily read counts for the owner chart, plus the last 24 local hours.
 
     A read is get_context, search_memory, or explain_memory. Proposals are
-    not reads. The result is dates and counts only: no snapshot, sentence,
-    or query. `utc_offset_minutes` matches `Date.getTimezoneOffset()`.
+    not reads. The result is dates, hours, and counts only: no snapshot,
+    sentence, or query. `utc_offset_minutes` matches `Date.getTimezoneOffset()`.
+    `last_24h` is 24 clock hours ending at the current local hour.
     """
     if type(days) is not int or days not in (7, 14):
         raise ApiError(400, "VALIDATION_ERROR", "days must be 7 or 14")
@@ -171,9 +191,15 @@ def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | 
     now_utc = now or datetime.now(timezone.utc)
     if now_utc.tzinfo is None:
         now_utc = now_utc.replace(tzinfo=timezone.utc)
-    today = (now_utc - timedelta(minutes=utc_offset_minutes)).date()
+    local_now = now_utc - timedelta(minutes=utc_offset_minutes)
+    today = local_now.date()
     start = today - timedelta(days=days - 1)
     day_list = [(start + timedelta(days=index)).isoformat() for index in range(days)]
+    day_keys = set(day_list)
+    local_hour = local_now.replace(minute=0, second=0, microsecond=0, tzinfo=None)
+    hour_start = local_hour - timedelta(hours=23)
+    hour_list = [(hour_start + timedelta(hours=index)).strftime("%Y-%m-%dT%H:00") for index in range(24)]
+    hour_keys = set(hour_list)
     start_utc = datetime.combine(start, time.min, tzinfo=timezone.utc) + timedelta(minutes=utc_offset_minutes)
     connection = _connect(db_path)
     try:
@@ -192,7 +218,8 @@ def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | 
         }
     finally:
         connection.close()
-    buckets: dict[str, dict[str, int]] = {}
+    day_buckets: dict[str, dict[str, int]] = {}
+    hour_buckets: dict[str, dict[str, int]] = {}
     for row in rows:
         if row["tool"] not in _READ_TOOLS:
             continue
@@ -202,27 +229,19 @@ def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | 
             continue
         if created.tzinfo is None:
             created = created.replace(tzinfo=timezone.utc)
-        day = (created - timedelta(minutes=utc_offset_minutes)).date().isoformat()
-        if day not in day_list:
-            continue
+        shifted = created - timedelta(minutes=utc_offset_minutes)
         agent_id = row["agent_id"] if isinstance(row["agent_id"], str) and row["agent_id"] else ""
-        buckets.setdefault(agent_id, {})[day] = buckets.get(agent_id, {}).get(day, 0) + 1
-    bases = {agent_id: names.get(agent_id) or "已移除的连接" for agent_id in buckets}
-    repeated = {name for name in bases.values() if list(bases.values()).count(name) > 1}
-    series = []
-    for agent_id, counts in buckets.items():
-        name = bases[agent_id]
-        if name in repeated:
-            name = f"{name} · {agent_id[:4]}"
-        series.append(
-            {
-                "id": agent_id or "removed",
-                "name": name,
-                "counts": [counts.get(day, 0) for day in day_list],
-            }
-        )
-    series.sort(key=lambda item: (-sum(item["counts"]), item["name"], item["id"]))
-    return {"days": day_list, "series": series}
+        day = shifted.date().isoformat()
+        if day in day_keys:
+            day_buckets.setdefault(agent_id, {})[day] = day_buckets.get(agent_id, {}).get(day, 0) + 1
+        hour_key = shifted.strftime("%Y-%m-%dT%H:00")
+        if hour_key in hour_keys and created <= now_utc:
+            hour_buckets.setdefault(agent_id, {})[hour_key] = hour_buckets.get(agent_id, {}).get(hour_key, 0) + 1
+    return {
+        "days": day_list,
+        "series": _count_series(day_buckets, names, day_list),
+        "last_24h": {"hours": hour_list, "series": _count_series(hour_buckets, names, hour_list)},
+    }
 
 
 def get_access_event(db_path, event_id: str) -> dict:

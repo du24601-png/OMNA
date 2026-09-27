@@ -35,13 +35,34 @@ function fullDay(iso: string) {
   return `${Number(parts[1])}月${Number(parts[2])}日`
 }
 
-function windowOf(data: AccessReads, days: 7 | 14): AccessReads {
-  const start = Math.max(0, data.days.length - days)
+type TrendRange = "24h" | 7 | 14
+
+function axisHour(iso: string) {
+  return iso.slice(11, 16)
+}
+
+function fullHour(iso: string) {
+  const [date, clock] = iso.split("T")
+  const parts = date.split("-")
+  return `${Number(parts[1])}月${Number(parts[2])}日 ${clock.slice(0, 5)}`
+}
+
+function chartView(data: AccessReads, range: TrendRange) {
+  if (range === "24h") {
+    const recent = data.last_24h ?? { hours: [], series: [] }
+    return {
+      buckets: recent.hours,
+      series: recent.series.filter(item => item.counts.some(count => count > 0)),
+      hourly: true,
+    }
+  }
+  const start = Math.max(0, data.days.length - range)
   return {
-    days: data.days.slice(start),
+    buckets: data.days.slice(start),
     series: data.series
       .map(item => ({ ...item, counts: item.counts.slice(start) }))
       .filter(item => item.counts.some(count => count > 0)),
+    hourly: false,
   }
 }
 
@@ -57,39 +78,44 @@ function TrendTip({ active, payload }: { active?: boolean; payload?: TipItem[] }
 
 export function ReadTrend({ tick }: { tick: number }) {
   const resource = useResource(() => api.accessReads(), [tick])
-  const [range, setRange] = useState<7 | 14>(7)
+  const [range, setRange] = useState<TrendRange>(7)
   const [hidden, setHidden] = useState<string[]>([])
   const reduce = useReducedMotion()
   const theme = useChartTheme()
-  const view = resource.data ? windowOf(resource.data, range) : null
+  const view = resource.data ? chartView(resource.data, range) : null
   const rest = theme.dark ? DARK : LIGHT
   const colorOf = (index: number) => index === 0 ? theme.accent : rest[(index - 1) % rest.length]
   const hiddenSet = new Set(hidden)
-  const rows = view?.days.map((day, index) => {
-    const row: Record<string, string | number> = { label: axisDay(day), full: fullDay(day) }
+  const rows = view?.buckets.map((bucket, index) => {
+    const row: Record<string, string | number> = {
+      label: view.hourly ? axisHour(bucket) : axisDay(bucket),
+      full: view.hourly ? fullHour(bucket) : fullDay(bucket),
+    }
     view.series.forEach(item => { if (!hiddenSet.has(item.id)) row[item.id] = item.counts[index] ?? 0 })
     return row
   }) ?? []
   const summary = view?.series.map(item => `${item.name} ${item.counts.reduce((sum, count) => sum + count, 0)} 次`).join("，")
+  const rangeLabel = range === "24h" ? "24 小时" : `${range} 天`
   return <section className="side-pane trend-pane" aria-labelledby="read-trend-title">
     <header className="pane-head">
       <div>
         <h2 id="read-trend-title">记忆调用</h2>
       </div>
       <div className="trend-range" role="group" aria-label="时间范围">
+        <button type="button" aria-pressed={range === "24h"} onClick={() => setRange("24h")}>24h</button>
         {([7, 14] as const).map(days => <button key={days} type="button" aria-pressed={range === days} onClick={() => setRange(days)}>{days} 天</button>)}
       </div>
     </header>
     {resource.error && <div className="notice error" role="alert"><div><strong>加载未完成</strong><p>{resource.error}</p></div><button className="button secondary" onClick={resource.reload}>重试加载</button></div>}
     {resource.loading && !resource.data && !resource.error && <div className="trend-skeleton" role="status" aria-label="正在加载记忆调用" />}
-    {view && !view.series.length && !resource.error && <p className="trend-empty">这 {range} 天还没有 Agent 读取记忆</p>}
+    {view && !view.series.length && !resource.error && <p className="trend-empty">这 {rangeLabel}还没有 Agent 读取记忆</p>}
     {view && !!view.series.length && <>
-      <p className="sr-only">{`最近 ${range} 天，${summary}`}</p>
+      <p className="sr-only">{`最近 ${rangeLabel}，${summary}`}</p>
       <div className="trend-plot">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={rows} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} interval={range === 14 ? 1 : 0} tick={{ fill: "var(--muted)", fontSize: 11 }} />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} interval={range === "24h" ? 3 : range === 14 ? 1 : 0} tick={{ fill: "var(--muted)", fontSize: 11 }} />
             <YAxis allowDecimals={false} width={28} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} />
             <Tooltip content={<TrendTip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} />
             {view.series.filter(item => !hiddenSet.has(item.id)).map(item => {

@@ -13,7 +13,7 @@
 | MCP | Python MCP SDK，stdio bridge | 客户端只连接知我 Gateway，不连接原生 Kernel MCP |
 | 正式记忆 | `mnemosyne-oss/mnemosyne`，经 Adapter 调用 | 复用内核；不复制第二套长期记忆引擎 |
 | 业务数据 | SQLite `zhiwo.db` | 来源、提案、权限、映射及访问记录 |
-| 模型 | 可配置的兼容 API 提取器；检索向量化默认本地 | 不固定未经验证的模型版本；画像首版不依赖 LLM |
+| 模型 | 可配置的兼容 API 提取器；检索向量化默认本地 | 不固定未经验证的模型版本；画像卡片不依赖 LLM，AI 摘要只在 Owner 手动触发时调用同一模型配置 |
 | 开发工具 | pnpm 管理前端，uv 管理 Python；pytest + 必要的 UI 验证 | P0 确定运行时版本并提交锁文件；不要求 Docker / WSL |
 
 这些是启动选择，尚未跑通。**不能用上游 README 的能力描述代替本项目验收。**
@@ -48,7 +48,7 @@ flowchart TD
 | 记忆 ID 映射、类别、共享/发布状态、有效期、来源指针 | `zhiwo.db` | 产品控制元数据；对外可见性由服务统一判定 |
 | Agent、工具与类别权限、撤销状态 | `zhiwo.db` | 拒绝优先；调用方不得自报身份 |
 | 返回内容及版本的访问快照 | `zhiwo.db` | 只为审计；不得回流成正式记忆或参与检索 |
-| 关于我画像 | 运行时派生，必要时可丢弃缓存 | 从当前有效个人事实构建；修改回到正式记忆流程 |
+| 关于我画像与 AI 摘要 | 卡片运行时派生；摘要在 `zhiwo.db` 保存一条可丢弃缓存 | 都从当前有效个人事实构建；摘要不参与检索、不反向生成正式记忆，修改回到正式记忆流程 |
 
 来源与审计可能包含和正式记忆相同的文字，但不是第二份可修改的事实库。删除时也要清理相关内容副本。
 
@@ -66,6 +66,7 @@ flowchart TD
 | `agent_permissions` | `agent_id, allowed_tools, allowed_categories`；空集即无权限 |
 | `agent_commands` | `id, agent_id, action, payload_hash, created_at`；管理请求的幂等记录。不存凭证明文，不存记忆正文 |
 | `access_events` | `id, request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state`；`id` 由服务生成，每次调用或重试各有一行。`outcome` 是 `success`、`empty` 或 `rejected`。`response_snapshot` 就是那一次返回的业务载荷。`delivery_state` 从 `prepared` 只能变为 `sent`、`failed` 或 `unknown`，之后不再改。交付按 `id` 更新，不按请求号批量更新 |
+| `profile_summary` | 单行派生缓存：`text, input_hash, generated_at, model, memory_count`。不保存原始记忆集合，不参与普通检索；可随时删除并从 Mnemosyne 当前记忆重建 |
 | `operations` | `id, action, target_id, base_revision, revision, payload_hash, payload_json, kernel_id, status, error_code`；跨库写入恢复及幂等。`payload_json` 只用于核对和恢复，不作为正式检索正文 |
 | `settings` | 非敏感设置、schema 版本、选定模型；密钥使用系统凭据存储或开发环境变量 |
 
@@ -85,13 +86,14 @@ flowchart TD
 | ProposalReview | `decide(id, decision, edited_payload?, base_revision?)` → `Operation` | 新增/更新/保留两者/拒绝；核验来源与目标版本 |
 | MemoryService | `create/update/delete/set_sharing` → `Operation / Memory` | Owner 的正式写入、生命周期、冲突处理、操作恢复 |
 | ProfileBuilder | `build_profile()` → 按主题分组的 `ProfileCard[]` | 只读已发布、当前有效事实；每句附记忆 ID 与版本 |
+| ProfileSummary | `generate_profile_summary()` → `ProfileSummary` | Owner 手动触发；完整读取当前有效记忆，调用已配置模型，生成期间输入指纹变化则拒绝覆盖旧缓存 |
 | PolicyEngine | `authorize(principal, tool)`；`filter(principal, memories, now)` | 身份、工具、类别、发布状态、共享开关、有效期统一判断 |
 | AccessLedger | `append(request_id, sanitized_response)` → `event_id` | 记录本次确定要返回的内容；日志写失败则不发出记忆内容 |
 | MnemosyneAdapter | `put_version/get_version/search/list_versions/delete_all_versions/find_operation` | 隔离上游接口、版本定位、存取、删除、幂等查证；不解释用户授权 |
 
 正式写入最小载荷：`{content, kind, category, scope?, valid_until?, share_enabled, source_refs}`。提案更新额外要求 `target_id, base_revision`。所有写入带幂等 `request_id`；同一 ID、不同载荷返回冲突。
 
-Profile 首版用模板组合已确认内容，不从原文再次推断。事件只用于“近期变化”，不自动晋升为稳定事实。停止共享的记忆仍可出现在本人画像中。
+Profile 卡片用模板组合已确认内容，不从原文再次推断。事件不进入身份、目标、偏好、项目四类卡片，接口仍在 `recent` 里最多返回 8 条；关于我页面不再单独展示近期变化。事件不自动晋升为稳定事实。停止共享的记忆仍可出现在本人画像中。AI 摘要是额外一层 Owner 派生视图：每次重新读取全部当前有效记忆，把上一版摘要作为非事实参考后生成完整新摘要。输入按 ID、版本、类别、场景、共享、有效期和正文计算指纹；记忆变化后标为待更新，模型调用期间发生变化则不保存。输入过大时明确失败，不静默截断。永久删除清空缓存，生成失败保留旧缓存。摘要不进入 MCP 或其他 Agent 读取路径。
 
 ## 5. 审核、版本与跨库一致性
 
@@ -123,6 +125,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | 路由 | 用途 |
 | --- | --- |
 | `GET /health`；`GET /profile` | 运行状态；画像 |
+| `GET /profile-summary`；`POST /profile-summary/generate` | 读取摘要缓存及新旧状态；Owner 主动调用模型重新生成 |
 | `POST /imports`；`GET /imports/{id}`；`POST /imports/{id}/retry` | 提取任务及失败重试 |
 | `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核。每条候选带 `requester`（提出它的客户端 id 和名称；导入的记为 OMNA）。决定仍逐项调用 |
 | `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除 |
@@ -131,7 +134,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回。每条连接附 `last_access_at`，取自 `access_events` 中该连接最新一条的时间，没有就是 `null`；Agent 侧接口不返回它 |
 | `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表报告是否安装、配置文件里是否已有 `zhiwo`，以及 `agent_id`：设置 `client_agent:{id}` 指向、且仍存在的连接，没有就是 `null`。确认后合并写入该客户端自己的配置，响应不回显凭证 |
 | `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照。列表每条多一个 `returned`：从该次快照取出已返回的记忆正文或解释片段，压成单行，超过 160 字截断，最多 8 句。不另存一列。错误信息不算返回的句子。只出现在 Owner 的访问记录里 |
-| `GET /access-reads?days=7\|14&utc_offset_minutes=` | 首页趋势图。按本地日汇总读取次数，只计 `get_context`、`search_memory`、`explain_memory`。返回日期和每个 Agent 的计数，不返回快照、正文或查询。`utc_offset_minutes` 与浏览器 `getTimezoneOffset()` 相同 |
+| `GET /access-reads?days=7\|14&utc_offset_minutes=` | 首页趋势图。按本地日汇总读取次数，并附带 `last_24h`：截至当前本地小时的 24 个小时。只计 `get_context`、`search_memory`、`explain_memory`。返回日期、小时和每个 Agent 的计数，不返回快照、正文或查询。`utc_offset_minutes` 与浏览器 `getTimezoneOffset()` 相同 |
 | `GET/PATCH /settings`；`POST /settings/test-model`；`POST /settings/data-dir/open`；`POST /settings/data-dir/pick` | 非敏感设置及模型连通测试，响应不回显密钥。打开或选择文件夹只作用于本机资源管理器，不改 `ZHIWO_DATA_DIR` |
 | `POST /exports`；`POST /backups`；`POST /restores?confirm=恢复备份`；`POST /data/reset` | 导出、备份、恢复、清空。恢复的确认词放在查询参数里，因为这四个字放不进 HTTP 头。清空的确认词在 JSON 里 |
 
@@ -187,7 +190,7 @@ P2.2 的四个工具在 `services/agent_tools.py`，可见性在 `services/polic
 
 所有成功状态须以实际存取结果为依据；“删除”指应用与数据库逻辑清除，不承诺存储介质取证级擦除。
 
-P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windows DPAPI 写到数据目录的 `extractor.key`，不进 `zhiwo.db`，接口也不回显。页面还没保存过时，进程继续使用启动时的环境变量。保存后当前进程立刻改用新配置。恢复会删掉这个密钥文件，并记 `extractor_requires_setup`，避免环境变量里的旧密钥自动生效；清空则去掉这个标记，重新读取环境变量。测试连接只发送一句不含记忆的请求。schema 仍是 6。永久删除先把版本标成 `deleting` 并写下操作，再清理 Kernel、派生行和业务库里的正文；`ZHIWO_CRASH_AFTER=delete_marked` 只在测试模式且数据目录位于系统临时目录时，于标记之后退出。重启从 `prepared` 的删除操作继续。短生命周期的 Kernel 连接在用完后关闭，否则 Windows 会因文件占用而无法替换备份。
+P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windows DPAPI 写到数据目录的 `extractor.key`，不进 `zhiwo.db`，接口也不回显。页面还没保存过时，进程继续使用启动时的环境变量。保存后当前进程立刻改用新配置。恢复会删掉这个密钥文件，并记 `extractor_requires_setup`，避免环境变量里的旧密钥自动生效；清空则去掉这个标记，重新读取环境变量。测试连接只发送一句不含记忆的请求。摘要缓存加入后 schema 是 7。永久删除先把版本标成 `deleting` 并写下操作，再清理 Kernel、派生行、摘要缓存和业务库里的正文；`ZHIWO_CRASH_AFTER=delete_marked` 只在测试模式且数据目录位于系统临时目录时，于标记之后退出。重启从 `prepared` 的删除操作继续。短生命周期的 Kernel 连接在用完后关闭，否则 Windows 会因文件占用而无法替换备份。
 
 ## 8. 目录与实现约束
 

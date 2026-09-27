@@ -48,6 +48,16 @@ export type Profile = {
   recent: Memory[]
 }
 
+export type ProfileSummary = {
+  status: "empty" | "current" | "stale"
+  text: string | null
+  generated_at: string | null
+  model: string | null
+  memory_count: number
+  current_memory_count: number
+  extractor_configured: boolean
+}
+
 export type Source = {
   id: string
   kind: string
@@ -92,9 +102,12 @@ export type AccessEvent = {
   returned?: string[]
 }
 
+export type AccessSeries = { id: string; name: string; counts: number[] }
+
 export type AccessReads = {
   days: string[]
-  series: { id: string; name: string; counts: number[] }[]
+  series: AccessSeries[]
+  last_24h?: { hours: string[]; series: AccessSeries[] }
 }
 
 export type AccessDetail = AccessEvent & {
@@ -190,6 +203,12 @@ export const api = {
   },
   profile() {
     return request("/api/v1/profile") as Promise<Profile>
+  },
+  profileSummary() {
+    return request("/api/v1/profile-summary") as Promise<ProfileSummary>
+  },
+  generateProfileSummary() {
+    return request("/api/v1/profile-summary/generate", { method: "POST" }) as Promise<ProfileSummary>
   },
   memories(params: { query?: string; state?: string; category?: string; origin?: string; limit?: number }) {
     const search = new URLSearchParams()

@@ -45,6 +45,7 @@ from zhiwo.services.memories import (
     parse_origin,
     update_memory,
 )
+from zhiwo.services.profile_summary import generate_profile_summary, get_profile_summary
 from zhiwo.services.runtime_settings import public_settings, resolve_extractor, save_extractor, test_extractor
 from zhiwo.services.shell import pick_folder, reveal_path
 from zhiwo.services.publish import operation_status, publish_memory
@@ -115,6 +116,20 @@ def create_app() -> FastAPI:
     @app.get("/api/v1/profile", dependencies=[Depends(require_owner)])
     def profile(request: Request) -> dict:
         return build_profile(request.app.state.settings.control_db, request.app.state.kernel)
+
+    @app.get("/api/v1/profile-summary", dependencies=[Depends(require_owner)])
+    def profile_summary(request: Request) -> dict:
+        settings = request.app.state.settings
+        return get_profile_summary(
+            settings.control_db,
+            request.app.state.kernel,
+            extractor_configured=settings.extractor_configured,
+        )
+
+    @app.post("/api/v1/profile-summary/generate", dependencies=[Depends(require_owner)])
+    def generate_summary(request: Request) -> dict:
+        settings = request.app.state.settings
+        return generate_profile_summary(settings.control_db, request.app.state.kernel, settings)
 
     @app.get("/api/v1/memories", dependencies=[Depends(require_owner)])
     def find_memories(
