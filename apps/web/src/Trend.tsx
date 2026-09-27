@@ -8,12 +8,12 @@ const LIGHT = ["#1d4ed8", "#15803d", "#6d28d9", "#0f766e", "#9a3412"]
 const DARK = ["#64b5ff", "#6ee78a", "#d7a4f7", "#5eead4", "#ffb088"]
 
 function useChartTheme() {
-  const [theme, setTheme] = useState({ accent: "#c2410c", dark: false })
+  const [theme, setTheme] = useState({ accent: "#171717", dark: false })
   useEffect(() => {
     const read = () => {
       const style = getComputedStyle(document.documentElement)
       setTheme({
-        accent: style.getPropertyValue("--accent").trim() || "#c2410c",
+        accent: style.getPropertyValue("--accent").trim() || "#171717",
         dark: document.documentElement.dataset.mode === "dark",
       })
     }

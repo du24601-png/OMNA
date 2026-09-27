@@ -12,7 +12,7 @@ const GROUPS: [string, [Section, string][]][] = [
   ["记忆", [["library", "本机数据"], ["backup", "备份"], ["reset", "清空"]]],
   ["外观", [["theme", "主题"]]],
 ]
-const ACCENTS: [ThemeAccent, string, string, string][] = [["orange", "橙", "#c2410c", "#ff8a4c"], ["blue", "蓝", "#1d4ed8", "#0a84ff"], ["green", "绿", "#15803d", "#30d158"], ["violet", "紫", "#6d28d9", "#bf5af2"]]
+const ACCENTS: [ThemeAccent, string, string, string][] = [["default", "默认", "#171717", "#f5f5f7"], ["orange", "橙", "#c2410c", "#ff8a4c"], ["blue", "蓝", "#1d4ed8", "#0a84ff"], ["green", "绿", "#15803d", "#30d158"], ["violet", "紫", "#6d28d9", "#bf5af2"]]
 
 export function SettingsDialog({ onClose, onChanged }: { onClose: () => void; onChanged: () => void }) {
   const reduce = useReducedMotion()
@@ -211,7 +211,7 @@ function ThemePane() {
     </div>
     <div className="settings-block">
       <h3>主色</h3>
-      <div className="theme-swatches" role="radiogroup" aria-label="主色">{ACCENTS.map(([id, label, light, dark]) => <button key={id} type="button" role="radio" className="theme-swatch" aria-checked={theme.accent === id} onClick={() => setAccent(id)}><i style={{ background: theme.mode === "dark" ? dark : light }}/>{label}</button>)}</div>
+      <div className="theme-swatches" role="radiogroup" aria-label="主色">{ACCENTS.map(([id, label, light, dark]) => <button key={id} type="button" role="radio" className="theme-swatch" aria-checked={theme.accent === id} onClick={() => setAccent(id)}><i className={id === "default" ? "theme-swatch-ink" : undefined} style={id === "default" ? undefined : { background: theme.mode === "dark" ? dark : light }}/>{label}</button>)}</div>
     </div>
   </div>
 }

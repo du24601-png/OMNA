@@ -230,6 +230,11 @@ function summaryBlocks(text: string) {
   flush()
   return blocks
 }
+
+function SummaryContent({ text, className }: { text: string; className?: string }) {
+  return <div className={className}>{summaryBlocks(text).map((block, index) => <div key={index}>{block.heading && <h3>{block.heading}</h3>}{block.body && <p>{block.body}</p>}</div>)}</div>
+}
+
 const SUMMARY_GLOW = ["#0894FF", "#C959DD", "#FF2E54", "#FF9004"]
 
 function summaryGlowFrames(colors: string[]) {
@@ -276,7 +281,7 @@ function ProfileSummaryPanel({ tick, online }: { tick: number; online: boolean }
     {resource.loading && !summary && <div className="summary-loading"><Skeleton className="skeleton-line" style={{ width: "92%" }}/><Skeleton className="skeleton-line" style={{ width: "68%", marginTop: 10 }}/></div>}
     {text ? <button type="button" className="profile-summary-open" onClick={() => setOpen(true)} aria-haspopup="dialog">
       <header className="profile-summary-head"><span className="summary-kicker">AI 摘要</span></header>
-      <p className="profile-summary-text">{text}</p>
+      <SummaryContent text={text} className="profile-summary-text"/>
       {meta && <p className={`profile-summary-meta${summary?.status === "stale" ? " is-stale" : ""}`}>{meta}</p>}
     </button> : !resource.loading && <div className="profile-summary-empty-state">
       <header className="profile-summary-head"><span className="summary-kicker">AI 摘要</span></header>
@@ -300,9 +305,7 @@ function ProfileSummaryPanel({ tick, online }: { tick: number; online: boolean }
               <Dialog.Close className="icon-button" aria-label="关闭摘要"><Icon name="close" /></Dialog.Close>
             </header>
             {summary?.status === "stale" && <p className="summary-dialog-stale">记忆有变化，摘要待更新</p>}
-            <div className="summary-dialog-body">
-              {summaryBlocks(text).map((block, index) => <div key={index}>{block.heading && <h3>{block.heading}</h3>}{block.body && <p>{block.body}</p>}</div>)}
-            </div>
+            <SummaryContent text={text} className="summary-dialog-body"/>
             {notice && <p className="profile-summary-error summary-dialog-error" role="alert">{notice}</p>}
             <footer className="summary-dialog-foot">
               {!summary?.extractor_configured && <strong>请先在设置中配置提取模型</strong>}

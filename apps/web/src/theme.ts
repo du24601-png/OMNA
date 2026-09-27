@@ -1,20 +1,20 @@
 export type ThemeMode = "light" | "dark"
-export type ThemeAccent = "orange" | "blue" | "green" | "violet"
+export type ThemeAccent = "default" | "orange" | "blue" | "green" | "violet"
 export type Theme = { mode: ThemeMode; accent: ThemeAccent }
 
 const KEY = "zhiwo.theme"
 const MODES = new Set<ThemeMode>(["light", "dark"])
-const ACCENTS = new Set<ThemeAccent>(["orange", "blue", "green", "violet"])
+const ACCENTS = new Set<ThemeAccent>(["default", "orange", "blue", "green", "violet"])
 
 export function loadTheme(): Theme {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) || "")
     return {
       mode: MODES.has(raw.mode) ? raw.mode : "light",
-      accent: ACCENTS.has(raw.accent) ? raw.accent : "orange",
+      accent: ACCENTS.has(raw.accent) ? raw.accent : "default",
     }
   } catch {
-    return { mode: "light", accent: "orange" }
+    return { mode: "light", accent: "default" }
   }
 }
 
@@ -28,7 +28,7 @@ export function applyTheme(theme: Theme) {
   themeReady = true
   if (theme.mode === "dark") root.dataset.mode = "dark"
   else delete root.dataset.mode
-  if (theme.accent === "orange") delete root.dataset.accent
+  if (theme.accent === "default") delete root.dataset.accent
   else root.dataset.accent = theme.accent
 }
 
