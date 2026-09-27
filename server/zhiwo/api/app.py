@@ -139,6 +139,8 @@ def create_app() -> FastAPI:
         category: str | None = None,
         origin: str | None = None,
         limit: int = 20,
+        sort: str = "newest",
+        cursor: str | None = None,
     ) -> dict:
         db_path = request.app.state.settings.control_db
         kernel = request.app.state.kernel
@@ -156,6 +158,7 @@ def create_app() -> FastAPI:
             if selected:
                 found["items"] = [item for item in items if origin_key(item.get("origin")) == selected]
             found["origins"] = list_origin_choices(db_path)
+            found["next_cursor"] = None
             return found
         return list_memories(
             db_path,
@@ -165,6 +168,8 @@ def create_app() -> FastAPI:
             origin=selected,
             query=query,
             limit=min(max(limit, 1), 50),
+            sort=sort,
+            cursor=cursor,
         )
 
     @app.get("/api/v1/memories/{memory_id}/versions", dependencies=[Depends(require_owner)])

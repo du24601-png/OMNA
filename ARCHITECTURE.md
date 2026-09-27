@@ -128,7 +128,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET /profile-summary`；`POST /profile-summary/generate` | 读取摘要缓存及新旧状态；Owner 主动调用模型重新生成 |
 | `POST /imports`；`GET /imports/{id}`；`POST /imports/{id}/retry` | 提取任务及失败重试 |
 | `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核。每条候选带 `requester`（提出它的客户端 id 和名称；导入的记为 OMNA）。决定仍逐项调用 |
-| `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除 |
+| `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除。列表一次最多 50 条，按创建时间排序，`sort=newest\|oldest`。`cursor` 接上一页最后一条；响应带 `total` 和 `next_cursor`。没有正文关键词时只读取这一页的 Kernel 正文。当前记忆的搜索仍最多 20 条，并带 `truncated`，不使用 cursor |
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
 | `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回。每条连接附 `last_access_at`，取自 `access_events` 中该连接最新一条的时间，没有就是 `null`；Agent 侧接口不返回它 |

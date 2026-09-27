@@ -354,9 +354,58 @@ function MemorySkeleton() {
     {rows.map((width, index) => <div className="memo-card skeleton-row" key={index}><Skeleton className="skeleton-sentence" style={{ width }}/><Skeleton className="skeleton-pill"/><span className="memo-source"><Skeleton className="skeleton-mark"/><Skeleton className="skeleton-source"/></span><Skeleton className="skeleton-time"/></div>)}
   </div>
 }
+function byCreated(sort: "newest" | "oldest") {
+  return (a: Memory, b: Memory) => {
+    const left = a.created_at || "", right = b.created_at || ""
+    if (left === right) return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+    const newerFirst = left > right ? -1 : 1
+    return sort === "newest" ? newerFirst : -newerFirst
+  }
+}
 function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear, onOpen, onAdd }: { tick: number; selectedId?: string; query: string; draft: string; onDraft: (value: string) => void; onSearch: () => void; onClear: () => void; onOpen: (id: string, layoutId?: string, seed?: string, origin?: { client: string; name: string }) => void; onAdd: () => void }) {
   const [state, setState] = useState("current"), [category, setCategory] = useState(""), [origin, setOrigin] = useState(""), [sort, setSort] = useState<"newest" | "oldest">("newest")
-  const resource = useResource(() => api.memories({ state, category, origin, query, limit: 50 }), [state, category, origin, query, tick])
+  const searching = !!query && state === "current"
+  const resource = useResource(() => api.memories({ state, category, origin, query, limit: searching ? 20 : 50, sort: searching ? undefined : sort }), [state, category, origin, query, tick, searching ? "search" : sort])
+  const feedRef = useRef<HTMLDivElement>(null)
+  const activeKey = useRef("")
+  const flight = useRef(0)
+  const [extra, setExtra] = useState<Memory[]>([])
+  const [moreCursor, setMoreCursor] = useState<string | null>(null)
+  const [moreLoading, setMoreLoading] = useState(false)
+  const [moreError, setMoreError] = useState("")
+  const pageKey = JSON.stringify([state, category, origin, query, sort, tick])
+  const [seenKey, setSeenKey] = useState(pageKey)
+  if (seenKey !== pageKey) {
+    setSeenKey(pageKey)
+    setExtra([])
+    setMoreCursor(null)
+    setMoreError("")
+    setMoreLoading(false)
+    flight.current += 1
+  }
+  activeKey.current = pageKey
+  useEffect(() => { feedRef.current?.scrollTo({ top: 0 }) }, [pageKey])
+  useEffect(() => {
+    const node = feedRef.current
+    if (!node) return
+    let timer = 0
+    const onScroll = () => {
+      node.classList.add("is-scrolling")
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => node.classList.remove("is-scrolling"), 700)
+    }
+    node.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.clearTimeout(timer)
+      node.removeEventListener("scroll", onScroll)
+    }
+  }, [])
+  useEffect(() => {
+    setExtra([])
+    setMoreError("")
+    if (!resource.data || searching) { setMoreCursor(null); return }
+    setMoreCursor(resource.data.next_cursor ?? null)
+  }, [resource.data, searching])
   const filtered = !!query || !!category || !!origin || state !== "current"
   const clear = () => { setState("current"); setCategory(""); setOrigin(""); onClear() }
   const statuses: [string, string][] = [["all", "全部"], ["current", "当前"], ["expired", "过期"], ["history", "历史"]]
@@ -367,15 +416,33 @@ function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear
   const statusLabel = statuses.find(([id]) => id === state)?.[1] || ""
   const baseName = state === "current" && !topic ? "" : state === "all" ? (topic || "全部") : topic ? `${statusLabel} · ${topic}` : statusLabel
   const filterName = originName ? (baseName ? `${baseName} · ${originName}` : originName) : baseName
-  const shown = (resource.data?.items ?? []).slice().sort((a, b) => {
-    const left = a.created_at || "", right = b.created_at || ""
-    if (left === right) return a.id < b.id ? -1 : 1
-    const newerFirst = left > right ? -1 : 1
-    return sort === "newest" ? newerFirst : -newerFirst
-  })
+  const first = resource.data?.items ?? []
+  const shown = searching ? first.slice().sort(byCreated(sort)) : [...first, ...extra]
+  const total = typeof resource.data?.total === "number" ? resource.data.total : null
+  const truncated = !!resource.data?.truncated
+  const partial = !searching && total !== null && shown.length < total && (!!moreCursor || moreLoading)
+  const canMore = !searching && !resource.loading && !!moreCursor
+  const loadMore = () => {
+    const cursor = moreCursor
+    const key = activeKey.current
+    if (!cursor || !canMore) return
+    const token = ++flight.current
+    setMoreLoading(true)
+    setMoreError("")
+    api.memories({ state, category, origin, query, limit: 50, sort, cursor }).then(page => {
+      if (token !== flight.current || activeKey.current !== key) return
+      setExtra(rows => [...rows, ...page.items])
+      setMoreCursor(page.next_cursor ?? null)
+    }).catch(err => {
+      if (token !== flight.current || activeKey.current !== key) return
+      setMoreError(explain(err))
+    }).finally(() => {
+      if (token === flight.current) setMoreLoading(false)
+    })
+  }
   return <div className="page library-page">
-    <div className="library-feed">
-      {query && <p className="helper search-caption">搜索“{query}”，仅包含已确认内容</p>}
+    <div className="library-feed" ref={feedRef}>
+      {query && <p className="helper search-caption">搜索“{query}”，仅包含已确认内容{truncated ? "。只列出最相关的 20 条" : ""}</p>}
       <div className="list-tools">
         <div className="list-tool-group">
           <Popover.Root>
@@ -417,7 +484,7 @@ function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear
       <ResourceNotice resource={resource} pending={false}/>
       {resource.loading && !resource.data && !resource.error && <MemorySkeleton/>}
       {resource.data && !shown.length && !resource.loading && !resource.error && <Empty title={filtered ? "没有符合筛选条件的记忆" : "还没有已确认的记忆"} action={<button className="button secondary" onClick={filtered ? clear : onAdd}>{filtered ? "清除筛选" : "添加记忆"}</button>}>{filtered ? "换个关键词、主题或来源再试试。" : "从一条偏好、目标或近期事件开始。"}</Empty>}
-      {!!shown.length && <div className="memo-list"><div className="memo-head" aria-hidden="true"><span>记忆 <span className="memo-count">{shown.length} 条</span></span><span>主题</span><span>来源</span><span>时间</span></div>{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} open={selectedId === item.id} onOpen={onOpen}/>)}</div>}
+      {!!shown.length && <div className="memo-list"><div className="memo-head" aria-hidden="true"><span>{partial ? <span className="memo-count">已显示 {shown.length} 条，共 {total} 条</span> : <>记忆 <span className="memo-count">{shown.length} 条</span></>}</span><span>主题</span><span>来源</span><span>时间</span></div>{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} open={selectedId === item.id} onOpen={onOpen}/>)}{canMore && <button type="button" className="memo-more" disabled={moreLoading} aria-busy={moreLoading} onClick={loadMore}>{moreLoading ? "正在查看…" : sort === "oldest" ? "查看更新的" : "查看更早的"}</button>}{moreError && <p className="helper memo-more-error" role="alert">{moreError}</p>}</div>}
     </div>
   </div>
 }

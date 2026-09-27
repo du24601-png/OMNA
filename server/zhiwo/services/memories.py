@@ -5,6 +5,7 @@ Content is read from the Kernel. This module does not keep a second fact store.
 
 from __future__ import annotations
 
+import base64
 import json
 import sqlite3
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from zhiwo.api.errors import ApiError
 from zhiwo.services.publish import publish_memory
 
 _STATES = {"all", "current", "expired", "history"}
+_SORTS = {"newest", "oldest"}
 
 
 def list_memories(
@@ -25,18 +27,23 @@ def list_memories(
     origin: str | None = None,
     query: str | None = None,
     limit: int = 50,
+    sort: str = "newest",
+    cursor: str | None = None,
 ) -> dict:
     if state not in _STATES:
         raise ApiError(400, "VALIDATION_ERROR", "state must be all, current, expired, or history")
+    if sort not in _SORTS:
+        raise ApiError(400, "VALIDATION_ERROR", "sort must be newest or oldest")
     if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > 50:
         raise ApiError(400, "VALIDATION_ERROR", "limit must be an integer from 1 to 50")
     selected = parse_origin(origin)
     text = query.strip() if isinstance(query, str) else ""
     if len(text) > 2000:
         raise ApiError(400, "VALIDATION_ERROR", "query must contain at most 2000 characters")
+    mark = _decode_cursor(cursor)
     sources, proposals, agents, clients = _origin_context(db_path)
     now = datetime.now(timezone.utc)
-    items = []
+    matched: list[tuple] = []
     for row in _rows(db_path):
         if category and row["category"] != category:
             continue
@@ -55,14 +62,93 @@ def list_memories(
         label = _origin(row["source_refs"], sources, proposals, agents, clients)
         if selected and origin_key(label) != selected:
             continue
-        content = read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
-        if text and text not in (content or ""):
-            continue
-        item = _item(row, content)
-        item["origin"] = label
+        matched.append((row, label))
+    newest = sort == "newest"
+    ordered = _ordered([row for row, _label in matched], newest)
+    labels = {(row["memory_id"], row["revision"]): label for row, label in matched}
+    total = len(ordered)
+    if text:
+        readable = {
+            (row["memory_id"], row["revision"]): read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
+            for row in ordered
+        }
+        ordered = [row for row in ordered if text in (readable[(row["memory_id"], row["revision"])] or "")]
+        total = len(ordered)
+    else:
+        readable = {}
+    window = [row for row in ordered if mark is None or _follows(row, mark, newest)]
+    page = window[:limit]
+    if not text:
+        readable = {
+            (row["memory_id"], row["revision"]): read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
+            for row in page
+        }
+    items = []
+    for row in page:
+        item = _item(row, readable[(row["memory_id"], row["revision"])])
+        item["origin"] = labels[(row["memory_id"], row["revision"])]
         items.append(item)
-    items.sort(key=lambda item: item["created_at"], reverse=True)
-    return {"items": items[:limit], "origins": list_origin_choices(db_path)}
+    next_cursor = _encode_cursor(page[-1]) if len(window) > limit else None
+    return {
+        "items": items,
+        "origins": list_origin_choices(db_path),
+        "total": total,
+        "next_cursor": next_cursor,
+    }
+
+
+def _ordered(rows: list, newest: bool) -> list:
+    """created_at follows the requested direction. Equal times stay in id, then revision, order."""
+    rows = sorted(rows, key=lambda row: (row["memory_id"], int(row["revision"])))
+    return sorted(rows, key=lambda row: row["created_at"] or "", reverse=newest)
+
+
+def _follows(row, mark: tuple[str, str, int], newest: bool) -> bool:
+    created = row["created_at"] or ""
+    mark_created, mark_id, mark_revision = mark
+    if created != mark_created:
+        return created < mark_created if newest else created > mark_created
+    if row["memory_id"] != mark_id:
+        return row["memory_id"] > mark_id
+    return int(row["revision"]) > mark_revision
+
+
+def _encode_cursor(row) -> str:
+    payload = json.dumps(
+        {"t": row["created_at"] or "", "id": row["memory_id"], "r": int(row["revision"])},
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode()
+    return base64.urlsafe_b64encode(payload).decode().rstrip("=")
+
+
+def _decode_cursor(value: str | None) -> tuple[str, str, int] | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    token = value.strip()
+    if not token:
+        return None
+    if len(token) > 512:
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    try:
+        raw = base64.urlsafe_b64decode(token + "=" * (-len(token) % 4))
+        loaded = json.loads(raw)
+    except (ValueError, json.JSONDecodeError, UnicodeError):
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid") from None
+    if not isinstance(loaded, dict):
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    created = loaded.get("t")
+    memory_id = loaded.get("id")
+    revision = loaded.get("r")
+    if not isinstance(created, str) or len(created) > 80:
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    if not isinstance(memory_id, str) or not memory_id or len(memory_id) > 80:
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    if isinstance(revision, bool) or not isinstance(revision, int) or revision < 1:
+        raise ApiError(400, "VALIDATION_ERROR", "cursor is invalid")
+    return created, memory_id, revision
 
 
 def get_memory(db_path, handle: KernelHandle, memory_id: str) -> dict:

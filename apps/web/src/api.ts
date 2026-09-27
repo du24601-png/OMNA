@@ -210,14 +210,16 @@ export const api = {
   generateProfileSummary() {
     return request("/api/v1/profile-summary/generate", { method: "POST" }) as Promise<ProfileSummary>
   },
-  memories(params: { query?: string; state?: string; category?: string; origin?: string; limit?: number }) {
+  memories(params: { query?: string; state?: string; category?: string; origin?: string; limit?: number; sort?: "newest" | "oldest"; cursor?: string }) {
     const search = new URLSearchParams()
     if (params.query) search.set("query", params.query)
     if (params.state) search.set("state", params.state)
     if (params.category) search.set("category", params.category)
     if (params.origin) search.set("origin", params.origin)
+    if (params.sort) search.set("sort", params.sort)
+    if (params.cursor) search.set("cursor", params.cursor)
     search.set("limit", String(params.limit || 50))
-    return request(`/api/v1/memories?${search}`) as Promise<{ items: Memory[]; origins?: { id: string; name: string }[] }>
+    return request(`/api/v1/memories?${search}`) as Promise<{ items: Memory[]; origins?: { id: string; name: string }[]; total?: number; next_cursor?: string | null; truncated?: boolean }>
   },
   memory(id: string) {
     return request(`/api/v1/memories/${id}`) as Promise<Memory>
