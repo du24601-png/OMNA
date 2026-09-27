@@ -73,6 +73,20 @@ class ClientConnectTest(unittest.TestCase):
         self.assertEqual(names[linked["id"]], "ChatGPT")
         self.assertEqual(names[other["id"]], "Codex 笔记")
 
+    def test_list_links_each_client_to_its_connection(self) -> None:
+        (self.home / ".config" / "opencode").mkdir(parents=True)
+        before = {item["id"]: item for item in list_clients(self.home, self.lookup, self.db)["clients"]}
+        self.assertIsNone(before["opencode"]["agent_id"])
+        result = connect_client(self.db, self.home, "opencode", "read", str(uuid.uuid4()), port=8765)
+        custom = create_agent(self.db, str(uuid.uuid4()), "OpenCode")
+        after = {item["id"]: item for item in list_clients(self.home, self.lookup, self.db)["clients"]}
+        self.assertEqual(after["opencode"]["agent_id"], result["agent_id"])
+        self.assertNotEqual(after["opencode"]["agent_id"], custom["id"])
+        self.assertTrue(all(after[key]["agent_id"] is None for key in after if key != "opencode"))
+        views = {item["id"]: item for item in list_agents(self.db)["agents"]}
+        self.assertIsNone(views[result["agent_id"]]["last_access_at"])
+        self.assertNotIn("credential", json.dumps(after))
+
     def test_merge_hides_credential_and_keeps_siblings(self) -> None:
         self._seed()
         first_id = str(uuid.uuid4())

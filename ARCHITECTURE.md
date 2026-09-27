@@ -7,7 +7,7 @@
 
 | 层 | 首版选择 | 边界 |
 | --- | --- | --- |
-| 界面 | React + TypeScript + Vite；Tailwind CSS；`@base-ui/react` 提供无样式的可访问控件，`motion` 只做反馈动效 | P1 先跑本地 Web，P3 复用同一界面装入 Electron |
+| 界面 | React + TypeScript + Vite；Tailwind CSS；`@base-ui/react` 提供无样式的可访问控件，`motion` 只做反馈动效，`recharts` 2.15.4 只画关于我的读取次数折线 | P1 先跑本地 Web，P3 复用同一界面装入 Electron |
 | 桌面壳 | Electron，Windows 原生环境优先 | 管理窗口、受限文件操作和本地服务生命周期 |
 | 本地服务 | Python + FastAPI，单进程服务 | 审核、发布、权限、画像、导出；模块化单体 |
 | MCP | Python MCP SDK，stdio bridge | 客户端只连接知我 Gateway，不连接原生 Kernel MCP |
@@ -128,10 +128,11 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除 |
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
-| `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回 |
-| `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表只报告是否安装、配置文件里是否已有 `zhiwo`。确认后合并写入该客户端自己的配置，响应不回显凭证 |
-| `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照 |
-| `GET/PATCH /settings`；`POST /settings/test-model` | 非敏感设置及模型连通测试，响应不回显密钥 |
+| `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回。每条连接附 `last_access_at`，取自 `access_events` 中该连接最新一条的时间，没有就是 `null`；Agent 侧接口不返回它 |
+| `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表报告是否安装、配置文件里是否已有 `zhiwo`，以及 `agent_id`：设置 `client_agent:{id}` 指向、且仍存在的连接，没有就是 `null`。确认后合并写入该客户端自己的配置，响应不回显凭证 |
+| `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照。列表每条多一个 `returned`：从该次快照取出已返回的记忆正文或解释片段，压成单行，超过 160 字截断，最多 8 句。不另存一列。错误信息不算返回的句子。只出现在 Owner 的访问记录里 |
+| `GET /access-reads?days=7\|14&utc_offset_minutes=` | 首页趋势图。按本地日汇总读取次数，只计 `get_context`、`search_memory`、`explain_memory`。返回日期和每个 Agent 的计数，不返回快照、正文或查询。`utc_offset_minutes` 与浏览器 `getTimezoneOffset()` 相同 |
+| `GET/PATCH /settings`；`POST /settings/test-model`；`POST /settings/data-dir/open`；`POST /settings/data-dir/pick` | 非敏感设置及模型连通测试，响应不回显密钥。打开或选择文件夹只作用于本机资源管理器，不改 `ZHIWO_DATA_DIR` |
 | `POST /exports`；`POST /backups`；`POST /restores?confirm=恢复备份`；`POST /data/reset` | 导出、备份、恢复、清空。恢复的确认词放在查询参数里，因为这四个字放不进 HTTP 头。清空的确认词在 JSON 里 |
 
 写操作携带 `Idempotency-Key`；异步工作返回 `operation_id`，通过 `GET /operations/{id}` 查看最终状态。`PATCH /memories/{id}` 必须带 `base_revision`。

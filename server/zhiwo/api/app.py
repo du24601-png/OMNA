@@ -5,6 +5,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 import uuid
+from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Header, Query, Request
@@ -19,7 +20,7 @@ from zhiwo.api.errors import ApiError, api_error
 from zhiwo.config import load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
-from zhiwo.services.access import get_access_event, list_access_events
+from zhiwo.services.access import get_access_event, list_access_events, read_counts
 from zhiwo.services.agent_tools import explain_memory, get_context, propose_memory, search_memory
 from zhiwo.services.agents import (
     AgentPrincipal,
@@ -45,6 +46,7 @@ from zhiwo.services.memories import (
     update_memory,
 )
 from zhiwo.services.runtime_settings import public_settings, resolve_extractor, save_extractor, test_extractor
+from zhiwo.services.shell import pick_folder, reveal_path
 from zhiwo.services.publish import operation_status, publish_memory
 from zhiwo.services.review import decide_proposal, get_proposal, list_proposals
 from zhiwo.services.search import list_versions, search_memories
@@ -255,8 +257,8 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/api/v1/agent-clients", dependencies=[Depends(require_owner)])
-    def agent_clients() -> dict:
-        return list_clients(client_home())
+    def agent_clients(request: Request) -> dict:
+        return list_clients(client_home(), db_path=request.app.state.settings.control_db)
 
     @app.post("/api/v1/agent-clients/{client_id}/connect", dependencies=[Depends(require_owner)])
     def connect_agent_client(
@@ -293,6 +295,10 @@ def create_app() -> FastAPI:
             "allowed_categories": list(principal.allowed_categories),
             "identity_source": "credential",
         }
+
+    @app.get("/api/v1/access-reads", dependencies=[Depends(require_owner)])
+    def access_reads(request: Request, days: int = 14, utc_offset_minutes: int = 0) -> dict:
+        return read_counts(request.app.state.settings.control_db, days, utc_offset_minutes)
 
     @app.get("/api/v1/access-events", dependencies=[Depends(require_owner)])
     def access_events(request: Request, agent_id: str | None = None) -> dict:
@@ -390,6 +396,20 @@ def create_app() -> FastAPI:
     ) -> dict:
         _request_id(idempotency_key)
         return test_extractor(request.app.state.settings)
+
+    @app.post("/api/v1/settings/data-dir/open", dependencies=[Depends(require_owner)])
+    def open_data_dir(request: Request, body: DataDirOpenBody = DataDirOpenBody()) -> dict:
+        settings = request.app.state.settings
+        target = settings.data_dir if not body.path else Path(body.path)
+        reveal_path(target)
+        return {"status": "opened", "path": str(target.expanduser().resolve())}
+
+    @app.post("/api/v1/settings/data-dir/pick", dependencies=[Depends(require_owner)])
+    def choose_data_dir(request: Request) -> dict:
+        chosen = pick_folder(request.app.state.settings.data_dir)
+        if chosen is None:
+            return {"cancelled": True}
+        return {"cancelled": False, "path": str(chosen)}
 
     @app.post("/api/v1/exports", dependencies=[Depends(require_owner)])
     def export_library(
@@ -607,6 +627,12 @@ class SettingsBody(BaseModel):
     extractor_base_url: str = ""
     extractor_model: str = ""
     extractor_api_key: str | None = None
+
+
+class DataDirOpenBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str | None = None
 
 
 class ResetBody(BaseModel):

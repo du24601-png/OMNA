@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react"
 import { explain } from "./api"
+import { sourceAsset } from "./format"
 
 export function useResource<T>(load: () => Promise<T>, keys: unknown[]) {
   const key = JSON.stringify(keys)
@@ -39,8 +40,8 @@ export function Notice({ children, tone = "info" }: { children: ReactNode; tone?
 export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return <div className="empty-state"><span className="empty-symbol" aria-hidden="true">◎</span><h2>{title}</h2>{children && <p>{children}</p>}{action && <div className="actions">{action}</div>}</div>
 }
-export function PageTitle({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
-  return <div className="page-heading"><div><h1>{title}</h1><p>{description}</p></div>{children}</div>
+export function PageTitle({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
+  return <div className="page-heading"><div><h1>{title}</h1>{description && <p>{description}</p>}</div>{children}</div>
 }
 export function canLeave() { return window.dispatchEvent(new Event("zhiwo:leave", { cancelable: true })) }
 export function useUnsaved(dirty: boolean, busy = false) {
@@ -55,7 +56,9 @@ export function usePanel(ref: RefObject<HTMLElement | null>, close: () => void, 
   const closeRef = useRef(close); closeRef.current = close
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
-    ref.current?.querySelector<HTMLElement>("button, input, textarea, select, [tabindex]")?.focus()
+    const root = ref.current
+    if (root?.getAttribute("tabindex") === "-1") root.focus()
+    else root?.querySelector<HTMLElement>("button, input, textarea, select, [tabindex]")?.focus()
     const keyboard = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); closeRef.current(); return }
       if (event.key !== "Tab" || (!modal && window.innerWidth > 1200)) return
@@ -83,7 +86,25 @@ export function Icon({ name }: { name: string }) {
     plus: <path d="M12 5v14M5 12h14"/>, close: <path d="m6 6 12 12M6 18 18 6"/>,
     arrow: <path d="M5 12h14m-5-5 5 5-5 5"/>,
     lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></>,
+    refresh: <><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></>,
+    more: <><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>,
+    check: <path d="m5 12.5 4.5 4.5L19 7.5"/>,
+    copy: <><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></>,
+    right: <path d="m9 6 6 6-6 6"/>,
     settings: <><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>,
   }
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name] || paths.memories}</svg>
+}
+
+const SOURCE_CLIENTS = new Set(["omna", "workbuddy", "zcode", "opencode", "codex", "claude", "claude-code"])
+const SOURCE_DUAL = new Set(["omna", "opencode", "zcode", "codex"])
+export function SourceMark({ origin }: { origin?: { client: string; name: string } }) {
+  const client = origin?.client || "omna"
+  const name = origin?.name || "OMNA"
+  if (!SOURCE_CLIENTS.has(client)) {
+    const mark = name === "Agent 提案" ? "" : Array.from(name)[0]
+    return <span className="memo-source"><span className="source-fallback" aria-hidden="true">{mark}</span><span>{name}</span></span>
+  }
+  const dual = SOURCE_DUAL.has(client)
+  return <span className="memo-source"><img className={dual ? "source-mark light dual" : "source-mark"} src={sourceAsset(client)} alt="" />{dual && <img className="source-mark dark" src={sourceAsset(client, true)} alt="" />}<span>{name}</span></span>
 }

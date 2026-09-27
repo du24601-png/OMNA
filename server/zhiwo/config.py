@@ -67,6 +67,12 @@ def load_settings() -> Settings:
     )
 
 
+def validate_data_dir(data_dir: Path) -> Path:
+    resolved = data_dir.expanduser().resolve()
+    _reject_protected_dir(resolved)
+    return resolved
+
+
 def _reject_protected_dir(data_dir: Path) -> None:
     for root in _protected_roots():
         if _is_inside(data_dir, root):

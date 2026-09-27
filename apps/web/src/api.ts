@@ -61,6 +61,7 @@ export type AgentClient = {
   installed: boolean
   configured: boolean
   config_path: string
+  agent_id: string | null
 }
 
 export type AgentConnection = {
@@ -71,6 +72,7 @@ export type AgentConnection = {
   allowed_tools: string[]
   allowed_categories: string[]
   client_status: string
+  last_access_at?: string | null
   credential?: string
 }
 
@@ -86,6 +88,12 @@ export type AccessEvent = {
   created_at: string
   delivery_state: string
   versions: AccessVersion[]
+  returned?: string[]
+}
+
+export type AccessReads = {
+  days: string[]
+  series: { id: string; name: string; counts: number[] }[]
 }
 
 export type AccessDetail = AccessEvent & {
@@ -267,6 +275,10 @@ export const api = {
       headers: { "Idempotency-Key": key },
     }) as Promise<AgentConnection>
   },
+  accessReads() {
+    const offset = new Date().getTimezoneOffset()
+    return request(`/api/v1/access-reads?days=14&utc_offset_minutes=${offset}`) as Promise<AccessReads>
+  },
   accessEvents(agentId: string) {
     return request(`/api/v1/access-events?agent_id=${encodeURIComponent(agentId)}`) as Promise<{ events: AccessEvent[] }>
   },
@@ -288,6 +300,15 @@ export const api = {
       method: "POST",
       headers: { "Idempotency-Key": key },
     }) as Promise<{ ok: boolean }>
+  },
+  pickDataDir() {
+    return request("/api/v1/settings/data-dir/pick", { method: "POST" }) as Promise<{ cancelled: boolean; path?: string }>
+  },
+  openDataDir(path?: string) {
+    return request("/api/v1/settings/data-dir/open", {
+      method: "POST",
+      body: JSON.stringify(path ? { path } : {}),
+    }) as Promise<{ status: string; path: string }>
   },
   downloadExport() {
     return download("/api/v1/exports", "zhiwo-export.zip")

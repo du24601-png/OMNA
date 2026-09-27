@@ -73,7 +73,7 @@ def bridge_launch(port: int) -> dict:
     }
 
 
-def list_clients(home: Path, lookup=shutil.which) -> dict:
+def list_clients(home: Path, lookup=shutil.which, db_path: Path | None = None) -> dict:
     return {
         "clients": [
             {
@@ -82,10 +82,18 @@ def list_clients(home: Path, lookup=shutil.which) -> dict:
                 "installed": _installed(home, profile, lookup),
                 "configured": _configured(home, profile),
                 "config_path": str(_config_path(home, profile.id)),
+                "agent_id": _linked_agent(db_path, profile) if db_path is not None else None,
             }
             for profile in PROFILES
         ]
     }
+
+
+def _linked_agent(db_path: Path, profile: ClientProfile) -> str | None:
+    agent_id = setting(db_path, f"client_agent:{profile.id}")
+    if agent_id and _agent_exists(db_path, agent_id):
+        return agent_id
+    return None
 
 
 def connect_client(

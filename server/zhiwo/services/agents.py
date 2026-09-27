@@ -360,6 +360,10 @@ def _remember(connection, request_id: str, agent_id: str, action: str, digest: s
 def _public(connection, agent_id: str) -> dict:
     row = _required(connection, agent_id)
     permissions = _permissions(connection, agent_id)
+    last = connection.execute(
+        "SELECT MAX(created_at) FROM access_events WHERE agent_id = ?",
+        (agent_id,),
+    ).fetchone()
     return {
         "id": row["id"],
         "name": row["name"],
@@ -368,6 +372,7 @@ def _public(connection, agent_id: str) -> dict:
         "allowed_tools": permissions["allowed_tools"],
         "allowed_categories": permissions["allowed_categories"],
         "client_status": row["client_status"] if row["client_status"] in {"pending", "verified"} else "pending",
+        "last_access_at": last[0] if last else None,
     }
 
 

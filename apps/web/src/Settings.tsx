@@ -1,4 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog"
+import { FolderOpen } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { ApiError, api, explain, type SettingsView } from "./api"
@@ -116,6 +117,26 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
     } catch (err) { setError(explain(err)) } finally { setBusy("") }
   }
 
+  async function chooseDataDir() {
+    if (busy) return
+    setBusy("pick"); setError(""); setNotice("")
+    try {
+      const result = await api.pickDataDir()
+      if (result.cancelled || !result.path) return
+      await api.openDataDir(result.path)
+      setNotice("已在资源管理器中打开这个文件夹。记忆库位置没有改。")
+    } catch (err) { setError(explain(err)) } finally { setBusy("") }
+  }
+
+  async function openDataDir() {
+    if (busy) return
+    setBusy("open"); setError(""); setNotice("")
+    try {
+      await api.openDataDir()
+      setNotice("已在资源管理器中打开这个文件夹。")
+    } catch (err) { setError(explain(err)) } finally { setBusy("") }
+  }
+
   return <>
     {error && <Notice tone="error">{error}</Notice>}
     {notice && <Notice tone="success">{notice}</Notice>}
@@ -135,8 +156,12 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
     </form>}
     {section === "library" && <div>
       <h2>本机数据</h2>
-      <p className="helper">记忆库存放在这个目录。这里只展示位置，不会搬动正在使用的库。</p>
-      <p className="path-line">{initial.data_dir}</p>
+      <div className="path-row">
+        <button className="path-line path-open" type="button" disabled={!!busy} onClick={openDataDir} title="在资源管理器中打开">{initial.data_dir}</button>
+        <button className="icon-button path-pick" type="button" disabled={!!busy} onClick={chooseDataDir} title="选择文件夹并打开" aria-label={busy === "pick" ? "正在选择文件夹" : "选择文件夹并打开"}>
+          <FolderOpen size={20} strokeWidth={1.75} aria-hidden="true" />
+        </button>
+      </div>
       <div className="settings-block">
         <h3>隐私</h3>
         <p className="helper">记忆库、来源、提案、权限和访问记录都保存在本机。默认在本机检索。选择云端模型提取时，只发送你这次提交的文字，并说明接收方。授权某个 Agent 后，返回给它的记忆可能离开这台设备。知我不会宣传无论怎样配置都全程离线，也不会监控剪贴板、聊天窗口或系统活动，不会默认上传使用记录。备份保存在你选择的位置；旧备份和外部 Agent 里的副本需要你另行管理。</p>

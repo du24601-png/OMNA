@@ -1,87 +1,575 @@
-import { useEffect, useRef, useState } from "react"
-import { api, explain, type AccessDetail, type AgentConnection } from "./api"
-import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, connectionStatus, dateLabel, deliveryLabel, outcomeLabel, toolLabel } from "./format"
-import { ClientBoard } from "./Clients"
-import { canLeave, Empty, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
+import { AlertDialog } from "@base-ui/react/alert-dialog"
+import { Menu } from "@base-ui/react/menu"
+import { Switch } from "@base-ui/react/switch"
+import { BookOpen, PencilLine, Quote, Search, type LucideIcon } from "lucide-react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
+import { api, explain, type AccessDetail, type AgentClient, type AgentConnection } from "./api"
+import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, dateLabel, dayHeading, deliveryLabel, groupAccess, listTime, outcomeLabel, spanLabel, toolLabel, type AccessGroup } from "./format"
+import { ClientMark, ConnectPanel, PresetChoice, presetOf, type Preset } from "./Clients"
+import { canLeave, Icon, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
 import type { Service } from "./App"
+
+type State = "missing" | "idle" | "pending" | "verified" | "off"
+type Row = { key: string; name: string; client?: AgentClient; agent?: AgentConnection; state: State }
+type Confirm = { title: string; body: string; action: string; danger?: boolean; run: () => Promise<void> }
+
+const STATE_LABEL: Record<State, string> = { missing: "未安装", idle: "未连接", pending: "待验证", verified: "已验证", off: "已停用" }
+const STATE_HINT: Record<State, string> = {
+  missing: "本机没有检测到这个客户端",
+  idle: "还没有写入配置",
+  pending: "配置已写入，还没收到它的第一次调用",
+  verified: "至少成功调用过一次，不代表此刻在线",
+  off: "已停止访问，它的请求都会被拒绝",
+}
+const READ_TOOLS = ["get_context", "search_memory"]
+const WAIT_MS = 180000
+
+function agentState(agent: AgentConnection): State {
+  if (!agent.enabled) return "off"
+  return agent.client_status === "verified" ? "verified" : "pending"
+}
+
+function clientState(client: AgentClient, agent?: AgentConnection): State {
+  if (!client.installed && !client.configured) return "missing"
+  if (!client.configured || !agent) return "idle"
+  return agentState(agent)
+}
+
+function buildRows(clients: AgentClient[], agents: AgentConnection[]): Row[] {
+  const linked = new Set(clients.map(client => client.agent_id).filter(Boolean))
+  const known = clients.map(client => {
+    const agent = agents.find(item => item.id === client.agent_id)
+    return { key: `client:${client.id}`, name: client.name, client, agent, state: clientState(client, agent) }
+  })
+  const custom = agents.filter(agent => !linked.has(agent.id)).map(agent => ({ key: `agent:${agent.id}`, name: agent.name, agent, state: agentState(agent) }))
+  return [...known, ...custom]
+}
+
+function Mark({ row, large = false }: { row: Row; large?: boolean }) {
+  return <span className={`conn-mark ${large ? "large" : ""}`} title={STATE_HINT[row.state]}>
+    {row.client ? <ClientMark id={row.client.id} /> : <span className="conn-letter">{Array.from(row.name)[0]}</span>}
+    {row.state !== "idle" && row.state !== "missing" && <i className={`conn-dot ${row.state}`} aria-hidden="true" />}
+  </span>
+}
+
+function CopyButton({ text, label = "复制" }: { text: string; label?: string }) {
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle")
+  return <button type="button" className="copy-button" onClick={async () => {
+    try { await navigator.clipboard.writeText(text); setState("done") } catch { setState("failed") }
+  }}><Icon name={state === "done" ? "check" : "copy"} />{state === "done" ? "已复制" : state === "failed" ? "复制失败，请手动选中" : label}</button>
+}
 
 export function AgentPage({ tick, online, runtime }: { tick: number; online: boolean; runtime?: Service["runtime"] }) {
   const [localTick, setLocalTick] = useState(0)
-  const resource = useResource(() => api.agents(), [tick, localTick])
+  const agentsRes = useResource(() => api.agents(), [tick, localTick])
+  const clientsRes = useResource(() => api.agentClients(), [tick, localTick])
   const [selected, setSelected] = useState<string | null>(null)
-  const [name, setName] = useState("")
-  const [showCreate, setShowCreate] = useState(false)
   const [issued, setIssued] = useState<AgentConnection | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
-  const requests = useRef(new Map<string,string>())
+  const [confirm, setConfirm] = useState<Confirm | null>(null)
+  const requests = useRef(new Map<string, string>())
   const running = useRef(false)
-  const agents = resource.data?.agents || []
-  const current = agents.find(a => a.id === selected) || agents[0]
-  useUnsaved(!!name.trim(), busy)
-  const refresh = () => { setLocalTick(n => n+1); resource.reload() }
-  function keyFor(sig: string) { let key = requests.current.get(sig); if (!key) { key = crypto.randomUUID(); requests.current.set(sig,key) }; return key }
-  async function create() {
-    if (!name.trim() || running.current) return
-    const sig = `create:${name.trim()}`
-    running.current=true; setBusy(true);setError("");setNotice("")
-    try { const value = await api.createAgent(name.trim(),keyFor(sig)); requests.current.delete(sig); setIssued(value);setName("");setShowCreate(false);setSelected(value.id);refresh() }
-    catch (err) { setError(explain(err)) }
-    finally { running.current=false;setBusy(false) }
+  const agents = agentsRes.data?.agents ?? []
+  const clients = clientsRes.data?.clients ?? []
+  const ready = !!agentsRes.data && !!clientsRes.data
+  const rows = ready ? buildRows(clients, agents) : []
+  const listed = rows.filter(row => row.state !== "missing")
+  const missing = rows.filter(row => row.state === "missing")
+  const current = selected === "new" ? null : listed.find(row => row.key === selected) ?? listed.find(row => row.agent && row.state !== "idle") ?? listed[0]
+  const live = online && !agentsRes.error && !clientsRes.error
+  const counts = (["verified", "pending", "off"] as State[]).map(state => [state, listed.filter(row => row.state === state).length] as const).filter(([, n]) => n)
+  const refresh = () => setLocalTick(n => n + 1)
+
+  function keyFor(sig: string) {
+    let key = requests.current.get(sig)
+    if (!key) { key = crypto.randomUUID(); requests.current.set(sig, key) }
+    return key
   }
-  async function patch(agent: AgentConnection, body: Record<string,unknown>) {
+  async function run<T>(sig: string, task: (key: string) => Promise<T>): Promise<T | null> {
     if (running.current) return null
-    const sig = `${agent.id}:${JSON.stringify(body)}`
-    running.current=true;setBusy(true);setError("");setNotice("")
-    try { const value=await api.updateAgent(agent.id,body,keyFor(sig));requests.current.delete(sig);setNotice("连接设置已保存。");refresh();return value }
-    catch(err) {setError(explain(err));return null}
-    finally {running.current=false;setBusy(false)}
+    running.current = true; setBusy(true); setError(""); setNotice("")
+    try { const value = await task(keyFor(sig)); requests.current.delete(sig); return value }
+    catch (err) { setError(explain(err)); return null }
+    finally { running.current = false; setBusy(false) }
   }
-  async function rotate(agent: AgentConnection) {
-    if (running.current || !window.confirm("重置后，旧凭证立即失效。客户端需要换成新配置才能继续调用，确定重置吗？")) return
-    const sig=`rotate:${agent.id}`
-    running.current=true;setBusy(true);setError("")
-    try { const value=await api.rotateAgent(agent.id,keyFor(sig));requests.current.delete(sig);setIssued(value);refresh() }
-    catch(err) {setError(explain(err))}
-    finally {running.current=false;setBusy(false)}
+  function select(key: string) {
+    if (key === (current?.key ?? selected) || !canLeave()) return
+    setSelected(key); setError(""); setNotice("")
   }
-  return <div className="page"><PageTitle title="我的 Agent" description="从已安装的客户端里选一个写入配置，它只能读取你允许的内容。"><button className="button primary" disabled={busy} onClick={() => setShowCreate(!showCreate)}>创建连接</button></PageTitle>
-    <ClientBoard online={online && !resource.error} onConnected={id => { setSelected(id); setLocalTick(value => value + 1) }} />
-    <ResourceNotice resource={resource}/>
-    {(showCreate || (resource.data && !agents.length && !resource.loading && !resource.error)) && <form className="create-connection surface" onSubmit={e => {e.preventDefault();void create()}}><div><h2>给这个连接起个名字</h2><p className="helper">例如“林舟的写作助手”。新连接默认没有任何权限。</p></div><div className="actions"><input aria-label="连接名称" placeholder="连接名称" value={name} maxLength={80} onChange={e => setName(e.target.value)} disabled={busy}/><button className="button primary" disabled={!online || busy || !name.trim()}>{busy ? "创建中…" : "确认创建"}</button></div></form>}
-    {error && <Notice tone="error">{error}</Notice>}{notice && <Notice tone="success">{notice}</Notice>}
-    {issued?.credential && <IssuedCredential agent={issued} runtime={runtime} onDone={() => setIssued(null)}/>}
-    {resource.data && !agents.length && !resource.loading && !resource.error && <Empty title="你来决定谁能了解你">在上方选择已安装的客户端并写入配置，或创建一条自定义连接。</Empty>}
-    {!!agents.length && <div className="agent-layout"><div className="agent-list">{agents.map(agent => <button key={agent.id} className={`agent-card ${agent.id===current?.id ? "selected" : ""}`} onClick={() => {if(agent.id!==current?.id && canLeave()) setSelected(agent.id)}}><span className="agent-avatar">{Array.from(agent.name)[0]}</span><strong>{agent.name}</strong><span className={`status-pill ${!agent.enabled ? "disabled" : agent.client_status==="verified" ? "verified" : ""}`}>{connectionStatus(agent)}</span><p>{agent.enabled ? "已启用" : "已停止访问"} · {agent.client_status==="verified" ? "曾验证成功" : "尚未验证"}</p><span className="helper">可读取：{agent.allowed_categories.length ? agent.allowed_categories.map(categoryLabel).join("、") : "未授权任何类别"}</span></button>)}</div>{current && <AgentEditor key={current.id} agent={current} online={online && !resource.error} busy={busy} tick={tick+localTick} onSave={body=>patch(current,body)} onRotate={()=>void rotate(current)}/>}</div>}
+
+  async function connect(client: AgentClient, preset: Preset) {
+    const result = await run(`connect:${client.id}:${preset}`, key => api.connectClient(client.id, preset, key))
+    if (!result) return
+    setSelected(`client:${client.id}`); refresh()
+  }
+  function reconnect(client: AgentClient, agent: AgentConnection) {
+    setConfirm({
+      title: `重新写入 ${client.name} 的配置`,
+      body: `会给 ${client.name} 换一份新凭证并写进它的配置文件，旧配置立即失效。权限保持不变。写入后需要重启 ${client.name}。`,
+      action: "重新写入",
+      run: async () => {
+        const preset = presetOf(agent.allowed_tools)
+        const done = await run(`reconnect:${client.id}:${agent.policy_version}`, async key => {
+          await api.connectClient(client.id, preset, key)
+          const restore = `restore:${agent.id}:${agent.policy_version}`
+          await api.updateAgent(agent.id, { allowed_tools: agent.allowed_tools, allowed_categories: agent.allowed_categories }, keyFor(restore))
+          requests.current.delete(restore)
+          return true
+        })
+        if (done) setNotice(`已重新写入。重启 ${client.name} 后生效。`)
+        refresh()
+      },
+    })
+  }
+  function rotate(agent: AgentConnection) {
+    setConfirm({
+      title: "重置凭证",
+      body: `${agent.name} 的旧凭证会立即失效。之后需要把新配置填进那个客户端，才能继续使用。`,
+      action: "重置凭证",
+      danger: true,
+      run: async () => {
+        const value = await run(`rotate:${agent.id}:${agent.policy_version}`, key => api.rotateAgent(agent.id, key))
+        if (value) { setIssued(value); refresh() }
+      },
+    })
+  }
+  async function toggle(agent: AgentConnection, enabled: boolean) {
+    const value = await run(`${agent.id}:enabled:${enabled}:${agent.policy_version}`, key => api.updateAgent(agent.id, { enabled }, key))
+    if (!value) return
+    setNotice(enabled ? `已恢复 ${agent.name} 的访问。` : `已停用。${agent.name} 之后的请求都会被拒绝。`)
+    refresh()
+  }
+  async function save(agent: AgentConnection, body: Record<string, unknown>) {
+    const value = await run(`${agent.id}:${JSON.stringify(body)}:${agent.policy_version}`, key => api.updateAgent(agent.id, body, key))
+    if (value) { setNotice("授权已保存，下一次请求开始生效。"); refresh() }
+    return value
+  }
+  async function create(name: string) {
+    const value = await run(`create:${name}`, key => api.createAgent(name, key))
+    if (!value) return false
+    setIssued(value); setSelected(`agent:${value.id}`); refresh()
+    return true
+  }
+
+  const panel = (() => {
+    if (!ready) return null
+    if (selected === "new") return <CreatePanel online={live} busy={busy} onCreate={create} />
+    if (!current) return <div className="detail-empty"><h2>还没有可连接的客户端</h2><p className="helper">装好 WorkBuddy、ZCode、OpenCode、ChatGPT、Claude 或 Claude Code 后点 ↻ 重新检测，或从左下角连接其他 MCP 客户端。</p></div>
+    if (current.client && (current.state === "idle" || !current.agent)) {
+      return <ConnectPanel key={current.key} client={current.client} agent={current.agent} online={live} busy={busy} onConnect={preset => void connect(current.client!, preset)} />
+    }
+    const agent = current.agent!
+    return <AgentDetail
+      key={current.key}
+      row={current}
+      agent={agent}
+      online={live}
+      busy={busy}
+      tick={tick + localTick}
+      issued={issued?.id === agent.id ? issued : null}
+      runtime={runtime}
+      onHideIssued={() => setIssued(null)}
+      onToggle={enabled => void toggle(agent, enabled)}
+      onSave={body => save(agent, body)}
+      onReconnect={() => current.client && reconnect(current.client, agent)}
+      onRotate={() => rotate(agent)}
+      onVerified={() => { setNotice(`${current.name} 刚刚调用成功，已验证。`); refresh() }}
+    />
+  })()
+
+  return <div className="page">
+    <PageTitle title="我的 Agent" />
+    {[agentsRes, clientsRes].map((resource, index) => (resource.error || !resource.data) && <ResourceNotice key={index} resource={resource} />)}
+    <div className="agents-shell">
+      <aside className="conn-list surface" aria-label="连接">
+        <header>
+          <div>
+            <h2>连接</h2>
+            <p className="conn-summary">{counts.length ? counts.map(([state, n]) => <span key={state}><i className={`conn-dot inline ${state}`} />{n} 个{STATE_LABEL[state]}</span>) : "还没有连接任何 Agent"}</p>
+          </div>
+          <button className="icon-button" type="button" title="重新检测本机客户端" aria-label="重新检测本机客户端" onClick={refresh}><Icon name="refresh" /></button>
+        </header>
+        <div className="conn-rows">
+          {listed.map(row => <button
+            key={row.key}
+            type="button"
+            className={`conn-row ${row.key === current?.key && selected !== "new" ? "selected" : ""}`}
+            aria-current={row.key === current?.key && selected !== "new" ? "true" : undefined}
+            onClick={() => select(row.key)}
+          >
+            <Mark row={row} />
+            <span className="conn-name"><strong>{row.name}</strong><small className={`state-text ${row.state}`}>{row.state === "verified" && row.agent?.last_access_at ? `最近访问 ${listTime(row.agent.last_access_at)}` : STATE_LABEL[row.state]}{!row.client ? " · 自定义" : ""}</small></span>
+            {row.state === "idle" ? <span className="conn-cta">连接</span> : <Icon name="right" />}
+          </button>)}
+        </div>
+        {!!missing.length && <details className="conn-missing">
+          <summary>未检测到 {missing.length} 个客户端</summary>
+          <ul>{missing.map(row => <li key={row.key}><Mark row={row} />{row.name}</li>)}</ul>
+          <p className="helper">装好后点上方 ↻ 重新检测。</p>
+        </details>}
+        <button type="button" className={`conn-add ${selected === "new" ? "selected" : ""}`} onClick={() => { if (selected !== "new" && canLeave()) { setSelected("new"); setError(""); setNotice("") } }}><Icon name="plus" />其他 MCP 客户端</button>
+      </aside>
+      <section className="conn-detail surface">
+        {error && <Notice tone="error">{error}</Notice>}
+        {notice && <Notice tone="success">{notice}</Notice>}
+        {panel}
+      </section>
+    </div>
+    <ConfirmDialog request={confirm} busy={busy} onClose={() => setConfirm(null)} />
   </div>
 }
-function IssuedCredential({ agent,runtime,onDone }: {agent:AgentConnection;runtime?:Service["runtime"];onDone:()=>void}) {
-  const [copied,setCopied]=useState(false),[error,setError]=useState("")
-  const config=runtime ? JSON.stringify({mcp:{zhiwo:{type:"local",command:runtime.command,environment:{...runtime.environment,ZHIWO_AGENT_CREDENTIAL:agent.credential}}}},null,2) : ""
-  return <section className="credential-box surface"><h2>保存这次连接配置</h2><p className="helper">凭证只在本次创建或重置后显示。关闭后不能再次查看，请妥善保存。</p>{runtime ? <><details className="disclosure"><summary>查看 OpenCode 配置（含专用凭证）</summary><pre className="code-block">{config}</pre></details><div className="actions"><button className="button primary" onClick={async()=>{try {await navigator.clipboard.writeText(config);setCopied(true);setError("")} catch {setError("复制失败，请展开配置后手动复制。")}}}>{copied ? "已复制配置" : "复制配置"}</button><button className="button secondary" onClick={onDone}>已保存，隐藏凭证</button></div></> : <><Notice tone="warning">无法读取客户端启动信息，请恢复服务后复制完整配置。凭证仍保留在当前界面。</Notice><details className="disclosure"><summary>查看本次专用凭证</summary><pre className="code-block">{agent.credential}</pre></details><button className="button secondary" onClick={onDone}>隐藏凭证</button></>}{error && <Notice tone="error">{error}</Notice>}</section>
-}
-function AgentEditor({agent,online,busy,tick,onSave,onRotate}:{agent:AgentConnection;online:boolean;busy:boolean;tick:number;onSave:(body:Record<string,unknown>)=>Promise<AgentConnection|null>;onRotate:()=>void}) {
-  const [tools,setTools]=useState(agent.allowed_tools),[categories,setCategories]=useState(agent.allowed_categories)
-  const [baseline,setBaseline]=useState(JSON.stringify([agent.allowed_tools,agent.allowed_categories]))
-  const [eventId,setEventId]=useState<string|null>(null)
-  const dirty=JSON.stringify([tools,categories])!==baseline
-  useUnsaved(dirty,busy)
-  useEffect(()=>{if(!dirty){setTools(agent.allowed_tools);setCategories(agent.allowed_categories);setBaseline(JSON.stringify([agent.allowed_tools,agent.allowed_categories]))}},[agent])
-  const events=useResource(()=>api.accessEvents(agent.id),[agent.id,tick])
-  const detail=useResource(()=>eventId ? api.accessEvent(eventId) : Promise.resolve(null),[eventId,tick])
-  function toggle(list:string[],value:string,set:(next:string[])=>void){set(list.includes(value)?list.filter(x=>x!==value):[...list,value])}
-  return <section className="agent-editor surface"><header><div><span className="eyebrow">连接与权限</span><h2>{agent.name}</h2></div><span className={`status-pill ${!agent.enabled?"disabled":""}`}>{connectionStatus(agent)}</span></header><p className="helper">验证成功仅表示曾完成一次客户端调用，不代表客户端此刻在线。</p>
-    <details className="disclosure connection-guide"><summary>连接与验证指引</summary><ol><li>在上方列表里选择已安装的客户端，确认权限后写入配置。</li><li>打开那个客户端，请求一次已获准的记忆。</li><li>回到这里刷新访问记录。配置已写入还不代表验证成功。</li></ol><p className="helper">刷新连接只重读配置文件还在不在。已隐藏的凭证需重新写入后才会更新到客户端。</p><button className="button secondary" disabled={!online} onClick={()=>events.reload()}>刷新访问记录</button></details>
-    <fieldset className="permissions" disabled={busy || !online}><legend>允许读取哪些内容</legend><p className="helper">只提供已确认、当前有效且允许 Agent 读取的记忆。</p><div className="category-permissions">{CATEGORIES.map(([id,label])=><label key={id}><input type="checkbox" checked={categories.includes(id)} onChange={()=>toggle(categories,id,setCategories)}/>{label}</label>)}</div></fieldset>
-    <fieldset className="permissions" disabled={busy || !online}><legend>允许执行哪些操作</legend><div className="tool-permissions">{TOOLS.map(([id,label])=><label key={id}><input type="checkbox" checked={tools.includes(id)} onChange={()=>toggle(tools,id,setTools)}/><span><strong>{label}</strong><small>{TOOL_DESCRIPTIONS[id]}</small></span></label>)}</div></fieldset>
-    <p className="permission-note">提出的修改建议需要你确认后才会生效。</p><div className="actions"><button className="button primary" disabled={busy || !online || !dirty} onClick={async()=>{const value=await onSave({allowed_tools:tools,allowed_categories:categories});if(value){setTools(value.allowed_tools);setCategories(value.allowed_categories);setBaseline(JSON.stringify([value.allowed_tools,value.allowed_categories]))}}}>{busy?"保存中…":"保存授权"}</button>{dirty && <span className="helper">有尚未保存的权限修改</span>}</div>
-    <section className="access-section"><div className="section-heading"><h3>最近访问</h3><button className="text-button" onClick={events.reload}>刷新</button></div><p className="helper">记录实际返回的内容与交付状态，不表示模型已阅读或采用。</p><ResourceNotice resource={events}/>{events.data && !events.data.events.length && !events.error && !events.loading && <p className="inline-empty">还没有访问记录。在客户端发起一次请求后，可在这里查看。</p>}<div className="access-list">{events.data?.events.map(event=><button key={event.id} className={`access-row ${event.id===eventId?"selected":""}`} onClick={()=>setEventId(event.id)}><span><strong>{toolLabel(event.tool)}</strong><small>{agent.name} · {dateLabel(event.created_at)}</small></span><span><span>{event.versions.length} 条记忆 · {outcomeLabel(event.outcome)}</span><small>{deliveryLabel(event.delivery_state)}</small></span></button>)}</div>{eventId && <><ResourceNotice resource={detail}/>{detail.data?.id===eventId && <AccessPane detail={detail.data}/>}</>}</section>
-    <section className="connection-controls"><h3>连接管理</h3><p className="helper">停用后拒绝后续请求；重置凭证会让旧配置立即失效。</p><div className="actions"><button className="button secondary" disabled={busy || !online} onClick={()=>void onSave({enabled:!agent.enabled})}>{agent.enabled?"停用连接":"启用连接"}</button><button className="button danger" disabled={busy || !online} onClick={onRotate}>重置凭证</button></div></section>
-  </section>
-}
-function AccessPane({detail}:{detail:AccessDetail}) {
-  const items=detail.response.items||[], explained=detail.response.result
-  return <div className="access-detail"><h3>这次实际返回的内容</h3><p className="helper">{dateLabel(detail.created_at)} · {deliveryLabel(detail.delivery_state)}</p>{detail.response.error && <Notice tone="warning">{detail.response.error.message}</Notice>}{items.map(item=><article key={`${item.id}-${item.revision}`}><p className="prose">{item.content}</p><div className="metadata"><span>版本 {item.revision}</span><span>{item.scope || "未限定场景"}</span></div></article>)}{explained && <article><p className="prose">{explained.evidence || "未返回证据片段。"}</p><p className="helper">版本 {explained.revision}</p></article>}{!items.length && !explained && !detail.response.error && <p className="helper">这次没有返回记忆正文。{detail.response.proposal_id ? "修改建议已进入待确认。" : ""}</p>}<details className="disclosure"><summary>技术信息</summary><pre className="code-block">{JSON.stringify({event_id:detail.id,request_id:detail.request_id,policy_version:detail.policy_version,response:detail.response},null,2)}</pre></details></div>
+
+function ConfirmDialog({ request, busy, onClose }: { request: Confirm | null; busy: boolean; onClose: () => void }) {
+  return <AlertDialog.Root open={!!request} onOpenChange={open => { if (!open && !busy) onClose() }}>
+    <AlertDialog.Portal>
+      <AlertDialog.Backdrop className="dialog-backdrop detail-alert-backdrop" />
+      <AlertDialog.Popup className="detail-alert material">
+        <AlertDialog.Title className="detail-alert-title">{request?.title}</AlertDialog.Title>
+        <AlertDialog.Description className="detail-alert-copy">{request?.body}</AlertDialog.Description>
+        <div className="actions detail-alert-actions">
+          <AlertDialog.Close className="button secondary" disabled={busy}>取消</AlertDialog.Close>
+          <button className={`button ${request?.danger ? "danger" : "primary"}`} type="button" disabled={busy} onClick={async () => { await request?.run(); onClose() }}>{busy ? "处理中…" : request?.action}</button>
+        </div>
+      </AlertDialog.Popup>
+    </AlertDialog.Portal>
+  </AlertDialog.Root>
 }
 
+function CreatePanel({ online, busy, onCreate }: { online: boolean; busy: boolean; onCreate: (name: string) => Promise<boolean> }) {
+  const [name, setName] = useState("")
+  useUnsaved(!!name.trim(), busy)
+  return <form className="connect-panel" onSubmit={async event => { event.preventDefault(); if (name.trim() && await onCreate(name.trim())) setName("") }}>
+    <span className="hero-mark"><Icon name="plus" /></span>
+    <h2>连接其他 MCP 客户端</h2>
+    <p className="helper">上面没有的客户端，可以手动填一份配置。新连接默认什么都读不到，创建后再授权。</p>
+    <h3 className="field-title">给它起个名字</h3>
+    <input aria-label="连接名称" placeholder="例如：林舟的写作助手" value={name} maxLength={80} onChange={event => setName(event.target.value)} disabled={busy} />
+    <button className="button primary connect-go" disabled={!online || busy || !name.trim()}>{busy ? "创建中…" : "创建并生成配置"}</button>
+  </form>
+}
+
+function IssuedCredential({ agent, runtime, onDone }: { agent: AgentConnection; runtime?: Service["runtime"]; onDone: () => void }) {
+  const [format, setFormat] = useState<"generic" | "opencode">("generic")
+  const env = runtime ? { ...runtime.environment, ZHIWO_AGENT_CREDENTIAL: agent.credential } : null
+  const config = runtime && env
+    ? JSON.stringify(format === "opencode"
+      ? { mcp: { zhiwo: { type: "local", command: runtime.command, environment: env } } }
+      : { mcpServers: { zhiwo: { command: runtime.command[0], args: runtime.command.slice(1), env } } }, null, 2)
+    : ""
+  return <section className="credential-box">
+    <div className="section-heading"><h3>把这份配置填进客户端</h3><div className="segmented" role="tablist" aria-label="配置格式">
+      <button type="button" role="tab" aria-selected={format === "generic"} onClick={() => setFormat("generic")}>通用 mcpServers</button>
+      <button type="button" role="tab" aria-selected={format === "opencode"} onClick={() => setFormat("opencode")}>OpenCode</button>
+    </div></div>
+    <p className="helper">里面有专用凭证，只显示这一次。收起后不能再查看，需要时可以重置凭证。</p>
+    {runtime ? <pre className="code-block">{config}</pre> : <>
+      <Notice tone="warning">读不到本地服务的启动信息，暂时只能给出凭证。恢复服务后可以重置凭证拿完整配置。</Notice>
+      <pre className="code-block">{agent.credential}</pre>
+    </>}
+    <div className="actions">
+      <CopyButton text={runtime ? config : agent.credential || ""} label={runtime ? "复制配置" : "复制凭证"} />
+      <button className="button secondary" type="button" onClick={onDone}>已保存，收起</button>
+    </div>
+  </section>
+}
+
+function useVerifyWatch(agentId: string, active: boolean, onVerified: () => void) {
+  const [waiting, setWaiting] = useState(active)
+  const [round, setRound] = useState(0)
+  const callback = useRef(onVerified)
+  callback.current = onVerified
+  useEffect(() => {
+    if (!active) return
+    setWaiting(true)
+    const started = Date.now()
+    const timer = window.setInterval(async () => {
+      if (document.visibilityState !== "visible") return
+      if (Date.now() - started > WAIT_MS) { window.clearInterval(timer); setWaiting(false); return }
+      try {
+        const { agents } = await api.agents()
+        const found = agents.find(item => item.id === agentId)
+        if (found && found.client_status === "verified") { window.clearInterval(timer); callback.current() }
+      } catch {
+        window.clearInterval(timer); setWaiting(false)
+      }
+    }, 4000)
+    return () => window.clearInterval(timer)
+  }, [agentId, active, round])
+  return { waiting, restart: () => setRound(n => n + 1) }
+}
+
+function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIssued, onToggle, onSave, onReconnect, onRotate, onVerified }: {
+  row: Row
+  agent: AgentConnection
+  online: boolean
+  busy: boolean
+  tick: number
+  issued: AgentConnection | null
+  runtime?: Service["runtime"]
+  onHideIssued: () => void
+  onToggle: (enabled: boolean) => void
+  onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null>
+  onReconnect: () => void
+  onRotate: () => void
+  onVerified: () => void
+}) {
+  const [tab, setTab] = useState<"permissions" | "access">("permissions")
+  const events = useResource(() => api.accessEvents(agent.id), [agent.id, tick])
+  const count = events.data ? groupAccess(events.data.events).filter(group => !group.quiet).length : 0
+  const watch = useVerifyWatch(agent.id, row.state === "pending", onVerified)
+  const sub = row.state === "verified" ? (agent.last_access_at ? `最近访问 ${listTime(agent.last_access_at)}` : "") : row.state === "off" ? "它的请求都会被拒绝" : row.state === "pending" ? "等它第一次调用" : ""
+  return <div className="agent-detail">
+    <header className="detail-head">
+      <Mark row={row} large />
+      <div className="detail-title">
+        <h2>{row.name}</h2>
+        <p className={`state-text ${row.state}`} title={STATE_HINT[row.state]}>{STATE_LABEL[row.state]}{sub && <span> · {sub}</span>}</p>
+      </div>
+      <label className="access-switch">
+        <span>允许访问</span>
+        <Switch.Root className="share-switch" checked={agent.enabled} disabled={!online || busy} onCheckedChange={onToggle} aria-label="允许访问">
+          <Switch.Thumb className="share-switch-thumb" />
+        </Switch.Root>
+      </label>
+      <Menu.Root>
+        <Menu.Trigger className="icon-button" aria-label="更多操作" disabled={!online || busy}><Icon name="more" /></Menu.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner className="detail-positioner" side="bottom" align="end" sideOffset={6}>
+            <Menu.Popup className="select-popup">
+              {row.client
+                ? <Menu.Item className="tool-option" onClick={onReconnect}>重新写入配置…</Menu.Item>
+                : <Menu.Item className="tool-option danger-option" onClick={onRotate}>重置凭证…</Menu.Item>}
+              {row.client && <Menu.Item className="tool-option" onClick={() => void navigator.clipboard.writeText(row.client!.config_path).catch(() => undefined)}>复制配置文件路径</Menu.Item>}
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </header>
+    {issued?.credential && <IssuedCredential agent={issued} runtime={runtime} onDone={onHideIssued} />}
+    {row.state === "pending" && <VerifyGuide row={row} agent={agent} waiting={watch.waiting} onRestart={watch.restart} onOpenPermissions={() => setTab("permissions")} />}
+    <div className="segmented detail-tabs" role="tablist" aria-label="连接详情">
+      <button type="button" role="tab" aria-selected={tab === "permissions"} onClick={() => setTab("permissions")}>权限</button>
+      <button type="button" role="tab" aria-selected={tab === "access"} onClick={() => setTab("access")}>访问记录{count ? <span className="tab-count">{count}</span> : null}</button>
+    </div>
+    <div role="tabpanel" hidden={tab !== "permissions"}><PermissionEditor agent={agent} name={row.name} online={online} busy={busy} onSave={onSave} /></div>
+    <div role="tabpanel" hidden={tab !== "access"}><AccessLog name={row.name} events={events} /></div>
+  </div>
+}
+
+function VerifyGuide({ row, agent, waiting, onRestart, onOpenPermissions }: { row: Row; agent: AgentConnection; waiting: boolean; onRestart: () => void; onOpenPermissions: () => void }) {
+  const readable = agent.allowed_categories.length > 0 && agent.allowed_tools.some(tool => READ_TOOLS.includes(tool))
+  const prompt = `请用 zhiwo 查一下我的${categoryLabel(agent.allowed_categories[0] || "preference")}`
+  return <section className="verify">
+    <ol className="stepper">
+      <li className="done"><Icon name="check" />{row.client ? "写入配置" : "创建连接"}</li>
+      <li className="current">在 {row.name} 里问一次</li>
+      <li>完成</li>
+    </ol>
+    {!readable ? <p className="helper">它现在读不到任何记忆。先在下面的<button type="button" className="text-button" onClick={onOpenPermissions}>权限</button>里选好它能读的内容。</p> : <>
+      <p>{row.client ? `如果 ${row.name} 正开着，先完全退出再打开，然后发一句：` : "把配置填进客户端并重启，然后发一句："}</p>
+      <div className="prompt-chip"><span>{prompt}</span><CopyButton text={prompt} /></div>
+      <p className="verify-wait">{waiting
+        ? <><span className="spinner" />正在等待第一次调用，收到后这里会自动变成已验证。</>
+        : <>这段时间没收到调用。<button type="button" className="text-button" onClick={onRestart}>继续等待</button></>}</p>
+      <details className="disclosure" open={!waiting || undefined}>
+        <summary>没反应？</summary>
+        <ul className="verify-tips">
+          <li>确认 {row.name} 已经重启过，并且开启了 MCP 工具。</li>
+          {row.client && <li>配置文件：<code>{row.client.config_path}</code> <CopyButton text={row.client.config_path} /></li>}
+          {row.client ? <li>还不行，就用右上角 ⋯ 里的「重新写入配置」。</li> : <li>还不行，就用右上角 ⋯ 重置凭证，换一份新配置。</li>}
+        </ul>
+      </details>
+    </>}
+  </section>
+}
+
+function sortedKey(tools: string[], categories: string[]) {
+  return JSON.stringify([[...tools].sort(), [...categories].sort()])
+}
+
+function permissionSummary(name: string, tools: string[], categories: string[]) {
+  if (!tools.length) return `${name} 现在什么都做不了。`
+  if (!categories.length) return `${name} 现在读不到任何记忆。`
+  const list = categories.map(id => `「${categoryLabel(id)}」`).join("")
+  return `${name} 可以读取你的${list}${tools.includes("propose_memory") ? "，还能提出修改建议，由你确认后生效。" : "，不能改动你的记忆。"}`
+}
+
+function PermissionEditor({ agent, name, online, busy, onSave }: { agent: AgentConnection; name: string; online: boolean; busy: boolean; onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null> }) {
+  const [tools, setTools] = useState(agent.allowed_tools)
+  const [categories, setCategories] = useState(agent.allowed_categories)
+  const [baseline, setBaseline] = useState(sortedKey(agent.allowed_tools, agent.allowed_categories))
+  const dirty = sortedKey(tools, categories) !== baseline
+  const locked = busy || !online
+  useUnsaved(dirty, busy)
+  useEffect(() => {
+    if (dirty) return
+    setTools(agent.allowed_tools); setCategories(agent.allowed_categories); setBaseline(sortedKey(agent.allowed_tools, agent.allowed_categories))
+  }, [agent])
+  const level: Preset | null = tools.includes("propose_memory") ? "propose" : tools.some(tool => READ_TOOLS.includes(tool)) ? "read" : null
+  function flip(list: string[], value: string, set: (next: string[]) => void) { set(list.includes(value) ? list.filter(item => item !== value) : [...list, value]) }
+  function setLevel(next: Preset) {
+    const wanted = new Set([...tools.filter(tool => tool !== "propose_memory"), ...READ_TOOLS, ...(next === "propose" ? ["propose_memory"] : [])])
+    setTools(TOOLS.map(([id]) => id).filter(id => wanted.has(id)))
+  }
+  function reset() { setTools(agent.allowed_tools); setCategories(agent.allowed_categories) }
+  async function submit() {
+    const value = await onSave({ allowed_tools: tools, allowed_categories: categories })
+    if (value) { setTools(value.allowed_tools); setCategories(value.allowed_categories); setBaseline(sortedKey(value.allowed_tools, value.allowed_categories)) }
+  }
+  return <div className="permission-editor">
+    <p className="permission-summary">{permissionSummary(name, tools, categories)}</p>
+    <h3 className="field-title">它可以做什么</h3>
+    <PresetChoice value={level} disabled={locked} onChange={setLevel} />
+    <h3 className="field-title">它可以读哪些</h3>
+    <div className="chip-group">{CATEGORIES.map(([id, label]) => {
+      const on = categories.includes(id)
+      return <button key={id} type="button" className={`chip ${on ? "on" : ""}`} aria-pressed={on} disabled={locked} onClick={() => flip(categories, id, setCategories)}>{on && <Icon name="check" />}{label}</button>
+    })}</div>
+    <p className="helper">只会提供已确认、当前有效、你没有设为「仅自己可见」的记忆。</p>
+    <details className="disclosure advanced">
+      <summary>逐项设置工具</summary>
+      <fieldset className="tool-permissions" disabled={locked}>
+        {TOOLS.map(([id, label]) => <label key={id}><input type="checkbox" checked={tools.includes(id)} onChange={() => flip(tools, id, setTools)} /><span><strong>{label}</strong><small>{TOOL_DESCRIPTIONS[id]}</small></span></label>)}
+      </fieldset>
+    </details>
+    {dirty && <div className="save-bar" role="status">
+      <span>改动还没保存</span>
+      <div className="actions">
+        <button type="button" className="button secondary" disabled={busy} onClick={reset}>还原</button>
+        <button type="button" className="button primary" disabled={locked} onClick={() => void submit()}>{busy ? "保存中…" : "保存"}</button>
+      </div>
+    </div>}
+  </div>
+}
+
+const TOOL_ICONS: Record<string, LucideIcon> = {
+  search_memory: Search,
+  get_context: BookOpen,
+  propose_memory: PencilLine,
+  explain_memory: Quote,
+}
+
+function ToolGlyph({ tool, alert = false }: { tool: string; alert?: boolean }) {
+  const Mark = TOOL_ICONS[tool] ?? Search
+  const kind = tool === "get_context" ? "context" : tool === "propose_memory" ? "propose" : tool === "explain_memory" ? "explain" : "search"
+  return <span className={`access-glyph ${kind}${alert ? " alert" : ""}`}><Mark size={16} strokeWidth={1.75} aria-hidden="true" /></span>
+}
+
+function headlines(group: AccessGroup) {
+  if (group.lines.length) return group.lines.slice(0, 3)
+  if (group.events.some(event => event.outcome === "rejected")) return ["这次被拒绝"]
+  if (group.tool === "propose_memory") return ["提出了修改建议，等你确认"]
+  if (group.events.some(event => event.delivery_state === "failed")) return ["这次没有发出去"]
+  if (group.events.some(event => event.delivery_state === "unknown")) return ["这次是否发出去，还不清楚"]
+  return ["这次还没发出去"]
+}
+
+function needsAttention(group: AccessGroup) {
+  return group.events.some(event => event.outcome === "rejected" || event.delivery_state !== "sent")
+}
+
+function callSummary(group: AccessGroup) {
+  const got = group.events.filter(event => event.returned?.length).length
+  const empty = group.events.filter(event => event.outcome === "empty").length
+  const rejected = group.events.filter(event => event.outcome === "rejected").length
+  const unsent = group.events.filter(event => event.delivery_state !== "sent").length
+  const parts = [`${group.events.length} 次调用`]
+  if (got) parts.push(`${got} 次拿到内容`)
+  if (empty) parts.push(`${empty} 次没有内容`)
+  if (rejected) parts.push(`${rejected} 次被拒绝`)
+  parts.push(unsent ? `${unsent} 次没有按通常方式发出` : "都已交给发送通道")
+  return parts.join(" · ")
+}
+
+function AccessLog({ name, events }: { name: string; events: { data: { events: Parameters<typeof groupAccess>[0] } | null; loading: boolean; error: string; reload: () => void } }) {
+  const [openId, setOpenId] = useState<string | null>(null)
+  const list = events.data?.events ?? []
+  const days: { label: string; shown: AccessGroup[]; quiet: AccessGroup[] }[] = []
+  for (const group of groupAccess(list)) {
+    const label = dayHeading(group.events[0].created_at)
+    const day = days.find(item => item.label === label) ?? { label, shown: [], quiet: [] }
+    if (!days.includes(day)) days.push(day)
+    ;(group.quiet ? day.quiet : day.shown).push(group)
+  }
+  return <div className="access-log">
+    <div className="section-heading">
+      <p className="helper">这里记的是实际发给 {name} 的内容，不代表模型读了或用了。</p>
+      <button className="icon-button" type="button" title="刷新访问记录" aria-label="刷新访问记录" onClick={events.reload}><Icon name="refresh" /></button>
+    </div>
+    <ResourceNotice resource={events} />
+    {events.data && !list.length && !events.error && !events.loading && <p className="inline-empty">还没有访问记录。{name} 调用一次后，会出现在这里。</p>}
+    {days.map(day => <section key={day.label} className="access-day-block">
+      <h3 className="access-day">{day.label}</h3>
+      {day.shown.map(group => <AccessGroupRow key={group.id} group={group} open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
+      {!!day.quiet.length && <details className="access-quiet">
+        <summary>还有 {day.quiet.reduce((sum, group) => sum + group.events.length, 0)} 次没有返回内容</summary>
+        {day.quiet.map(group => <AccessGroupRow key={group.id} group={group} quiet open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
+      </details>}
+    </section>)}
+  </div>
+}
+
+function AccessGroupRow({ group, open, quiet = false, onToggle }: { group: AccessGroup; open: boolean; quiet?: boolean; onToggle: () => void }) {
+  const newest = group.events[0].created_at
+  const oldest = group.events[group.events.length - 1].created_at
+  const text = quiet ? [toolLabel(group.tool)] : headlines(group)
+  const meta = quiet ? `${spanLabel(newest, oldest)} · ${group.events.length} 次` : `${toolLabel(group.tool)} · ${spanLabel(newest, oldest)}`
+  const more = !quiet && group.lines.length > 3 ? `还有 ${group.lines.length - 3} 句` : ""
+  return <div className={`access-item ${open ? "open" : ""} ${quiet ? "quiet" : ""}`}>
+    <button type="button" className="access-row" aria-expanded={open} onClick={onToggle}>
+      <ToolGlyph tool={group.tool} alert={!quiet && needsAttention(group)} />
+      <span className="access-copy">
+        {text.map(line => <span className="access-line" key={line}>{line}</span>)}
+        <small>{meta}{more ? ` · ${more}` : ""}</small>
+      </span>
+    </button>
+    {open && <GroupCalls group={group} />}
+  </div>
+}
+
+function routineCall(event: AccessGroup["events"][number]) {
+  return event.outcome === "success" && event.delivery_state === "sent" && !!event.returned?.length
+}
+
+function CallButton({ event, selected, onPick }: { event: AccessGroup["events"][number]; selected: boolean; onPick: (id: string) => void }) {
+  return <button type="button" className={selected ? "selected" : ""} onClick={() => onPick(event.id)}>
+    <span>{dateLabel(event.created_at)}</span>
+    <span>{event.outcome === "rejected" ? "已拒绝" : event.returned?.length ? `${event.returned.length} 条记忆` : outcomeLabel(event.outcome)}</span>
+    <small>{deliveryLabel(event.delivery_state)}</small>
+  </button>
+}
+
+function GroupCalls({ group }: { group: AccessGroup }) {
+  const routine = group.events.filter(routineCall)
+  const notable = group.events.filter(event => !routineCall(event))
+  const [eventId, setEventId] = useState(group.events.find(event => event.returned?.length)?.id ?? group.events[0].id)
+  const detail = useResource(() => api.accessEvent(eventId), [eventId])
+  const calls = (items: AccessGroup["events"]) => items.map(event => <CallButton key={event.id} event={event} selected={event.id === eventId} onPick={setEventId} />)
+  return <div className="access-detail">
+    {group.events.length > 1 && <p className="helper">{callSummary(group)}</p>}
+    {!!notable.length && <div className="access-calls">{calls(notable)}</div>}
+    {routine.length > 1 && <details className="access-quiet">
+      <summary>其余 {routine.length} 次也拿到了内容</summary>
+      <div className="access-calls">{calls(routine)}</div>
+    </details>}
+    {routine.length === 1 && group.events.length > 1 && <div className="access-calls">{calls(routine)}</div>}
+    <ResourceNotice resource={detail} />
+    {detail.data?.id === eventId && <AccessPane detail={detail.data} />}
+  </div>
+}
+
+function AccessPane({ detail }: { detail: AccessDetail }) {
+  const items = detail.response.items || [], explained = detail.response.result
+  let body: ReactNode = null
+  if (!items.length && !explained && !detail.response.error) body = <p className="helper">这次没有返回记忆正文。{detail.response.proposal_id ? "修改建议已进入待确认。" : ""}</p>
+  return <div className="access-detail">
+    <p className="helper">{dateLabel(detail.created_at)} · {deliveryLabel(detail.delivery_state)}</p>
+    {detail.response.error && <Notice tone="warning">{detail.response.error.message}</Notice>}
+    {items.map(item => <article key={`${item.id}-${item.revision}`}><p className="prose">{item.content}</p><div className="metadata"><span>{categoryLabel(item.category)}</span><span>版本 {item.revision}</span><span>{item.scope || "未限定场景"}</span></div></article>)}
+    {explained && <article><p className="prose">{explained.evidence || "未返回证据片段。"}</p><p className="helper">版本 {explained.revision}</p></article>}
+    {body}
+    <details className="disclosure"><summary>技术信息</summary><pre className="code-block">{JSON.stringify({ event_id: detail.id, request_id: detail.request_id, policy_version: detail.policy_version, response: detail.response }, null, 2)}</pre></details>
+  </div>
+}

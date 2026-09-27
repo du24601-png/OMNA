@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OMNA · profile-night 滚动条方案对比</title>
+  <style>
+    :root {
+      --bg: #f6f6f7;
+      --surface: #fff;
+      --border: #e5e5e7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --accent: #c2410c;
+      --hover: #fafafa;
+      --panel-h: 420px;
+      --col-w: 320px;
+    }
+    :root[data-mode="dark"] {
+      --bg: #1c1c1e;
+      --surface: #2c2c2e;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(235, 235, 245, 0.6);
+      --accent: #ff8a4c;
+      --hover: rgba(255, 255, 255, 0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px 64px;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.6 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.4px; }
+    .lead { margin: 0 0 24px; color: var(--muted); max-width: 920px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 28px; }
+    .pill {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .pill[aria-pressed="true"] { background: #ececee; }
+    :root[data-mode="dark"] .pill[aria-pressed="true"] { background: rgba(255,255,255,.12); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .demo {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+    .demo-head h2 { margin: 0; font-size: 15px; font-weight: 650; }
+    .demo-head p { margin: 4px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .demo-head a { color: var(--accent); }
+    .frame {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: transparent;
+      padding: 0 8px 8px 0;
+      height: var(--panel-h);
+      min-height: 0;
+      position: relative;
+    }
+    .wall { column-count: 2; column-gap: 12px; }
+    .card {
+      break-inside: avoid;
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 16px 16px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    :root[data-mode="dark"] .card { border-color: transparent; }
+    .chip { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .card p { margin: 0; font-size: 14px; line-height: 1.45; }
+    .caption { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+    /* A · 当前默认：浏览器原生 */
+    .scroll-native { overflow: auto; }
+
+    /* B · Radix UI / shadcn ScrollArea：overlay + 滚动时出现 */
+    .scroll-radix {
+      overflow: auto;
+      scrollbar-gutter: stable;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+    }
+    .scroll-radix::-webkit-scrollbar { width: 10px; height: 10px; }
+    .scroll-radix::-webkit-scrollbar-track { background: transparent; }
+    .scroll-radix::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--muted) 0%, transparent);
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background-clip: padding-box;
+      transition: background 0.2s;
+    }
+    .scroll-radix.is-scrolling::-webkit-scrollbar-thumb,
+    .scroll-radix:hover::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--muted) 55%, transparent);
+      background-clip: padding-box;
+    }
+    .scroll-radix.is-scrolling,
+    .scroll-radix:hover { scrollbar-color: color-mix(in srgb, var(--muted) 55%, transparent) transparent; }
+
+    /* C · Linear / Vercel：常驻细滚动条 */
+    .scroll-linear {
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+    }
+    .scroll-linear::-webkit-scrollbar { width: 6px; }
+    .scroll-linear::-webkit-scrollbar-track { background: transparent; }
+    .scroll-linear::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--muted) 45%, transparent);
+      border-radius: 999px;
+    }
+    .scroll-linear::-webkit-scrollbar-thumb:hover {
+      background: color-mix(in srgb, var(--muted) 70%, transparent);
+    }
+
+    /* D · SimpleBar 风格：轨道内嵌、thumb 更细 */
+    .scroll-simplebar-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+    .scroll-simplebar-wrap .scroll-body {
+      height: 100%;
+      overflow: auto;
+      margin-right: -12px;
+      padding-right: 12px;
+      scrollbar-width: none;
+    }
+    .scroll-simplebar-wrap .scroll-body::-webkit-scrollbar { display: none; }
+    .scroll-simplebar-wrap .sb-track {
+      position: absolute;
+      top: 8px;
+      right: 2px;
+      bottom: 8px;
+      width: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 8%, transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .scroll-simplebar-wrap:hover .sb-track,
+    .scroll-simplebar-wrap.is-scrolling .sb-track { opacity: 1; pointer-events: auto; }
+    .scroll-simplebar-wrap .sb-thumb {
+      position: absolute;
+      left: 1px;
+      width: 6px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 55%, transparent);
+      min-height: 28px;
+      cursor: grab;
+    }
+    .scroll-simplebar-wrap .sb-thumb:active { cursor: grabbing; }
+
+    /* E · Apple / Aceternity：hover 容器才显示 */
+    .scroll-hover {
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+    }
+    .scroll-hover::-webkit-scrollbar { width: 8px; }
+    .scroll-hover::-webkit-scrollbar-track { background: transparent; }
+    .scroll-hover::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 999px;
+      transition: background 0.25s;
+    }
+    .frame:hover .scroll-hover { scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent; }
+    .frame:hover .scroll-hover::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--muted) 50%, transparent);
+    }
+
+    /* F · Magic UI / 渐隐遮罩：隐藏滚动条，用边缘提示可滚动 */
+    .scroll-fade-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+    .scroll-fade-wrap .scroll-body {
+      height: 100%;
+      overflow: auto;
+      scrollbar-width: none;
+    }
+    .scroll-fade-wrap .scroll-body::-webkit-scrollbar { display: none; }
+    .scroll-fade-wrap::before,
+    .scroll-fade-wrap::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 28px;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .scroll-fade-wrap::before {
+      top: 0;
+      background: linear-gradient(to bottom, var(--bg), transparent);
+    }
+    .scroll-fade-wrap::after {
+      bottom: 0;
+      background: linear-gradient(to top, var(--bg), transparent);
+    }
+    .scroll-fade-wrap.can-up::before { opacity: 1; }
+    .scroll-fade-wrap.can-down::after { opacity: 1; }
+
+    /* G · OverlayScrollbars：floating thumb，不占内容宽度 */
+    .scroll-overlay {
+      overflow: overlay;
+      scrollbar-width: none;
+    }
+    .scroll-overlay::-webkit-scrollbar { width: 0; height: 0; }
+    .scroll-overlay-host { position: relative; overflow: hidden; }
+    .scroll-overlay-host .os-thumb {
+      position: absolute;
+      right: 4px;
+      width: 4px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 60%, transparent);
+      opacity: 0;
+      transition: opacity 0.18s, width 0.18s;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .scroll-overlay-host:hover .os-thumb,
+    .scroll-overlay-host.is-scrolling .os-thumb {
+      opacity: 1;
+      width: 6px;
+      right: 3px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+      color: var(--accent);
+    }
+    .note {
+      margin-top: 32px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 960px;
+    }
+    .note strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <h1>profile-night 滚动条方案对比</h1>
+  <p class="lead">同一组记忆卡片、同一容器高度。请在每个面板内滚动，对比右侧滚动条的存在感、出现时机与是否挤压内容。推荐优先看 <strong>B（Radix/shadcn）</strong> 与 <strong>F（渐隐遮罩）</strong>。</p>
+
+  <div class="toolbar">
+    <button class="pill" id="theme-light" type="button" aria-pressed="true">浅色</button>
+    <button class="pill" id="theme-dark" type="button" aria-pressed="false">深色</button>
+  </div>
+
+  <div class="grid" id="demos"></div>
+
+  <div class="note">
+    <strong>落地建议（OMNA）：</strong>
+    B 可直接用已安装的 Base UI / shadcn ScrollArea 思路，改动最小；
+    F 最「安静」，但要接受用户可能不知道还能滚；
+    C 适合 Windows 用户习惯常驻细条；
+    A 即你现在看到的默认 Windows 滚动条——占宽、对比强，所以显得突兀。
+  </div>
+
+  <template id="card-template">
+    <article class="card">
+      <div class="chip"></div>
+      <p></p>
+      <div class="caption"></div>
+    </article>
+  </template>
+
+  <script>
+    const CARDS = [
+      ["身份", "杜睿的简历基本信息：求职意向为 AI 产品经理实习。中南大学会计学本科，2027 届。"],
+      ["身份", "「知我」面向国内用户做本土适配；讨论过如何包装本土 GTM 闭环。"],
+      ["目标", "把界面做成翻卡书：左栏卡片墙 + 右侧近期变化与调用趋势。"],
+      ["偏好", "界面安静、信息密度适中；橙色只用于主按钮和焦点。"],
+      ["偏好", "滚动条不要抢视觉；卡片 hover 有轻微 spotlight。"],
+      ["偏好", "系统字体、12px 圆角卡片、最小宽度 1024px。"],
+      ["项目", "P3.1 演示库：真实 access 日志驱动趋势图，不用 mock。"],
+      ["事件", "09/26 调整左栏明暗跟随主题，去掉趋势图说明句。"],
+      ["身份", "允许已授权 Agent 读取；版本 1。"],
+      ["目标", "V1 不做聊天 Agent、云同步、图谱大屏。"],
+    ];
+
+    const SCHEMES = [
+      {
+        id: "A",
+        title: "A · 当前默认（浏览器原生）",
+        source: "无库 · Windows / Chromium 默认 scrollbar",
+        className: "scroll-native",
+        tag: "现状",
+        body: (root) => {
+          const el = document.createElement("div");
+          el.className = "frame scroll-native";
+          el.appendChild(buildWall());
+          root.appendChild(el);
+        },
+      },
+      {
+        id: "B",
+        title: "B · Radix / shadcn ScrollArea",
+        source: '<a href="https://ui.shadcn.com/docs/components/scroll-area">shadcn ScrollArea</a> · Radix 同款 overlay 逻辑',
+        className: "scroll-radix",
+        tag: "推荐",
+        body: (root) => {
+          const el = document.createElement("div");
+          el.className = "frame scroll-radix";
+          el.appendChild(buildWall());
+          bindScrollClass(el);
+          root.appendChild(el);
+        },
+      },
+      {
+        id: "C",
+        title: "C · Linear / Vercel 细滚动条",
+        source: "纯 CSS · scrollbar-width: thin（Linear、Vercel Dashboard 常见）",
+        className: "scroll-linear",
+        tag: "稳妥",
+        body: (root) => {
+          const el = document.createElement("div");
+          el.className = "frame scroll-linear";
+          el.appendChild(buildWall());
+          root.appendChild(el);
+        },
+      },
+      {
+        id: "D",
+        title: "D · SimpleBar 风格",
+        source: '<a href="https://github.com/Grsmto/simplebar">SimpleBar</a> · 自定义轨道 + 隐藏原生条',
+        className: "scroll-simplebar-wrap",
+        tag: "库方案",
+        body: (root) => {
+          const wrap = document.createElement("div");
+          wrap.className = "frame scroll-simplebar-wrap";
+          const body = document.createElement("div");
+          body.className = "scroll-body";
+          body.appendChild(buildWall());
+          const track = document.createElement("div");
+          track.className = "sb-track";
+          const thumb = document.createElement("div");
+          thumb.className = "sb-thumb";
+          track.appendChild(thumb);
+          wrap.append(body, track);
+          bindSimplebar(wrap, body, track, thumb);
+          root.appendChild(wrap);
+        },
+      },
+      {
+        id: "E",
+        title: "E · Apple 静默 · hover 才出现",
+        source: "macOS 灵感 · Aceternity / 多数 design tool 侧栏",
+        className: "scroll-hover",
+        tag: "安静",
+        body: (root) => {
+          const el = document.createElement("div");
+          el.className = "frame";
+          const scroller = document.createElement("div");
+          scroller.className = "scroll-hover";
+          scroller.style.height = "100%";
+          scroller.appendChild(buildWall());
+          el.appendChild(scroller);
+          root.appendChild(el);
+        },
+      },
+      {
+        id: "F",
+        title: "F · 无滚动条 + 边缘渐隐",
+        source: "Magic UI Blur Fade 思路 · Framer / Figma 面板",
+        className: "scroll-fade-wrap",
+        tag: "最静",
+        body: (root) => {
+          const wrap = document.createElement("div");
+          wrap.className = "frame scroll-fade-wrap";
+          const body = document.createElement("div");
+          body.className = "scroll-body";
+          body.appendChild(buildWall());
+          wrap.appendChild(body);
+          bindFade(wrap, body);
+          root.appendChild(wrap);
+        },
+      },
+      {
+        id: "G",
+        title: "G · OverlayScrollbars floating",
+        source: '<a href="https://github.com/KingSora/OverlayScrollbars">OverlayScrollbars</a> · thumb 浮在内容之上',
+        className: "scroll-overlay-host",
+        tag: "浮层",
+        body: (root) => {
+          const host = document.createElement("div");
+          host.className = "frame scroll-overlay-host";
+          const body = document.createElement("div");
+          body.className = "scroll-overlay";
+          body.style.height = "100%";
+          body.appendChild(buildWall());
+          const thumb = document.createElement("div");
+          thumb.className = "os-thumb";
+          host.append(body, thumb);
+          bindOverlay(host, body, thumb);
+          root.appendChild(host);
+        },
+      },
+    ];
+
+    function buildWall() {
+      const wall = document.createElement("div");
+      wall.className = "wall";
+      const tpl = document.getElementById("card-template");
+      CARDS.forEach(([chip, text], i) => {
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        node.querySelector(".chip").textContent = chip;
+        node.querySelector("p").textContent = text;
+        node.querySelector(".caption").textContent = `允许已授权 Agent 读取 · 09/${String(20 + (i % 7)).padStart(2, "0")}`;
+        wall.appendChild(node);
+      });
+      return wall;
+    }
+
+    function bindScrollClass(el) {
+      let t;
+      el.addEventListener("scroll", () => {
+        el.classList.add("is-scrolling");
+        clearTimeout(t);
+        t = setTimeout(() => el.classList.remove("is-scrolling"), 700);
+      }, { passive: true });
+    }
+
+    function bindSimplebar(wrap, body, track, thumb) {
+      bindScrollClass(wrap);
+      const update = () => {
+        const sh = body.scrollHeight;
+        const ch = body.clientHeight;
+        const max = sh - ch;
+        if (max <= 0) {
+          track.style.display = "none";
+          return;
+        }
+        track.style.display = "block";
+        const trackH = track.clientHeight;
+        const thumbH = Math.max(28, (ch / sh) * trackH);
+        const top = (body.scrollTop / max) * (trackH - thumbH);
+        thumb.style.height = `${thumbH}px`;
+        thumb.style.transform = `translateY(${top}px)`;
+      };
+      body.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+
+      let drag = null;
+      thumb.addEventListener("mousedown", (e) => {
+        drag = { y: e.clientY, scroll: body.scrollTop, thumbTop: thumb.offsetTop };
+        e.preventDefault();
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!drag) return;
+        const trackH = track.clientHeight;
+        const thumbH = thumb.clientHeight;
+        const maxScroll = body.scrollHeight - body.clientHeight;
+        const delta = e.clientY - drag.y;
+        const ratio = maxScroll / Math.max(1, trackH - thumbH);
+        body.scrollTop = drag.scroll + delta * ratio;
+      });
+      window.addEventListener("mouseup", () => { drag = null; });
+    }
+
+    function bindFade(wrap, body) {
+      const update = () => {
+        const max = body.scrollHeight - body.clientHeight;
+        wrap.classList.toggle("can-up", body.scrollTop > 4);
+        wrap.classList.toggle("can-down", body.scrollTop < max - 4);
+      };
+      body.addEventListener("scroll", update, { passive: true });
+      update();
+    }
+
+    function bindOverlay(host, body, thumb) {
+      bindScrollClass(host);
+      const update = () => {
+        const sh = body.scrollHeight;
+        const ch = body.clientHeight;
+        const max = sh - ch;
+        if (max <= 0) {
+          thumb.style.opacity = "0";
+          return;
+        }
+        const thumbH = Math.max(24, (ch / sh) * ch);
+        const top = 8 + (body.scrollTop / max) * (ch - thumbH - 16);
+        thumb.style.height = `${thumbH}px`;
+        thumb.style.top = `${top}px`;
+      };
+      body.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+    }
+
+    const demos = document.getElementById("demos");
+    SCHEMES.forEach((scheme) => {
+      const demo = document.createElement("section");
+      demo.className = "demo";
+      demo.innerHTML = `
+        <div class="demo-head">
+          <h2>${scheme.title}</h2>
+          <p>${scheme.source}</p>
+          ${scheme.tag ? `<span class="tag">${scheme.tag}</span>` : ""}
+        </div>`;
+      scheme.body(demo);
+      demos.appendChild(demo);
+    });
+
+    const root = document.documentElement;
+    document.getElementById("theme-light").onclick = () => {
+      root.dataset.mode = "light";
+      document.getElementById("theme-light").ariaPressed = "true";
+      document.getElementById("theme-dark").ariaPressed = "false";
+    };
+    document.getElementById("theme-dark").onclick = () => {
+      root.dataset.mode = "dark";
+      document.getElementById("theme-light").ariaPressed = "false";
+      document.getElementById("theme-dark").ariaPressed = "true";
+    };
+  </script>
+</body>
+</html>

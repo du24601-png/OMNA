@@ -12,7 +12,7 @@ import json
 import sqlite3
 import uuid
 from contextvars import ContextVar
-from datetime import datetime, timezone
+from datetime import datetime, time, timedelta, timezone
 
 from zhiwo.api.errors import ApiError
 from zhiwo.services.commit_gate import commit_lock
@@ -154,6 +154,77 @@ def list_access_events(db_path, agent_id: str | None = None) -> dict:
     return {"events": [_summary(row) for row in rows]}
 
 
+_READ_TOOLS = ("get_context", "search_memory", "explain_memory")
+
+
+def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | None = None) -> dict:
+    """Daily read counts for the owner chart.
+
+    A read is get_context, search_memory, or explain_memory. Proposals are
+    not reads. The result is dates and counts only: no snapshot, sentence,
+    or query. `utc_offset_minutes` matches `Date.getTimezoneOffset()`.
+    """
+    if type(days) is not int or days not in (7, 14):
+        raise ApiError(400, "VALIDATION_ERROR", "days must be 7 or 14")
+    if type(utc_offset_minutes) is not int or not -14 * 60 <= utc_offset_minutes <= 14 * 60:
+        raise ApiError(400, "VALIDATION_ERROR", "utc offset is not supported")
+    now_utc = now or datetime.now(timezone.utc)
+    if now_utc.tzinfo is None:
+        now_utc = now_utc.replace(tzinfo=timezone.utc)
+    today = (now_utc - timedelta(minutes=utc_offset_minutes)).date()
+    start = today - timedelta(days=days - 1)
+    day_list = [(start + timedelta(days=index)).isoformat() for index in range(days)]
+    start_utc = datetime.combine(start, time.min, tzinfo=timezone.utc) + timedelta(minutes=utc_offset_minutes)
+    connection = _connect(db_path)
+    try:
+        rows = connection.execute(
+            """
+            SELECT agent_id, tool, created_at
+            FROM access_events
+            WHERE tool IN ('get_context', 'search_memory', 'explain_memory')
+              AND created_at >= ?
+            """,
+            (start_utc.isoformat(),),
+        ).fetchall()
+        names = {
+            row["id"]: row["name"]
+            for row in connection.execute("SELECT id, name FROM agents")
+        }
+    finally:
+        connection.close()
+    buckets: dict[str, dict[str, int]] = {}
+    for row in rows:
+        if row["tool"] not in _READ_TOOLS:
+            continue
+        try:
+            created = datetime.fromisoformat(row["created_at"])
+        except ValueError:
+            continue
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        day = (created - timedelta(minutes=utc_offset_minutes)).date().isoformat()
+        if day not in day_list:
+            continue
+        agent_id = row["agent_id"] if isinstance(row["agent_id"], str) and row["agent_id"] else ""
+        buckets.setdefault(agent_id, {})[day] = buckets.get(agent_id, {}).get(day, 0) + 1
+    bases = {agent_id: names.get(agent_id) or "已移除的连接" for agent_id in buckets}
+    repeated = {name for name in bases.values() if list(bases.values()).count(name) > 1}
+    series = []
+    for agent_id, counts in buckets.items():
+        name = bases[agent_id]
+        if name in repeated:
+            name = f"{name} · {agent_id[:4]}"
+        series.append(
+            {
+                "id": agent_id or "removed",
+                "name": name,
+                "counts": [counts.get(day, 0) for day in day_list],
+            }
+        )
+    series.sort(key=lambda item: (-sum(item["counts"]), item["name"], item["id"]))
+    return {"days": day_list, "series": series}
+
+
 def get_access_event(db_path, event_id: str) -> dict:
     connection = _connect(db_path)
     try:
@@ -179,7 +250,41 @@ def _summary(row) -> dict:
         "created_at": row["created_at"],
         "delivery_state": row["delivery_state"],
         "versions": _versions(payload),
+        "returned": _returned(payload),
     }
+
+
+_RETURNED_LIMIT = 8
+_RETURNED_CHARS = 160
+
+
+def _returned(payload: dict) -> list[str]:
+    """Sentences the caller actually received, clipped for the owner list.
+
+    Memory text and an explain fragment count. An error message does not,
+    so a rejection cannot look like a memory that was handed over.
+    """
+    lines: list[str] = []
+    items = payload.get("items")
+    if isinstance(items, list):
+        for item in items:
+            if isinstance(item, dict):
+                _push_line(lines, item.get("content"))
+    result = payload.get("result")
+    if isinstance(result, dict):
+        _push_line(lines, result.get("evidence"))
+    return lines[:_RETURNED_LIMIT]
+
+
+def _push_line(lines: list[str], value: object) -> None:
+    if not isinstance(value, str):
+        return
+    text = " ".join(value.split())
+    if not text:
+        return
+    if len(text) > _RETURNED_CHARS:
+        text = text[:_RETURNED_CHARS] + "…"
+    lines.append(text)
 
 
 def _versions(payload: dict) -> list[dict]:

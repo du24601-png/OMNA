@@ -4,13 +4,14 @@ import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { ApiError, api, explain, getCredential, setCredential, type Memory } from "./api"
 import { Detail } from "./Detail"
-import { CATEGORIES, categoryLabel, dateLabel, listTime, sharingLabel, sourceAsset } from "./format"
-import { canLeave, Empty, Icon, Notice, ResourceNotice, Skeleton, useResource } from "./ui"
+import { CATEGORIES, categoryLabel, dateLabel, listTime, sharingLabel } from "./format"
+import { canLeave, Empty, Icon, Notice, ResourceNotice, Skeleton, SourceMark, useResource } from "./ui"
 import { Composer } from "./Composer"
 import { ReviewPage } from "./Review"
 import { AgentPage } from "./Agents"
 import { SettingsDialog } from "./Settings"
 import { BrandLockup, BrandMark } from "./Brand"
+import { ReadTrend } from "./Trend"
 
 type Page = "profile" | "memories" | "review" | "agents"
 export type Service = { status: "checking" | "online" | "offline" | "error"; extractor: boolean | null; testMode: boolean; runtime?: { command: string[]; environment: Record<string, string> } }
@@ -25,7 +26,7 @@ export function App() {
   const [query, setQuery] = useState("")
   const [activeQuery, setActiveQuery] = useState("")
   const [selected, setSelected] = useState<string | null>(null)
-  const [morph, setMorph] = useState<{ layoutId?: string; seed?: string }>({})
+  const [morph, setMorph] = useState<{ layoutId?: string; seed?: string; origin?: { client: string; name: string } }>({})
   const [composer, setComposer] = useState<"add" | "import" | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(() => rawHash() === "settings")
   const [tick, setTick] = useState(0)
@@ -81,7 +82,7 @@ export function App() {
     history.pushState(null, "", "#/settings")
     setSettingsOpen(true)
   }
-  const openMemory = (id: string, layoutId?: string, seed?: string) => { if (!selected || selected === id || canLeave()) { setSelected(id); setMorph({ layoutId, seed }) } }
+  const openMemory = (id: string, layoutId?: string, seed?: string, origin?: { client: string; name: string }) => { if (!selected || selected === id || canLeave()) { setSelected(id); setMorph({ layoutId, seed, origin }) } }
   const closeMemory = () => { setSelected(null); setMorph({}) }
   const compose = (kind: "add" | "import") => { if (canLeave()) { closeMemory(); setComposer(kind) } }
   const retry = () => { setHealthTick(n => n + 1); refresh() }
@@ -98,12 +99,12 @@ export function App() {
         <div className="workspace-scroll">
           <main className="main-content" ref={main} id="main-content">
             {page === "profile" && <ProfilePage tick={tick} service={service} serviceLabel={serviceLabel} onRetry={retry} openLayout={selected ? morph.layoutId : undefined} onOpen={openMemory} onAdd={() => compose("add")} onImport={() => compose("import")}/>}
-            {page === "memories" && <MemoryPage tick={tick} openLayout={selected ? morph.layoutId : undefined} query={activeQuery} draft={query} onDraft={setQuery} onSearch={() => { if (canLeave()) { setActiveQuery(query.trim()); closeMemory() } }} onClear={() => { setQuery(""); setActiveQuery("") }} onOpen={openMemory} onAdd={() => compose("add")}/>}
+            {page === "memories" && <MemoryPage tick={tick} selectedId={selected || undefined} query={activeQuery} draft={query} onDraft={setQuery} onSearch={() => { if (canLeave()) { setActiveQuery(query.trim()); closeMemory() } }} onClear={() => { setQuery(""); setActiveQuery("") }} onOpen={openMemory} onAdd={() => compose("add")}/>}
             {page === "review" && <ReviewPage tick={tick} online={online} onOpen={openMemory} onSaved={refresh}/>}
             {page === "agents" && <AgentPage tick={tick} online={online} runtime={service.runtime}/>}
           </main>
         </div>
-        {selected && <Detail key={selected} memoryId={selected} layoutId={morph.layoutId} seed={morph.seed} online={online} onClose={closeMemory} onSaved={refresh}/>}
+        {selected && <Detail key={selected} memoryId={selected} layoutId={morph.layoutId} seed={morph.seed} origin={morph.origin} online={online} onClose={closeMemory} onSaved={refresh}/>}
       </div>
     </div>
     {composer && <Composer kind={composer} service={service} onClose={() => setComposer(null)} onRefresh={refresh} onSaved={id => { setComposer(null); refresh(); if (id) setSelected(id) }} onReview={() => { setComposer(null); navigate("review"); refresh() }}/>}
@@ -139,11 +140,19 @@ function Gate({ onReady }: { onReady: () => void }) {
   return <main className="gate"><form className="surface gate-card" onSubmit={async e => { e.preventDefault(); if (busy) return; setBusy(true); setCredential(value.trim()); try { await api.ownerHealth(); onReady() } catch (err) { setCredential(""); setError(explain(err)) } finally { setBusy(false) } }}><BrandMark/><h1>欢迎回到知我</h1><p className="helper">用本机凭证打开你的个人记忆。凭证仅保存在当前浏览器会话。</p><label className="field">本机凭证<input type="password" autoComplete="off" value={value} onChange={e => setValue(e.target.value)} required/></label>{error && <Notice tone="error">{error}</Notice>}<button className="button primary" disabled={busy || !value.trim()}>{busy ? "正在验证…" : "进入我的空间"}</button></form></main>
 }
 function ProfileSkeleton() {
-  const cards = [["100%", "88%", "46%"], ["94%", "62%"], ["100%", "80%", "36%"], ["78%", "52%"]]
-  return <div className="profile-skeleton" role="status" aria-label="正在加载关于我">
-    <Skeleton className="skeleton-count"/>
-    <div className="card-wall">{cards.map((lines, index) => <div className="memory-card skeleton-card" key={index}><Skeleton className="skeleton-chip"/>{lines.map((width, line) => <Skeleton key={line} className="skeleton-line" style={{ width }}/>)}<span className="card-caption"><Skeleton className="skeleton-meta"/><Skeleton className="skeleton-meta short"/></span></div>)}</div>
+  const cards = [["100%", "72%"], ["86%", "48%"], ["92%"], ["70%", "40%"]]
+  return <div className="profile-split" role="status" aria-label="正在加载关于我">
+    <div className="profile-night"><div className="night-wall">{cards.map((lines, index) => <div className="memory-card skeleton-card" key={index}><Skeleton className="skeleton-chip"/>{lines.map((width, line) => <Skeleton key={line} className="skeleton-line" style={{ width }}/>)}</div>)}</div></div>
+    <div className="profile-side">
+      <div className="side-pane"><Skeleton className="skeleton-line" style={{ width: "40%" }}/><Skeleton className="skeleton-line" style={{ width: "88%", marginTop: 16 }}/><Skeleton className="skeleton-line" style={{ width: "64%", marginTop: 10 }}/></div>
+      <div className="side-pane"><div className="trend-skeleton"/></div>
+    </div>
   </div>
+}
+function moveSpot(event: { clientX: number; clientY: number; currentTarget: HTMLElement }) {
+  const rect = event.currentTarget.getBoundingClientRect()
+  event.currentTarget.style.setProperty("--spot-x", `${event.clientX - rect.left}px`)
+  event.currentTarget.style.setProperty("--spot-y", `${event.clientY - rect.top}px`)
 }
 function ProfilePage({ tick, service, serviceLabel, onRetry, openLayout, onOpen, onAdd, onImport }: { tick: number; service: Service; serviceLabel: string; onRetry: () => void; openLayout?: string; onOpen: (id: string, layoutId?: string, seed?: string) => void; onAdd: () => void; onImport: () => void }) {
   const resource = useResource(() => api.profile(), [tick])
@@ -168,42 +177,43 @@ function ProfilePage({ tick, service, serviceLabel, onRetry, openLayout, onOpen,
     </div>
     <ResourceNotice resource={resource} pending={false}/>
     {resource.loading && !data && !resource.error && <ProfileSkeleton/>}
-    {empty && !resource.loading && !resource.error ? <Empty title="从一条真实的记忆开始" action={<><button className="button primary" onClick={onAdd}>添加第一条记忆</button><button className="button secondary" onClick={onImport}>导入已有文本</button></>}>记录你的偏好、目标或正在做的事。只有你确认过的内容，才会出现在这里。</Empty> : data && <>
-      <p className="quiet-label profile-count">{count} 条已确认事实</p>
-      <div className="card-wall">{filled.map(card => <MemoryCard key={card.id} memory={card} layoutId={`memory-${card.id}`} openLayout={openLayout} onOpen={onOpen}/>)}{vacant.map(group => <button key={group.id} className="memory-card memory-card-empty" onClick={onAdd}><span className="card-chip">{group.title}</span><p>{group.title}还是空的</p></button>)}</div>
-      {data.recent.length > 0 && <section className="recent-section"><h2>近期变化</h2><div className="card-wall">{data.recent.map(card => <MemoryCard key={`${card.id}-recent`} memory={card} layoutId={`memory-${card.id}-recent`} openLayout={openLayout} onOpen={onOpen}/>)}</div></section>}
-    </>}
+    {data && <div className="profile-split">
+      <section className="profile-night" aria-label="已确认的记忆">
+        {empty && !resource.loading && !resource.error ? <Empty title="从一条真实的记忆开始" action={<><button className="button primary" onClick={onAdd}>添加第一条记忆</button><button className="button secondary" onClick={onImport}>导入已有文本</button></>}>记录你的偏好、目标或正在做的事。只有你确认过的内容，才会出现在这里。</Empty> : <NightWall cards={filled} vacant={vacant} openLayout={openLayout} onOpen={onOpen} onAdd={onAdd}/>}
+      </section>
+      <div className="profile-side">
+        <section className="side-pane recent-pane" aria-labelledby="recent-title">
+          <header className="pane-head"><div><h2 id="recent-title">近期变化</h2><p>{count} 条已确认</p></div></header>
+          {data.recent.length > 0 ? <div className="recent-list">{data.recent.map(card => <button key={card.id} type="button" className="recent-row" onClick={() => onOpen(card.id, undefined, card.content || undefined)}><span className="card-chip">{categoryLabel(card.category)}</span><span className="recent-text">{card.content || "正文暂时无法读取。"}</span><time>{dateLabel(card.created_at)}</time></button>)}</div> : <p className="trend-empty">最近没有变化</p>}
+        </section>
+        <ReadTrend tick={tick}/>
+      </div>
+    </div>}
+  </div>
+}
+function NightWall({ cards, vacant, openLayout, onOpen, onAdd }: { cards: Memory[]; vacant: { id: string; title: string }[]; openLayout?: string; onOpen: (id: string, layoutId?: string, seed?: string) => void; onAdd: () => void }) {
+  const [hot, setHot] = useState<string | null>(null)
+  return <div className={`night-wall${hot ? " is-hot" : ""}`}>
+    {cards.map(card => <MemoryCard key={card.id} memory={card} layoutId={`memory-${card.id}`} openLayout={openLayout} hot={hot === card.id} onHot={setHot} onOpen={onOpen}/>)}
+    {vacant.map(group => <button key={group.id} type="button" className={`memory-card memory-card-empty${hot === group.id ? " is-hot" : ""}`} onClick={onAdd} onMouseEnter={() => setHot(group.id)} onMouseLeave={() => setHot(null)} onMouseMove={moveSpot} onFocus={() => setHot(group.id)} onBlur={() => setHot(null)}><span className="night-spot" aria-hidden="true"/><span className="card-chip">{group.title}</span><p>{group.title}还是空的</p></button>)}
   </div>
 }
 const morphSpring = { type: "spring" as const, stiffness: 200, damping: 24 }
-function MemoryCard({ memory, layoutId, openLayout, onOpen }: { memory: Memory; layoutId: string; openLayout?: string; onOpen: (id: string, layoutId?: string, seed?: string) => void }) {
+function MemoryCard({ memory, layoutId, openLayout, hot, onHot, onOpen }: { memory: Memory; layoutId: string; openLayout?: string; hot: boolean; onHot: (id: string | null) => void; onOpen: (id: string, layoutId?: string, seed?: string) => void }) {
   const reduce = useReducedMotion()
   const source = openLayout === layoutId
-  return <motion.button type="button" layoutId={reduce ? undefined : layoutId} className="memory-card" data-morph-source={source || undefined} style={{ borderRadius: 12 }} transition={morphSpring} aria-expanded={source} onClick={() => onOpen(memory.id, layoutId, memory.content || undefined)}><span className="card-chip">{categoryLabel(memory.category)}</span><p>{memory.content || "正文暂时无法读取。"}</p><span className="card-caption">{memory.scope && <span>{memory.scope}</span>}<span className="card-share">{sharingLabel(memory)}</span><span>版本 {memory.revision}</span><time>{dateLabel(memory.created_at)}</time></span></motion.button>
+  const brief = (memory.content || "").length > 0 && (memory.content || "").length <= 40
+  return <motion.button type="button" layoutId={reduce ? undefined : layoutId} className={`memory-card${hot ? " is-hot" : ""}`} data-brief={brief ? "1" : undefined} data-morph-source={source || undefined} style={{ borderRadius: 12 }} transition={morphSpring} aria-expanded={source} onClick={() => onOpen(memory.id, layoutId, memory.content || undefined)} onMouseEnter={() => onHot(memory.id)} onMouseLeave={() => onHot(null)} onMouseMove={moveSpot} onFocus={() => onHot(memory.id)} onBlur={() => onHot(null)}><span className="night-spot" aria-hidden="true"/><span className="card-chip">{categoryLabel(memory.category)}</span><p>{memory.content || "正文暂时无法读取。"}</p><span className="card-caption">{memory.scope && <span>{memory.scope}</span>}<span className="card-share">{sharingLabel(memory)}</span><span>版本 {memory.revision}</span><time>{dateLabel(memory.created_at)}</time></span></motion.button>
 }
-const SOURCE_CLIENTS = new Set(["omna", "workbuddy", "zcode", "opencode", "codex", "claude", "claude-code"])
-const SOURCE_DUAL = new Set(["omna", "opencode", "zcode", "codex"])
-function SourceMark({ origin }: { origin?: { client: string; name: string } }) {
-  const client = origin?.client || "omna"
-  const name = origin?.name || "OMNA"
-  if (!SOURCE_CLIENTS.has(client)) {
-    const mark = name === "Agent 提案" ? "" : Array.from(name)[0]
-    return <span className="memo-source"><span className="source-fallback" aria-hidden="true">{mark}</span><span>{name}</span></span>
-  }
-  const dual = SOURCE_DUAL.has(client)
-  return <span className="memo-source"><img className={dual ? "source-mark light dual" : "source-mark"} src={sourceAsset(client)} alt="" />{dual && <img className="source-mark dark" src={sourceAsset(client, true)} alt="" />}<span>{name}</span></span>
-}
-function MemoCard({ memory, layoutId, openLayout, onOpen }: { memory: Memory; layoutId: string; openLayout?: string; onOpen: (id: string, layoutId?: string, seed?: string) => void }) {
+function MemoCard({ memory, open, onOpen }: { memory: Memory; open: boolean; onOpen: (id: string, layoutId?: string, seed?: string, origin?: { client: string; name: string }) => void }) {
   const privateOnly = memory.share_enabled === false
   const revised = memory.revision > 1
-  const reduce = useReducedMotion()
-  const source = openLayout === layoutId
-  return <motion.button type="button" layoutId={reduce ? undefined : layoutId} className="memo-card" data-morph-source={source || undefined} style={{ borderRadius: 0 }} transition={morphSpring} aria-expanded={source} onClick={() => onOpen(memory.id, layoutId, memory.content || undefined)}>
+  return <button type="button" className={`memo-card${open ? " is-open" : ""}`} aria-expanded={open} onClick={() => onOpen(memory.id, undefined, memory.content || undefined, memory.origin)}>
     <span className="memo-sentence">{memory.content || "正文暂时无法读取。"}</span>
     <span className="memo-topic"><span className="memo-cat">{categoryLabel(memory.category)}</span>{memory.scope && <span className="memo-cat">{memory.scope}</span>}{privateOnly && <span className="memo-note">仅自己可见</span>}{revised && <span className="memo-note">版本 {memory.revision}</span>}</span>
     <SourceMark origin={memory.origin}/>
     <time dateTime={memory.created_at} title={dateLabel(memory.created_at)}>{listTime(memory.created_at)}</time>
-  </motion.button>
+  </button>
 }
 const SOURCE_FILTERS: [string, string][] = [
   ["omna", "OMNA"],
@@ -221,7 +231,7 @@ function MemorySkeleton() {
     {rows.map((width, index) => <div className="memo-card skeleton-row" key={index}><Skeleton className="skeleton-sentence" style={{ width }}/><Skeleton className="skeleton-pill"/><span className="memo-source"><Skeleton className="skeleton-mark"/><Skeleton className="skeleton-source"/></span><Skeleton className="skeleton-time"/></div>)}
   </div>
 }
-function MemoryPage({ tick, openLayout, query, draft, onDraft, onSearch, onClear, onOpen, onAdd }: { tick: number; openLayout?: string; query: string; draft: string; onDraft: (value: string) => void; onSearch: () => void; onClear: () => void; onOpen: (id: string, layoutId?: string, seed?: string) => void; onAdd: () => void }) {
+function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear, onOpen, onAdd }: { tick: number; selectedId?: string; query: string; draft: string; onDraft: (value: string) => void; onSearch: () => void; onClear: () => void; onOpen: (id: string, layoutId?: string, seed?: string, origin?: { client: string; name: string }) => void; onAdd: () => void }) {
   const [state, setState] = useState("current"), [category, setCategory] = useState(""), [origin, setOrigin] = useState(""), [sort, setSort] = useState<"newest" | "oldest">("newest")
   const resource = useResource(() => api.memories({ state, category, origin, query, limit: 50 }), [state, category, origin, query, tick])
   const filtered = !!query || !!category || !!origin || state !== "current"
@@ -284,7 +294,7 @@ function MemoryPage({ tick, openLayout, query, draft, onDraft, onSearch, onClear
       <ResourceNotice resource={resource} pending={false}/>
       {resource.loading && !resource.data && !resource.error && <MemorySkeleton/>}
       {resource.data && !shown.length && !resource.loading && !resource.error && <Empty title={filtered ? "没有符合筛选条件的记忆" : "还没有已确认的记忆"} action={<button className="button secondary" onClick={filtered ? clear : onAdd}>{filtered ? "清除筛选" : "添加记忆"}</button>}>{filtered ? "换个关键词、主题或来源再试试。" : "从一条偏好、目标或近期事件开始。"}</Empty>}
-      {!!shown.length && <div className="memo-list"><div className="memo-head" aria-hidden="true"><span>记忆 <span className="memo-count">{shown.length} 条</span></span><span>主题</span><span>来源</span><span>时间</span></div>{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} layoutId={`memo-${item.id}-${item.revision}`} openLayout={openLayout} onOpen={onOpen}/>)}</div>}
+      {!!shown.length && <div className="memo-list"><div className="memo-head" aria-hidden="true"><span>记忆 <span className="memo-count">{shown.length} 条</span></span><span>主题</span><span>来源</span><span>时间</span></div>{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} open={selectedId === item.id} onOpen={onOpen}/>)}</div>}
     </div>
   </div>
 }

@@ -11,9 +11,9 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
   const [notice, setNotice] = useState<{ text: string; id?: string } | null>(null)
   const items = (resource.data?.proposals || []).filter(p => !finished.includes(p.id))
   const proposal = items.find(p => p.id === selected) || items[0]
-  return <div className="page"><PageTitle title="待确认" description="先看清变化，再决定要记住什么。"/><ResourceNotice resource={resource}/>
+  return <div className="page"><PageTitle title="待确认" /><ResourceNotice resource={resource}/>
     {notice && <Notice tone="success"><span>{notice.text}</span>{notice.id && <button className="text-button" onClick={() => onOpen(notice.id!)}>查看正式记忆</button>}</Notice>}
-    {resource.data && !items.length && !resource.loading && !resource.error && <Empty title="当前没有待确认的记忆">新的导入内容或 Agent 建议，会先来到这里。未经确认，不会改变你的记忆。</Empty>}
+    {resource.data && !items.length && !resource.loading && !resource.error && <Empty title="当前没有待确认的记忆" />}
     {!!items.length && <div className="review-layout"><div className="proposal-list"><p className="eyebrow">等待你的决定 · {items.length}</p>{items.map(item => <button key={item.id} className={`proposal-item ${proposal?.id === item.id ? "selected" : ""}`} onClick={() => { if (item.id !== proposal?.id && canLeave()) setSelected(item.id) }}><span className="metadata"><span className="tag">{item.target_id ? "更新建议" : "新增建议"}</span><span>{categoryLabel(item.payload.category)}</span></span><p>{item.payload.content}</p><small>{sourceLabel(item.source.kind)}{item.demo ? " · 合成演示数据" : ""}</small></button>)}</div>
       {proposal && <ReviewCard key={proposal.id} proposal={proposal} online={online && !resource.error} onDone={(id, result) => { setFinished(old => [...old, id]); setNotice(result); resource.reload(); onSaved() }}/>}</div>}
   </div>
