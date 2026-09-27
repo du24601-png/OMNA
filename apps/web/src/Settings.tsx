@@ -142,13 +142,11 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
     {notice && <Notice tone="success">{notice}</Notice>}
     {section === "model" && <form onSubmit={save}>
       <div className="settings-title-row"><h2>提取模型</h2><span className={`settings-status ${initial.extractor.configured ? "ready" : ""}`}>{initial.extractor.configured ? "可以提取" : "还不能提取"}</span></div>
-      <p className="helper">导入时，只有你这次提交的文字会发给这个模型。</p>
       <label className="field">服务地址<input value={baseUrl} onChange={e => setBaseUrl(e.target.value)} autoComplete="off" placeholder="https://example.com/v1"/></label>
       <label className="field">模型名<input value={model} onChange={e => setModel(e.target.value)} autoComplete="off"/></label>
       <label className="field">密钥
         <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} autoComplete="new-password" placeholder={savedKey ? "已保存，留空表示不修改" : "尚未保存"}/>
       </label>
-      <p className="helper">{savedKey ? "密钥已保存在本机，页面不会显示它。" : "还没有在这里保存过密钥。"}</p>
       <div className="actions">
         <button className="button primary" disabled={!!busy}>{busy === "save" ? "保存中…" : "保存"}</button>
         <button className="button secondary" type="button" disabled={!!busy || !initial.extractor.configured} onClick={test}>{busy === "test" ? "测试中…" : "测试连接"}</button>
@@ -169,14 +167,12 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
     </div>}
     {section === "backup" && <div>
       <h2>备份</h2>
-      <p className="helper">导出包含已确认的记忆、版本和来源关联，不含密钥、凭证和已删除的正文。备份是整份记忆库的副本，同样不含提取密钥。</p>
       <div className="actions">
         <button className="button secondary" disabled={!!busy} onClick={exportLibrary}>{busy === "export" ? "导出中…" : "导出"}</button>
         <button className="button secondary" disabled={!!busy} onClick={backup}>{busy === "backup" ? "备份中…" : "备份"}</button>
       </div>
       <div className="settings-block">
         <h3>从备份恢复</h3>
-        <p className="helper">只接受同一版本的 OMNA 备份。校验失败时，当前库不会被替换。恢复成功后，全部 Agent 停用，旧凭证失效，提取密钥需要重新填写。</p>
         <label className="field">备份文件<input ref={file} type="file" accept=".zip,application/zip"/></label>
         <label className="field">输入「恢复备份」以确认<input value={restoreWord} onChange={e => setRestoreWord(e.target.value)} autoComplete="off"/></label>
         <button className="button danger" disabled={!!busy || restoreWord !== "恢复备份"} onClick={restore}>{busy === "restore" ? "恢复中…" : "恢复备份"}</button>
