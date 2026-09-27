@@ -1,10 +1,11 @@
 import { AlertDialog } from "@base-ui/react/alert-dialog"
+import { Collapsible } from "@base-ui/react/collapsible"
 import { Menu } from "@base-ui/react/menu"
 import { Switch } from "@base-ui/react/switch"
 import { BookOpen, PencilLine, Quote, Search, type LucideIcon } from "lucide-react"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { api, explain, type AccessDetail, type AgentClient, type AgentConnection } from "./api"
-import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, dateLabel, dayHeading, deliveryLabel, groupAccess, listTime, outcomeLabel, spanLabel, toolLabel, type AccessGroup } from "./format"
+import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, dateLabel, deliveryLabel, groupAccess, listTime, outcomeLabel, toolLabel, type AccessGroup } from "./format"
 import { ClientMark, ConnectPanel, PresetChoice, presetOf, type Preset } from "./Clients"
 import { canLeave, Icon, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
 import type { Service } from "./App"
@@ -243,7 +244,6 @@ function CreatePanel({ online, busy, onCreate }: { online: boolean; busy: boolea
   return <form className="connect-panel" onSubmit={async event => { event.preventDefault(); if (name.trim() && await onCreate(name.trim())) setName("") }}>
     <span className="hero-mark"><Icon name="plus" /></span>
     <h2>连接其他 MCP 客户端</h2>
-    <p className="helper">上面没有的客户端，可以手动填一份配置。新连接默认什么都读不到，创建后再授权。</p>
     <h3 className="field-title">给它起个名字</h3>
     <input aria-label="连接名称" placeholder="例如：林舟的写作助手" value={name} maxLength={80} onChange={event => setName(event.target.value)} disabled={busy} />
     <button className="button primary connect-go" disabled={!online || busy || !name.trim()}>{busy ? "创建中…" : "创建并生成配置"}</button>
@@ -353,34 +353,32 @@ function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIs
       <button type="button" role="tab" aria-selected={tab === "permissions"} onClick={() => setTab("permissions")}>权限</button>
       <button type="button" role="tab" aria-selected={tab === "access"} onClick={() => setTab("access")}>访问记录{count ? <span className="tab-count">{count}</span> : null}</button>
     </div>
-    <div role="tabpanel" hidden={tab !== "permissions"}><PermissionEditor agent={agent} name={row.name} online={online} busy={busy} onSave={onSave} /></div>
+    <div role="tabpanel" hidden={tab !== "permissions"}><PermissionEditor agent={agent} online={online} busy={busy} onSave={onSave} /></div>
     <div role="tabpanel" hidden={tab !== "access"}><AccessLog name={row.name} events={events} /></div>
   </div>
 }
 
 function VerifyGuide({ row, agent, waiting, onRestart, onOpenPermissions }: { row: Row; agent: AgentConnection; waiting: boolean; onRestart: () => void; onOpenPermissions: () => void }) {
   const readable = agent.allowed_categories.length > 0 && agent.allowed_tools.some(tool => READ_TOOLS.includes(tool))
-  const prompt = `请用 zhiwo 查一下我的${categoryLabel(agent.allowed_categories[0] || "preference")}`
+  const prompt = `请查一下我的${categoryLabel(agent.allowed_categories[0] || "preference")}`
+  const [helpOpen, setHelpOpen] = useState(false)
+  useEffect(() => { if (!waiting) setHelpOpen(true) }, [waiting])
   return <section className="verify">
-    <ol className="stepper">
-      <li className="done"><Icon name="check" />{row.client ? "写入配置" : "创建连接"}</li>
-      <li className="current">在 {row.name} 里问一次</li>
-      <li>完成</li>
-    </ol>
-    {!readable ? <p className="helper">它现在读不到任何记忆。先在下面的<button type="button" className="text-button" onClick={onOpenPermissions}>权限</button>里选好它能读的内容。</p> : <>
-      <p>{row.client ? `如果 ${row.name} 正开着，先完全退出再打开，然后发一句：` : "把配置填进客户端并重启，然后发一句："}</p>
+    {!readable ? <p className="verify-lead">它现在读不到记忆。先在<button type="button" className="text-button" onClick={onOpenPermissions}>权限</button>里选好它能读的内容。</p> : <>
+      <p className="verify-lead">{row.client ? `复制这句，重启 ${row.name} 后发给它` : "把配置填进客户端，重启后发这句"}</p>
       <div className="prompt-chip"><span>{prompt}</span><CopyButton text={prompt} /></div>
-      <p className="verify-wait">{waiting
-        ? <><span className="spinner" />正在等待第一次调用，收到后这里会自动变成已验证。</>
-        : <>这段时间没收到调用。<button type="button" className="text-button" onClick={onRestart}>继续等待</button></>}</p>
-      <details className="disclosure" open={!waiting || undefined}>
-        <summary>没反应？</summary>
-        <ul className="verify-tips">
-          <li>确认 {row.name} 已经重启过，并且开启了 MCP 工具。</li>
-          {row.client && <li>配置文件：<code>{row.client.config_path}</code> <CopyButton text={row.client.config_path} /></li>}
-          {row.client ? <li>还不行，就用右上角 ⋯ 里的「重新写入配置」。</li> : <li>还不行，就用右上角 ⋯ 重置凭证，换一份新配置。</li>}
-        </ul>
-      </details>
+      {!waiting && <p className="verify-wait">还没收到。<button type="button" className="text-button" onClick={onRestart}>继续等待</button></p>}
+      <Collapsible.Root className="verify-help" open={helpOpen} onOpenChange={setHelpOpen}>
+        <Collapsible.Trigger className="verify-help-trigger">没反应？</Collapsible.Trigger>
+        <Collapsible.Panel>
+          <ul className="verify-tips">
+            <li>{row.client ? `先完全退出 ${row.name}，再重新打开。` : "确认配置已经填进去，然后完全退出再打开。"}</li>
+            <li>在客户端里开启名为 zhiwo 的 MCP 工具。</li>
+            {row.client && <li>配置文件：<code>{row.client.config_path}</code> <CopyButton text={row.client.config_path} /></li>}
+            <li>{row.client ? "还不行，就用右上角 ⋯ 里的「重新写入配置」。" : "还不行，就用右上角 ⋯ 重置凭证，换一份新配置。"}</li>
+          </ul>
+        </Collapsible.Panel>
+      </Collapsible.Root>
     </>}
   </section>
 }
@@ -389,14 +387,7 @@ function sortedKey(tools: string[], categories: string[]) {
   return JSON.stringify([[...tools].sort(), [...categories].sort()])
 }
 
-function permissionSummary(name: string, tools: string[], categories: string[]) {
-  if (!tools.length) return `${name} 现在什么都做不了。`
-  if (!categories.length) return `${name} 现在读不到任何记忆。`
-  const list = categories.map(id => `「${categoryLabel(id)}」`).join("")
-  return `${name} 可以读取你的${list}${tools.includes("propose_memory") ? "，还能提出修改建议，由你确认后生效。" : "，不能改动你的记忆。"}`
-}
-
-function PermissionEditor({ agent, name, online, busy, onSave }: { agent: AgentConnection; name: string; online: boolean; busy: boolean; onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null> }) {
+function PermissionEditor({ agent, online, busy, onSave }: { agent: AgentConnection; online: boolean; busy: boolean; onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null> }) {
   const [tools, setTools] = useState(agent.allowed_tools)
   const [categories, setCategories] = useState(agent.allowed_categories)
   const [baseline, setBaseline] = useState(sortedKey(agent.allowed_tools, agent.allowed_categories))
@@ -419,7 +410,6 @@ function PermissionEditor({ agent, name, online, busy, onSave }: { agent: AgentC
     if (value) { setTools(value.allowed_tools); setCategories(value.allowed_categories); setBaseline(sortedKey(value.allowed_tools, value.allowed_categories)) }
   }
   return <div className="permission-editor">
-    <p className="permission-summary">{permissionSummary(name, tools, categories)}</p>
     <h3 className="field-title">它可以做什么</h3>
     <PresetChoice value={level} disabled={locked} onChange={setLevel} />
     <h3 className="field-title">它可以读哪些</h3>
@@ -451,10 +441,9 @@ const TOOL_ICONS: Record<string, LucideIcon> = {
   explain_memory: Quote,
 }
 
-function ToolGlyph({ tool, alert = false }: { tool: string; alert?: boolean }) {
+function ToolMark({ tool }: { tool: string }) {
   const Mark = TOOL_ICONS[tool] ?? Search
-  const kind = tool === "get_context" ? "context" : tool === "propose_memory" ? "propose" : tool === "explain_memory" ? "explain" : "search"
-  return <span className={`access-glyph ${kind}${alert ? " alert" : ""}`}><Mark size={16} strokeWidth={1.75} aria-hidden="true" /></span>
+  return <Mark size={13} strokeWidth={1.75} aria-hidden="true" />
 }
 
 function headlines(group: AccessGroup) {
@@ -468,6 +457,26 @@ function headlines(group: AccessGroup) {
 
 function needsAttention(group: AccessGroup) {
   return group.events.some(event => event.outcome === "rejected" || event.delivery_state !== "sent")
+}
+
+function groupContent(group: AccessGroup) {
+  if (group.quiet) return toolLabel(group.tool)
+  const lines = headlines(group)
+  const primary = lines[0] || toolLabel(group.tool)
+  if (group.lines.length > 1) return `${primary} 等 ${group.lines.length} 条`
+  return primary
+}
+
+function groupResult(group: AccessGroup) {
+  if (group.events.some(event => event.outcome === "rejected")) return "已拒绝"
+  if (group.events.some(event => event.delivery_state === "failed")) return "发送失败"
+  if (group.events.some(event => event.delivery_state === "unknown")) return "交付未知"
+  if (group.events.some(event => event.delivery_state !== "sent")) return "未发出"
+  if (group.lines.length) {
+    return group.events.length > 1 ? `${group.events.length} 次 · ${group.lines.length} 条` : `${group.lines.length} 条记忆`
+  }
+  if (group.tool === "propose_memory" && group.events.some(event => event.outcome === "success")) return "待确认"
+  return outcomeLabel(group.events[0].outcome)
 }
 
 function callSummary(group: AccessGroup) {
@@ -486,44 +495,35 @@ function callSummary(group: AccessGroup) {
 function AccessLog({ name, events }: { name: string; events: { data: { events: Parameters<typeof groupAccess>[0] } | null; loading: boolean; error: string; reload: () => void } }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const list = events.data?.events ?? []
-  const days: { label: string; shown: AccessGroup[]; quiet: AccessGroup[] }[] = []
-  for (const group of groupAccess(list)) {
-    const label = dayHeading(group.events[0].created_at)
-    const day = days.find(item => item.label === label) ?? { label, shown: [], quiet: [] }
-    if (!days.includes(day)) days.push(day)
-    ;(group.quiet ? day.quiet : day.shown).push(group)
-  }
+  const groups = groupAccess(list)
+  const visible = groups.filter(group => !group.quiet)
+  const quiet = groups.filter(group => group.quiet)
   return <div className="access-log">
-    <div className="section-heading">
-      <p className="helper">这里记的是实际发给 {name} 的内容，不代表模型读了或用了。</p>
+    <div className="access-toolbar">
       <button className="icon-button" type="button" title="刷新访问记录" aria-label="刷新访问记录" onClick={events.reload}><Icon name="refresh" /></button>
     </div>
     <ResourceNotice resource={events} />
     {events.data && !list.length && !events.error && !events.loading && <p className="inline-empty">还没有访问记录。{name} 调用一次后，会出现在这里。</p>}
-    {days.map(day => <section key={day.label} className="access-day-block">
-      <h3 className="access-day">{day.label}</h3>
-      {day.shown.map(group => <AccessGroupRow key={group.id} group={group} open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
-      {!!day.quiet.length && <details className="access-quiet">
-        <summary>还有 {day.quiet.reduce((sum, group) => sum + group.events.length, 0)} 次没有返回内容</summary>
-        {day.quiet.map(group => <AccessGroupRow key={group.id} group={group} quiet open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
+    {!!groups.length && <div className="access-list">
+      <div className="access-head" aria-hidden="true"><span>内容</span><span>操作</span><span>结果</span><span>时间</span></div>
+      {visible.map(group => <AccessGroupRow key={group.id} group={group} open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
+      {!!quiet.length && <details className="access-quiet">
+        <summary>还有 {quiet.reduce((sum, group) => sum + group.events.length, 0)} 次没有返回内容</summary>
+        {quiet.map(group => <AccessGroupRow key={group.id} group={group} quiet open={openId === group.id} onToggle={() => setOpenId(openId === group.id ? null : group.id)} />)}
       </details>}
-    </section>)}
+    </div>}
   </div>
 }
 
 function AccessGroupRow({ group, open, quiet = false, onToggle }: { group: AccessGroup; open: boolean; quiet?: boolean; onToggle: () => void }) {
   const newest = group.events[0].created_at
-  const oldest = group.events[group.events.length - 1].created_at
-  const text = quiet ? [toolLabel(group.tool)] : headlines(group)
-  const meta = quiet ? `${spanLabel(newest, oldest)} · ${group.events.length} 次` : `${toolLabel(group.tool)} · ${spanLabel(newest, oldest)}`
-  const more = !quiet && group.lines.length > 3 ? `还有 ${group.lines.length - 3} 句` : ""
+  const attention = !quiet && needsAttention(group)
   return <div className={`access-item ${open ? "open" : ""} ${quiet ? "quiet" : ""}`}>
     <button type="button" className="access-row" aria-expanded={open} onClick={onToggle}>
-      <ToolGlyph tool={group.tool} alert={!quiet && needsAttention(group)} />
-      <span className="access-copy">
-        {text.map(line => <span className="access-line" key={line}>{line}</span>)}
-        <small>{meta}{more ? ` · ${more}` : ""}</small>
-      </span>
+      <span className="access-content">{groupContent(group)}</span>
+      <span className="access-tool"><span className={`memo-cat access-tool-chip ${group.tool}`}><ToolMark tool={group.tool} />{toolLabel(group.tool)}</span></span>
+      <span className={`access-result${attention ? " alert" : ""}`}>{groupResult(group)}</span>
+      <time dateTime={newest} title={dateLabel(newest)}>{listTime(newest)}</time>
     </button>
     {open && <GroupCalls group={group} />}
   </div>

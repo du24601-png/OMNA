@@ -264,6 +264,25 @@ def _origin_context(db_path):
         connection.close()
 
 
+def requester_labels(db_path) -> tuple[dict, dict]:
+    """Agent id to display name, and agent id to a known client id."""
+    _, _, agents, clients = _origin_context(db_path)
+    return agents, clients
+
+
+def requester_of(agent_id: str | None, agents: dict, clients: dict) -> dict:
+    """The client mark for a proposal. Imports and unknown agents stay OMNA or a letter."""
+    if not agent_id:
+        return {"client": "omna", "name": "OMNA"}
+    name = agents.get(agent_id)
+    if not name:
+        return {"client": "agent", "name": "Agent 提案"}
+    client = clients.get(agent_id) or _CLIENT_NAMES.get(name, "agent")
+    if client not in _KNOWN_CLIENTS:
+        client = "agent"
+    return {"client": client, "name": name}
+
+
 def _origin(raw, sources: dict, proposals: dict, agents: dict, clients: dict) -> dict:
     for source_id in _source_ids(raw):
         if sources.get(source_id) != "agent_claim":

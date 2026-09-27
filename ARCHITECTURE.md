@@ -124,7 +124,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | --- | --- |
 | `GET /health`；`GET /profile` | 运行状态；画像 |
 | `POST /imports`；`GET /imports/{id}`；`POST /imports/{id}/retry` | 提取任务及失败重试 |
-| `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核，批量审核可逐项调用并汇总结果 |
+| `GET /proposals`；`POST /proposals/{id}/decision` | 候选与审核。每条候选带 `requester`（提出它的客户端 id 和名称；导入的记为 OMNA）。决定仍逐项调用 |
 | `GET/POST /memories`；`GET/PATCH/DELETE /memories/{id}`；`GET /memories/{id}/deletion-preview` | 查询、添加、修改、删除预览和永久删除 |
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |

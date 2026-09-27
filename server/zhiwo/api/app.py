@@ -69,7 +69,7 @@ async def _lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="知我", lifespan=_lifespan)
+    app = FastAPI(title="OMNA", lifespan=_lifespan)
     app.add_exception_handler(OwnerAuthError, owner_auth_error)
     app.add_exception_handler(ApiError, api_error)
     app.add_exception_handler(RequestValidationError, _validation_error)

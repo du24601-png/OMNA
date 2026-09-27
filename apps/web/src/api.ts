@@ -39,6 +39,7 @@ export type Proposal = {
   payload: { content: string; kind: string; category: string; scope: string | null; share_enabled?: boolean; valid_until?: string | null }
   evidence: { text?: string; source_id?: string }
   source: { id: string; kind: string; name: string | null }
+  requester?: { client: string; name: string }
   demo: boolean
 }
 

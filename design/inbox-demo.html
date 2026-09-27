@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>待确认</title>
+<style>
+  :root {
+    --bg: #fff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --faint: #8e8e93;
+    --line: #ececee;
+    --hover: #f6f6f7;
+    --selected: #f3f3f4;
+    --green: #1f8f4e;
+    --green-press: #187a42;
+    --danger: #c5342a;
+    --danger-press: #a42820;
+    --ring: rgba(31, 143, 78, .28);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    color: var(--text);
+    background: var(--bg);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  button, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .page { max-width: 760px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 22px 8px 10px;
+  }
+  header h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
+  header span { color: var(--faint); font-size: 13px; }
+  .list { list-style: none; margin: 0; padding: 0 0 24px; }
+  .slot { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .18s ease, opacity .16s ease; }
+  .slot.out { grid-template-rows: 0fr; opacity: 0; }
+  .clip { overflow: hidden; }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    margin: 0 8px;
+    padding: 11px 12px 12px;
+    border-radius: 12px;
+    outline: none;
+  }
+  .row:hover { background: var(--hover); }
+  .row.selected { background: var(--selected); }
+  .row:focus-visible { box-shadow: inset 0 0 0 1px #d0d0d4; }
+  .lead { display:grid; grid-template-columns:16px minmax(0,1fr); column-gap:8px; align-items:start; min-width:0; }
+  .kicker { display:flex; align-items:center; gap:4px; margin:0 0 2px; min-width:0; color:var(--faint); font-size:13px; font-weight:450; }
+  .kicker .agent { color:var(--text); }
+  .source-mark { width:16px; height:16px; margin-top:1px; border-radius:4px; object-fit:contain; }
+  .sentence {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hint { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-weight: 400; }
+  .editor {
+    width: 100%;
+    margin-top: 6px;
+    padding: 0;
+    border: 0;
+    resize: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+    line-height: 1.4;
+    outline: none;
+  }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .choices button {
+    height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px #e3e3e5;
+    font-size: 13px;
+  }
+  .choices button:hover { background: #fafafa; }
+  .choices button.primary { background: var(--green); color: #fff; box-shadow: none; }
+  .choices button.primary:hover { background: var(--green-press); }
+  .actions { display:flex; align-items:center; gap:6px; flex:none; }
+  .actions > button { flex:none; }
+  .icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 0;
+    background: transparent;
+    color: #3a3a3c;
+    padding: 0;
+  }
+  .icon svg { width: 16px; height: 16px; }
+  .icon.edit { color: #8e8e93; }
+  .icon.edit:hover, .row.selected .icon.edit { color: #3a3a3c; }
+  .icon.ignore, .icon.remember {
+    box-shadow: inset 0 0 0 1px #d8d8dc;
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .icon.remember:hover, .icon.remember:focus-visible {
+    background: var(--green);
+    color: #fff;
+    box-shadow: none;
+  }
+  .icon.remember:active { background: var(--green-press); }
+  .icon.ignore:hover, .icon.ignore:focus-visible {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: none;
+  }
+  .icon.ignore:active { background: var(--danger-press); }
+  .icon:focus-visible, .choices button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .foot { padding: 8px 20px 28px; color: var(--faint); font-size: 12px; }
+  .foot p { margin: 0; }
+  .keys { margin-top: 4px; }
+  .empty { padding: 48px 20px; color: var(--muted); }
+  .empty h2 { margin: 0 0 6px; font-size: 16px; color: var(--text); font-weight: 600; }
+  .empty button {
+    margin-top: 12px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(8px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px 8px 14px;
+    background: #1d1d1f;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .toast button {
+    border: 0;
+    background: transparent;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+  .toast button:hover { background: rgba(255,255,255,.12); }
+  @media (max-width: 640px) {
+    .sentence { white-space: normal; }
+    .actions { align-self: start; padding-top: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slot, .toast, .icon { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>待确认</h1>
+      <span id="count"></span>
+    </header>
+    <ul class="list" id="list"></ul>
+    <div class="empty" id="empty" hidden>
+      <h2>这一批看完了</h2>
+      <p>记住和忽略都只发生在这个演示里。</p>
+      <button type="button" id="reset">再看一遍</button>
+    </div>
+    <footer class="foot">
+      <p>点击图标即可。这个页面只做演示，不会保存或删除实际记忆。</p>
+      <p class="keys">上下键选择 · E 编辑 · 退格忽略 · 回车确认</p>
+    </footer>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+<script>
+const seed = [
+  { id: "mcp", client: "opencode", source: "OpenCode", kind: "新增目标", text: "十月中旬完成个人 MCP 项目。" },
+  { id: "summary", client: "opencode", source: "OpenCode", kind: "新增偏好", text: "阅读长文档时，先给要点，再给结论。" },
+  { id: "friday", client: "opencode", source: "OpenCode", kind: "新增目标", text: "每周五下午只留三项下周要做的事。" },
+  { id: "mail", client: "opencode", source: "OpenCode", kind: "修改偏好", text: "写邮件时正文不超过五句，结尾写下一步。", lane: "update", was: "写邮件时尽量简短。" },
+  { id: "proxy", client: "opencode", source: "OpenCode", kind: "新增偏好", text: "测试写入链路时，git 需要走本地代理。", lane: "similar", like: "测试写入链路（可拒绝）：deepseek-harness 更新时 git 需走本地代理。" },
+  { id: "scripts", client: "zcode", source: "ZCode", kind: "新增身份", text: "常用项目的脚本放在 scripts 目录里统一维护。" }
+]
+
+const svg = {
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg>'
+}
+const MARKS = {
+  opencode: "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(30, 0)"><path d="M180 240H60V120H180V240Z" fill="#CFCECD"/><path d="M180 60H60V240H180V60ZM240 300H0V0H240V300Z" fill="#211E1E"/></g></svg>'),
+  zcode: "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#111111"><path d="M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z"/></svg>')
+}
+
+let items = seed.map(item => ({ ...item }))
+let selected = items[0].id
+let mode = {}
+let drafts = {}
+let undo = null
+let toastTimer = 0
+
+const list = document.getElementById("list")
+const count = document.getElementById("count")
+const empty = document.getElementById("empty")
+const toast = document.getElementById("toast")
+
+function render() {
+  count.textContent = items.length ? String(items.length) : ""
+  empty.hidden = items.length > 0
+  list.innerHTML = ""
+  for (const item of items) {
+    const li = document.createElement("li")
+    li.className = "slot"
+    li.dataset.id = item.id
+    const clip = document.createElement("div")
+    clip.className = "clip"
+    const row = document.createElement("div")
+    row.className = "row" + (item.id === selected ? " selected" : "")
+    row.tabIndex = item.id === selected ? 0 : -1
+    row.dataset.id = item.id
+    const state = mode[item.id] || "idle"
+    const body = document.createElement("div")
+    body.className = "lead"
+    const mark = document.createElement("img")
+    mark.className = "source-mark"
+    mark.alt = ""
+    mark.src = MARKS[item.client]
+    const text = document.createElement("div")
+    text.className = "lead-text"
+    const kicker = document.createElement("p")
+    kicker.className = "kicker"
+    const agent = document.createElement("span")
+    agent.className = "agent"
+    agent.textContent = item.source
+    const kind = document.createElement("span")
+    kind.textContent = "· " + item.kind
+    kicker.append(agent, kind)
+    text.append(kicker)
+    if (state === "edit") {
+      const field = document.createElement("textarea")
+      field.className = "editor"
+      field.rows = 2
+      field.value = drafts[item.id] ?? item.text
+      field.setAttribute("aria-label", "修改这句")
+      field.addEventListener("input", () => { drafts[item.id] = field.value; fit(field) })
+      field.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); commitEdit(item.id) }
+        if (event.key === "Escape") { event.preventDefault(); cancelEdit(item.id) }
+      })
+      text.append(field)
+      queueMicrotask(() => { fit(field); field.focus(); field.setSelectionRange(field.value.length, field.value.length) })
+    } else {
+      const sentence = document.createElement("p")
+      sentence.className = "sentence"
+      sentence.textContent = item.text
+      text.append(sentence)
+    }
+    if (state === "confirm") text.append(confirmLine(item))
+    else if (state !== "edit" && item.lane === "update") {
+      const hint = document.createElement("p")
+      hint.className = "hint"
+      hint.textContent = "替换「" + item.was + "」"
+      text.append(hint)
+    } else if (state !== "edit" && item.lane === "similar") {
+      const hint = document.createElement("p")
+      hint.className = "hint"
+      hint.textContent = "已有一条几乎一样的记忆"
+      text.append(hint)
+    }
+    body.append(mark, text)
+    const actions = document.createElement("div")
+    actions.className = "actions"
+    if (state !== "confirm") {
+      actions.append(iconButton("edit", "编辑", svg.edit, () => startEdit(item.id)))
+      actions.append(iconButton("ignore", "忽略", svg.x, () => dismiss(item.id, "忽略")))
+      actions.append(iconButton("remember", "记住", svg.check, () => {
+        if (mode[item.id] === "edit") commitEdit(item.id)
+        else remember(item.id)
+      }))
+    } else {
+      actions.append(iconButton("ignore", "忽略", svg.x, () => dismiss(item.id, "忽略")))
+    }
+    row.append(body, actions)
+    row.addEventListener("click", event => {
+      if (event.target.closest("button, textarea")) return
+      select(item.id)
+    })
+    clip.append(row)
+    li.append(clip)
+    list.append(li)
+  }
+}
+
+function iconButton(kind, label, markup, onClick) {
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = "icon " + kind
+  button.setAttribute("aria-label", label)
+  button.title = label
+  button.innerHTML = markup
+  button.addEventListener("click", event => { event.stopPropagation(); onClick() })
+  return button
+}
+
+function confirmLine(item) {
+  const wrap = document.createElement("div")
+  wrap.className = "choices"
+  if (item.lane === "update") {
+    wrap.append(choice("更新原记忆", true, () => finish(item.id, "已更新原记忆")))
+    wrap.append(choice("另存一条", false, () => finish(item.id, "已另存一条")))
+  } else if (item.lane === "similar") {
+    wrap.append(choice("仍要记住", true, () => finish(item.id, "已记住")))
+    wrap.append(choice("不用了", false, () => dismiss(item.id, "忽略")))
+  }
+  return wrap
+}
+
+function choice(label, primary, onClick) {
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = primary ? "primary" : ""
+  button.textContent = label
+  button.addEventListener("click", event => { event.stopPropagation(); onClick() })
+  return button
+}
+
+function fit(field) {
+  field.style.height = "auto"
+  field.style.height = field.scrollHeight + "px"
+}
+
+function select(id) {
+  if (!id) return
+  selected = id
+  list.querySelectorAll(".row").forEach(row => {
+    const on = row.dataset.id === id
+    row.classList.toggle("selected", on)
+    row.tabIndex = on ? 0 : -1
+  })
+  const row = list.querySelector('.row[data-id="' + id + '"]')
+  if (row) row.focus()
+}
+
+function indexOf(id) { return items.findIndex(item => item.id === id) }
+
+function neighbor(id) {
+  const index = indexOf(id)
+  return items[index + 1] || items[index - 1] || null
+}
+
+function startEdit(id) {
+  selected = id
+  mode = { [id]: "edit" }
+  drafts[id] = items.find(item => item.id === id).text
+  render()
+}
+
+function cancelEdit(id) {
+  delete mode[id]
+  delete drafts[id]
+  render()
+  focusRow(id)
+}
+
+function commitEdit(id) {
+  const field = list.querySelector('.row[data-id="' + id + '"] textarea')
+  const text = ((field && field.value) || drafts[id] || "").trim()
+  if (!text) return
+  const item = items.find(entry => entry.id === id)
+  item.text = text
+  delete mode[id]
+  delete drafts[id]
+  finish(id, "已记住")
+}
+
+function remember(id) {
+  const item = items.find(entry => entry.id === id)
+  if (item.lane === "update" || item.lane === "similar") {
+    selected = id
+    mode = { [id]: "confirm" }
+    render()
+    const first = list.querySelector(".choices button")
+    if (first) first.focus()
+    return
+  }
+  finish(id, "已记住")
+}
+
+function finish(id, label) { remove(id, label) }
+function dismiss(id, label) { remove(id, "已忽略") }
+
+function remove(id, label) {
+  const index = indexOf(id)
+  if (index < 0) return
+  const item = items[index]
+  const next = neighbor(id)
+  undo = { item: { ...item }, index }
+  delete mode[id]
+  items.splice(index, 1)
+  selected = next ? next.id : null
+  const slot = list.querySelector('.slot[data-id="' + id + '"]')
+  if (slot && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    slot.classList.add("out")
+    slot.addEventListener("transitionend", () => render(), { once: true })
+  } else render()
+  showToast(label)
+}
+
+function showToast(label) {
+  clearTimeout(toastTimer)
+  toast.innerHTML = ""
+  const text = document.createElement("span")
+  text.textContent = label
+  const back = document.createElement("button")
+  back.type = "button"
+  back.textContent = "撤销"
+  back.addEventListener("click", restore)
+  toast.append(text, back)
+  toast.classList.add("show")
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 3200)
+}
+
+function restore() {
+  if (!undo) return
+  items.splice(undo.index, 0, undo.item)
+  selected = undo.item.id
+  undo = null
+  toast.classList.remove("show")
+  render()
+  focusRow(selected)
+}
+
+function focusRow(id) {
+  const row = list.querySelector('.row[data-id="' + id + '"]')
+  if (row) row.focus()
+}
+
+function move(step) {
+  if (!items.length) return
+  const index = Math.max(0, indexOf(selected))
+  const next = items[Math.min(items.length - 1, Math.max(0, index + step))]
+  if (next) select(next.id)
+}
+
+document.getElementById("reset").addEventListener("click", () => {
+  items = seed.map(item => ({ ...item }))
+  selected = items[0].id
+  mode = {}
+  drafts = {}
+  undo = null
+  toast.classList.remove("show")
+  render()
+  focusRow(selected)
+})
+
+window.addEventListener("keydown", event => {
+  const typing = event.target.closest("textarea")
+  if (typing) return
+  if (event.key === "ArrowDown") { event.preventDefault(); move(1) }
+  else if (event.key === "ArrowUp") { event.preventDefault(); move(-1) }
+  else if ((event.key === "e" || event.key === "E") && selected && !mode[selected]) startEdit(selected)
+  else if ((event.key === "Backspace" || event.key === "x" || event.key === "X") && selected) { event.preventDefault(); dismiss(selected) }
+  else if (event.key === "Enter" && selected && mode[selected] !== "edit" && mode[selected] !== "confirm") {
+    event.preventDefault()
+    remember(selected)
+  }
+  else if (event.key === "Escape" && selected && mode[selected]) cancelEdit(selected)
+})
+
+render()
+focusRow(selected)
+</script>
+</body>
+</html>

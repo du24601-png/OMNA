@@ -164,7 +164,7 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
       </div>
       <div className="settings-block">
         <h3>隐私</h3>
-        <p className="helper">记忆库、来源、提案、权限和访问记录都保存在本机。默认在本机检索。选择云端模型提取时，只发送你这次提交的文字，并说明接收方。授权某个 Agent 后，返回给它的记忆可能离开这台设备。知我不会宣传无论怎样配置都全程离线，也不会监控剪贴板、聊天窗口或系统活动，不会默认上传使用记录。备份保存在你选择的位置；旧备份和外部 Agent 里的副本需要你另行管理。</p>
+        <p className="helper">记忆库、来源、提案、权限和访问记录都保存在本机。默认在本机检索。选择云端模型提取时，只发送你这次提交的文字，并说明接收方。授权某个 Agent 后，返回给它的记忆可能离开这台设备。OMNA 不会宣传无论怎样配置都全程离线，也不会监控剪贴板、聊天窗口或系统活动，不会默认上传使用记录。备份保存在你选择的位置；旧备份和外部 Agent 里的副本需要你另行管理。</p>
       </div>
     </div>}
     {section === "backup" && <div>
@@ -176,7 +176,7 @@ function SettingsForm({ section, initial, onChanged }: { section: Section; initi
       </div>
       <div className="settings-block">
         <h3>从备份恢复</h3>
-        <p className="helper">只接受同一版本的知我备份。校验失败时，当前库不会被替换。恢复成功后，全部 Agent 停用，旧凭证失效，提取密钥需要重新填写。</p>
+        <p className="helper">只接受同一版本的 OMNA 备份。校验失败时，当前库不会被替换。恢复成功后，全部 Agent 停用，旧凭证失效，提取密钥需要重新填写。</p>
         <label className="field">备份文件<input ref={file} type="file" accept=".zip,application/zip"/></label>
         <label className="field">输入「恢复备份」以确认<input value={restoreWord} onChange={e => setRestoreWord(e.target.value)} autoComplete="off"/></label>
         <button className="button danger" disabled={!!busy || restoreWord !== "恢复备份"} onClick={restore}>{busy === "restore" ? "恢复中…" : "恢复备份"}</button>

@@ -226,7 +226,7 @@ def _markdown(memories: list[dict]) -> str:
         "event": "事件",
         "other": "其他",
     }
-    lines = ["# 知我导出", ""]
+    lines = ["# OMNA 导出", ""]
     if not memories:
         lines.append("没有已确认的记忆。")
         return "\n".join(lines)
@@ -305,7 +305,7 @@ def _unpack_backup(payload: bytes) -> dict:
 
 def _require_same_version(db_path, manifest: dict) -> None:
     if manifest.get("app") != _APP:
-        raise ApiError(409, "CONFLICT", "这份备份不是知我的记忆库。当前库没有改动。")
+        raise ApiError(409, "CONFLICT", "这份备份不是 OMNA 的记忆库。当前库没有改动。")
     if manifest.get("schema_version") != schema_version(db_path):
         raise ApiError(409, "CONFLICT", "这份备份的版本和当前记忆库不一致。当前库没有改动。")
     if manifest.get("kernel_package") != FROZEN_KERNEL:

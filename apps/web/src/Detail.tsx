@@ -304,7 +304,7 @@ export function Detail({ memoryId, layoutId, seed, origin, onClose, onSaved, onl
         <AlertDialog.Backdrop className="dialog-backdrop detail-alert-backdrop"/>
         <AlertDialog.Popup className="detail-alert material">
           <AlertDialog.Title className="detail-alert-title">永久删除这条记忆</AlertDialog.Title>
-          {preview && <AlertDialog.Description className="detail-alert-copy">删除后无法从知我里恢复这条记忆。若来源仍包含这段内容，确认后会整份删除这些来源；其他记忆会保留，并显示来源已删除。将删除 {preview.version_count} 个版本。</AlertDialog.Description>}
+          {preview && <AlertDialog.Description className="detail-alert-copy">删除后无法从 OMNA 里恢复这条记忆。若来源仍包含这段内容，确认后会整份删除这些来源；其他记忆会保留，并显示来源已删除。将删除 {preview.version_count} 个版本。</AlertDialog.Description>}
           {preview && (preview.sources.length ? <ul className="detail-alert-list">{preview.sources.map(item => <li key={item.id}>{sourceLabel(item.kind)}{item.name ? ` · ${item.name}` : ""}</li>)}</ul> : <p className="helper">没有仍包含这段内容的来源。</p>)}
           {error && <Notice tone="error">{error}</Notice>}
           <div className="actions detail-alert-actions">

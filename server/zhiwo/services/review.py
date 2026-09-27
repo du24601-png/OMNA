@@ -13,6 +13,7 @@ import sqlite3
 
 from zhiwo.adapters.kernel_client import KernelHandle
 from zhiwo.api.errors import ApiError
+from zhiwo.services.memories import requester_labels, requester_of
 from zhiwo.services.publish import (
     VERSION_CONFLICT,
     canonical_record,
@@ -48,7 +49,8 @@ def list_proposals(db_path, *, demo: bool = False, status: str | None = None) ->
         rows = connection.execute(sql, values).fetchall()
     finally:
         connection.close()
-    return {"proposals": [_proposal_view(row, demo=demo) for row in rows]}
+    agents, clients = requester_labels(db_path)
+    return {"proposals": [_proposal_view(row, demo=demo, agents=agents, clients=clients) for row in rows]}
 
 
 def get_proposal(db_path, proposal_id: str, *, demo: bool = False) -> dict:
@@ -68,7 +70,8 @@ def get_proposal(db_path, proposal_id: str, *, demo: bool = False) -> dict:
         connection.close()
     if row is None:
         raise ApiError(404, "NOT_FOUND", "proposal not found")
-    return _proposal_view(row, demo=demo)
+    agents, clients = requester_labels(db_path)
+    return _proposal_view(row, demo=demo, agents=agents, clients=clients)
 
 
 def decide_proposal(db_path, handle: KernelHandle, proposal_id: str, request_id: str, body: dict) -> dict:
@@ -458,10 +461,13 @@ def _decision_view(proposal, published: dict | None) -> dict:
     return view
 
 
-def _proposal_view(row, *, demo: bool = False) -> dict:
+def _proposal_view(row, *, demo: bool = False, agents: dict | None = None, clients: dict | None = None) -> dict:
+    directory_agents = agents or {}
+    directory_clients = clients or {}
     return {
         "id": row["id"],
         "origin": row["origin"],
+        "requester": requester_of(row["agent_id"], directory_agents, directory_clients),
         "change_type": row["change_type"],
         "target_id": row["target_id"],
         "base_revision": row["base_revision"],
