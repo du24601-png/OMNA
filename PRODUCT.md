@@ -1,7 +1,7 @@
 # 知我 · PRODUCT
 
 > V1.0 启动基线｜2026-09-25  
-> 依据：《知我｜最终产品方案（V1.0）》。本文定义产品范围；技术见 [ARCHITECTURE.md](ARCHITECTURE.md)，执行与验收见 [PLAN.md](PLAN.md)，AI 开发规则见 [AGENTS.md](AGENTS.md)。  
+> 依据：《知我｜最终产品方案（V1.0）》。本文定义产品范围；技术见 [ARCHITECTURE.md](ARCHITECTURE.md)，AI 开发规则见 [AGENTS.md](AGENTS.md)。
 > 这是待实现的需求，不代表功能已经完成。页面细节与默认行为是为启动开发补充的约定。
 
 ## 1. 产品定位
@@ -113,7 +113,7 @@ V1 必须打通这条真实链路。界面演示不能代替内核和真实客�
 
 ## 7. 发布标准
 
-以 [PLAN.md](PLAN.md) 的 A01–A14 场景为验收依据，重点是：
+验收重点如下；实际结果以 `tests/results/` 与 `experiments/kernel_spike/results/` 中的证据为准，当前使用限制见 [README.md](README.md)：
 
 1. 看得懂：从首页能迅速说明“系统认为我是谁、有什么目标和偏好”。
 2. 改得动：修改有差异、有来源、有历史，拒绝后不污染正式记忆。

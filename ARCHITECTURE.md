@@ -1,7 +1,7 @@
 # 知我 · ARCHITECTURE
 
 > V1.0 启动基线｜2026-09-26  
-> 范围以 [PRODUCT.md](PRODUCT.md) 为准。以下是知我的设计契约；底层实际接口、版本及平台兼容性在 [PLAN.md](PLAN.md) 的 P0 验证。
+> 范围以 [PRODUCT.md](PRODUCT.md) 为准。以下是知我的设计契约；底层实际接口、版本及平台兼容性的早期验证证据见 `experiments/kernel_spike/results/`；当前使用限制见 [README.md](README.md)。
 
 ## 1. 架构决策
 
@@ -200,7 +200,7 @@ P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windo
 
 | 目录 | 内容 |
 | --- | --- |
-| 根目录四份 `.md` | 唯一常驻项目文档，不额外维护另一套 PRD/架构/进度 |
+| `PRODUCT.md`、`ARCHITECTURE.md`、`AGENTS.md`、`README.md` | 产品范围、架构、开发规则与使用说明，不额外维护另一套 PRD/架构/进度 |
 | `apps/web/` | 四页界面、圆角顶栏、设置弹窗、客户端连接 UI、来源标志、`Skeleton` 加载占位、API client；品牌资源在 `brand/` 与 `apps/web/public/sources/` |
 | `apps/desktop/` | Electron main/preload、打包与服务启动 |
 | `server/zhiwo/api/`、`gateway/` | Owner HTTP API、MCP bridge 与 Agent 入口 |
