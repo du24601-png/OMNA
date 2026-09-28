@@ -33,7 +33,19 @@ WRONG = "p04-wrong-credential"
 TARGET_ID = "m06"
 QUERY_ID = "d06"
 OPENCODE_MODEL = "opencode-go/deepseek-v4-flash"
-OPENCODE = Path(r"C:\Users\example\npm-global\node_modules\opencode-ai\bin\opencode.exe")
+def _find_opencode() -> Path:
+    configured = os.environ.get("OPENCODE_BIN")
+    if configured:
+        return Path(configured)
+    found = shutil.which("opencode")
+    if found is None:
+        return Path("opencode")
+    # npm's .cmd shim cannot pass a multi-line prompt through cmd.exe.
+    real = Path(found).parent / "node_modules" / "opencode-ai" / "bin" / "opencode.exe"
+    return real if real.is_file() else Path(found)
+
+
+OPENCODE = _find_opencode()
 
 
 def emit(payload: dict) -> None:

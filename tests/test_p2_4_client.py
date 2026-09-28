@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import platform
+import shutil
 import socket
 import sqlite3
 import subprocess
@@ -31,7 +32,19 @@ FIXTURE = REPO / "experiments" / "kernel_spike" / "fixtures" / "p0_3_queries.jso
 DELIVERY = REPO / "tests" / "results" / "p2_3_delivery_windows.json"
 RESULT_PATH = REPO / "tests" / "results" / "p2_4_windows.json"
 BRIDGE = SERVER / "zhiwo" / "gateway" / "stdio_bridge.py"
-OPENCODE = Path(r"C:\Users\example\npm-global\node_modules\opencode-ai\bin\opencode.exe")
+def _find_opencode() -> Path:
+    configured = os.environ.get("OPENCODE_BIN")
+    if configured:
+        return Path(configured)
+    found = shutil.which("opencode")
+    if found is None:
+        return Path("opencode")
+    # npm's .cmd shim cannot pass a multi-line prompt through cmd.exe.
+    real = Path(found).parent / "node_modules" / "opencode-ai" / "bin" / "opencode.exe"
+    return real if real.is_file() else Path(found)
+
+
+OPENCODE = _find_opencode()
 OPENCODE_MODEL = "opencode-go/deepseek-v4-flash"
 IRRELEVANT = "如何校准实验室里的激光干涉仪"
 PENDING = "待审探针：紫水晶计划还没有批准。"
