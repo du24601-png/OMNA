@@ -270,11 +270,11 @@ export const api = {
   agentClients() {
     return request("/api/v1/agent-clients") as Promise<{ clients: AgentClient[] }>
   },
-  connectClient(id: string, preset: "read" | "propose", key: string) {
+  connectClient(id: string, preset: "read" | "propose", key: string, permissions?: { allowed_tools: string[]; allowed_categories: string[] }) {
     return request(`/api/v1/agent-clients/${encodeURIComponent(id)}/connect`, {
       method: "POST",
       headers: { "Idempotency-Key": key },
-      body: JSON.stringify({ preset, confirm: true }),
+      body: JSON.stringify({ preset, confirm: true, ...(permissions ?? {}) }),
     }) as Promise<{ client_id: string; name: string; agent_id: string; preset: string; config_path: string; configured: boolean }>
   },
   createAgent(name: string, key: string) {

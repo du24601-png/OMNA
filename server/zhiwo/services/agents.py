@@ -141,7 +141,7 @@ def _principal_from_row(row) -> AgentPrincipal | None:
     )
 
 
-def create_agent(db_path, request_id: str, name: str) -> dict:
+def create_agent(db_path, request_id: str, name: str, *, secret: str | None = None) -> dict:
     cleaned = _name(name)
     digest = _payload_hash({"name": cleaned})
     with _lock:
@@ -154,7 +154,11 @@ def create_agent(db_path, request_id: str, name: str) -> dict:
                 connection.rollback()
                 return view
             agent_id = str(uuid.uuid4())
-            secret = secrets.token_urlsafe(32)
+            if secret is None:
+                secret = secrets.token_urlsafe(32)
+            elif not isinstance(secret, str) or not secret:
+                connection.rollback()
+                raise ApiError(500, "UNAVAILABLE", "这次没有生成可用凭证，配置没有写入。")
             install_redaction(secret)
             now = _now()
             connection.execute(
@@ -299,6 +303,38 @@ def rotate_credential(db_path, agent_id: str, request_id: str) -> dict:
             view = _public(connection, agent_id)
             view["credential"] = secret
             return view
+        except Exception:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+
+def commit_credential(db_path, agent_id: str, secret: str) -> None:
+    """Store a credential that is already in the client config.
+
+    The caller writes the config first. A failed write must not call this,
+    so the previous credential remains valid.
+    """
+    if not isinstance(secret, str) or not secret:
+        raise ApiError(500, "UNAVAILABLE", "这次没有生成可用凭证，配置没有写入。")
+    install_redaction(secret)
+    with _lock:
+        connection = _connect(db_path)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            _required(connection, agent_id)
+            now = _now()
+            connection.execute(
+                """
+                UPDATE agents
+                SET credential_hash = ?, policy_version = policy_version + 1, updated_at = ?
+                WHERE id = ?
+                """,
+                (credential_digest(secret), now, agent_id),
+            )
+            connection.commit()
         except Exception:
             if connection.in_transaction:
                 connection.rollback()

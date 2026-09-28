@@ -296,6 +296,8 @@ def create_app() -> FastAPI:
             body.preset,
             _request_id(idempotency_key),
             port=int(request.scope["server"][1]),
+            allowed_tools=body.allowed_tools,
+            allowed_categories=body.allowed_categories,
         )
 
     @app.get("/api/v1/agent/session")
@@ -579,6 +581,8 @@ class ClientConnectBody(BaseModel):
 
     preset: Literal["read", "propose"]
     confirm: bool = False
+    allowed_tools: list[str] | None = None
+    allowed_categories: list[str] | None = None
 
 
 class AgentPatch(BaseModel):

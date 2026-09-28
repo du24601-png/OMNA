@@ -6,6 +6,7 @@ Uses a temporary home. Does not read or write the real user profile.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import sys
 import unittest
@@ -14,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
 
+from zhiwo.api.auth import credential_digest
 from zhiwo.api.errors import ApiError
 from zhiwo.repositories.migrate import migrate, put_setting
 from zhiwo.services.agents import create_agent, list_agents
@@ -33,10 +35,19 @@ class ClientConnectTest(unittest.TestCase):
         self.db = self.directory / "zhiwo.db"
         migrate(self.db)
         self.lookup = lambda _name: None
+        self._saved_env = {
+            key: os.environ.pop(key, None)
+            for key in ("ZHIWO_BRIDGE_PYTHON", "ZHIWO_BRIDGE_PYTHONPATH")
+        }
 
     def tearDown(self) -> None:
         import shutil
 
+        for key, value in self._saved_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
         link = self.home / ".workbuddy"
         if link.is_junction():
             link.rmdir()
@@ -101,6 +112,7 @@ class ClientConnectTest(unittest.TestCase):
         self.assertEqual(opencode["mcp"]["zhiwo"]["type"], "local")
         self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["ZHIWO_AGENT_CREDENTIAL"], secret)
         self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["ZHIWO_API_ORIGIN"], "http://127.0.0.1:8765")
+        self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["PYTHONPATH"], str(ROOT / "server"))
         permissions = self._permissions(result["agent_id"])
         self.assertEqual(permissions["allowed_categories"], ["preference", "goal"])
         self.assertEqual(permissions["allowed_tools"], ["get_context", "search_memory"])
@@ -158,6 +170,7 @@ class ClientConnectTest(unittest.TestCase):
         self.assertEqual(error.exception.code, "VALIDATION_ERROR")
         self.assertEqual(path.read_text(encoding="utf-8"), "{")
         self.assertFalse(path.with_name("mcp.json.tmp").exists())
+        self.assertEqual(self._agent_count(), 0)
 
     def test_junction_outside_home_is_refused(self) -> None:
         import subprocess
@@ -178,6 +191,118 @@ class ClientConnectTest(unittest.TestCase):
             connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=1)
         self.assertEqual(error.exception.code, "VALIDATION_ERROR")
         self.assertEqual(target.read_text(encoding="utf-8"), "{}")
+        self.assertEqual(self._agent_count(), 0)
+
+    def test_install_files_under_the_user_profile_count(self) -> None:
+        npm = self.home / "AppData" / "Roaming" / "npm" / "opencode.cmd"
+        npm.parent.mkdir(parents=True)
+        npm.write_text("@echo off\n", encoding="utf-8")
+        desktop = self.home / "AppData" / "Local" / "AnthropicClaude" / "app-1.0.0" / "claude.exe"
+        desktop.parent.mkdir(parents=True)
+        desktop.write_bytes(b"")
+        listed = {item["id"]: item for item in list_clients(self.home, self.lookup)["clients"]}
+        self.assertTrue(listed["opencode"]["installed"])
+        self.assertTrue(listed["claude"]["installed"])
+        self.assertFalse(listed["claude-code"]["installed"])
+        self.assertFalse(listed["zcode"]["installed"])
+
+    def test_command_on_the_user_path_counts(self) -> None:
+        listed = {
+            item["id"]: item
+            for item in list_clients(
+                self.home,
+                self.lookup,
+                path_lookup=lambda name: r"C:\Tools\claude.cmd" if name == "claude" else None,
+            )["clients"]
+        }
+        self.assertTrue(listed["claude-code"]["installed"])
+        self.assertFalse(listed["claude"]["installed"])
+
+    def test_registered_claude_package_counts_as_desktop(self) -> None:
+        listed = {
+            item["id"]: item
+            for item in list_clients(self.home, self.lookup, packages=frozenset({"claude"}))["clients"]
+        }
+        self.assertTrue(listed["claude"]["installed"])
+        self.assertFalse(listed["claude-code"]["installed"])
+
+    def test_packaged_runtime_is_what_gets_written(self) -> None:
+        python = self.directory / "python.exe"
+        python.write_bytes(b"")
+        bundled = self.directory / "bundled"
+        bundled.mkdir()
+        os.environ["ZHIWO_BRIDGE_PYTHON"] = str(python)
+        os.environ["ZHIWO_BRIDGE_PYTHONPATH"] = str(bundled)
+        connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
+        written = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))
+        entry = written["mcpServers"]["zhiwo"]
+        self.assertEqual(entry["command"], str(python.resolve()))
+        self.assertEqual(entry["args"], ["-m", "zhiwo.gateway.stdio_bridge"])
+        self.assertEqual(entry["env"]["PYTHONPATH"], str(bundled.resolve()))
+        self.assertEqual(entry["env"]["ZHIWO_API_ORIGIN"], "http://127.0.0.1:8765")
+        self.assertNotIn(entry["env"]["ZHIWO_AGENT_CREDENTIAL"], json.dumps({key: value for key, value in entry["env"].items() if key != "ZHIWO_AGENT_CREDENTIAL"}))
+
+    def test_missing_bundled_python_writes_nothing(self) -> None:
+        os.environ["ZHIWO_BRIDGE_PYTHON"] = str(self.directory / "missing.exe")
+        with self.assertRaises(ApiError) as error:
+            connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
+        self.assertEqual(error.exception.code, "UNAVAILABLE")
+        self.assertFalse((self.home / ".workbuddy" / "mcp.json").exists())
+        self.assertEqual(self._agent_count(), 0)
+
+    def test_failed_rewrite_keeps_the_old_credential(self) -> None:
+        first = connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
+        path = self.home / ".workbuddy" / "mcp.json"
+        before = path.read_text(encoding="utf-8")
+        secret = json.loads(before)["mcpServers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+        digest = self._hash(first["agent_id"])
+        self.assertEqual(digest, credential_digest(secret))
+        path.with_name("mcp.json.tmp").mkdir()
+        with self.assertRaises(ApiError) as error:
+            connect_client(
+                self.db,
+                self.home,
+                "workbuddy",
+                "propose",
+                str(uuid.uuid4()),
+                port=8765,
+                allowed_tools=["get_context", "search_memory", "propose_memory", "explain_memory"],
+                allowed_categories=["preference", "goal", "project"],
+            )
+        self.assertEqual(error.exception.code, "UNAVAILABLE")
+        self.assertEqual(path.read_text(encoding="utf-8"), before)
+        self.assertEqual(self._hash(first["agent_id"]), digest)
+        self.assertEqual(self._permissions(first["agent_id"])["allowed_tools"], ["get_context", "search_memory"])
+
+    def test_rewrite_can_keep_tools_outside_the_preset(self) -> None:
+        first = connect_client(self.db, self.home, "zcode", "read", str(uuid.uuid4()), port=8765)
+        tools = ["get_context", "search_memory", "propose_memory", "explain_memory"]
+        categories = ["preference", "goal", "project"]
+        again = connect_client(
+            self.db,
+            self.home,
+            "zcode",
+            "propose",
+            str(uuid.uuid4()),
+            port=8765,
+            allowed_tools=tools,
+            allowed_categories=categories,
+        )
+        self.assertEqual(again["agent_id"], first["agent_id"])
+        self.assertEqual(self._permissions(first["agent_id"])["allowed_tools"], tools)
+        self.assertEqual(self._permissions(first["agent_id"])["allowed_categories"], categories)
+        with self.assertRaises(ApiError) as error:
+            connect_client(
+                self.db,
+                self.home,
+                "zcode",
+                "read",
+                str(uuid.uuid4()),
+                port=8765,
+                allowed_tools=["get_context"],
+            )
+        self.assertEqual(error.exception.code, "VALIDATION_ERROR")
+        self.assertEqual(self._permissions(first["agent_id"])["allowed_tools"], tools)
 
     def _seed(self) -> None:
         opencode = self.home / ".config" / "opencode" / "opencode.json"
@@ -232,6 +357,20 @@ class ClientConnectTest(unittest.TestCase):
             if line.startswith("ZHIWO_AGENT_CREDENTIAL"):
                 return line.split("=", 1)[1].strip().strip('"')
         raise AssertionError("missing codex credential")
+
+    def _hash(self, agent_id: str) -> str:
+        connection = sqlite3.connect(self.db)
+        try:
+            return connection.execute("SELECT credential_hash FROM agents WHERE id = ?", (agent_id,)).fetchone()[0]
+        finally:
+            connection.close()
+
+    def _agent_count(self) -> int:
+        connection = sqlite3.connect(self.db)
+        try:
+            return connection.execute("SELECT COUNT(*) FROM agents").fetchone()[0]
+        finally:
+            connection.close()
 
     def _permissions(self, agent_id: str) -> dict:
         connection = sqlite3.connect(self.db)

@@ -37,6 +37,8 @@ flowchart TD
 
 运行数据统一位于 `ZHIWO_DATA_DIR`：发布版由 Electron 的用户数据目录派生；开发/测试显式使用隔离目录。包含 `zhiwo.db`、Kernel 专用目录、模型缓存。禁止误用用户已有的 Mnemosyne 默认库。
 
+发布版的页面由本地服务在 `127.0.0.1:8765` 同源提供构建好的前端，Electron 窗口直接打开这个地址。Owner 凭证由 main 进程首次启动时生成并保存在数据目录，经 preload 交给渲染层。关闭窗口只隐藏到托盘，服务继续运行；托盘退出时结束服务进程树。随包模型只带 `models--Qdrant--bge-small-zh-v1.5`，通过 `ZHIWO_FASTEMBED_CACHE_DIR` 只读使用。
+
 ## 3. 两个数据库如何分工
 
 **`mnemosyne.db` 回答“已经确认记住了什么”；`zhiwo.db` 回答“从哪来、谁批准、谁能取、曾返回什么”。**
@@ -120,7 +122,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 
 ### 6.1 本机 Owner API
 
-前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。`GET /health` 在此前缀之外，只表示进程在运行。`GET /api/v1/health` 返回控制库版本、Kernel 连接、提取模型是否已配置、`test_mode`，以及 `mcp_runtime`。`test_mode` 只在 `ZHIWO_TEST_MODE=1` 时为真，页面用它标明演示数据。`mcp_runtime` 只包含本机 stdio bridge 的启动命令、`PYTHONPATH` 和当前服务地址，不包含 Agent 凭证。该接口要求 Owner 凭证。
+前缀 `/api/v1`，仅本机 Owner 凭证可调用；Agent 凭证不能调用这些接口。`GET /health` 在此前缀之外，只表示进程在运行。`GET /api/v1/health` 返回控制库版本、Kernel 连接、提取模型是否已配置、`test_mode`，以及 `mcp_runtime`。`test_mode` 只在 `ZHIWO_TEST_MODE=1` 时为真，页面用它标明演示数据。`mcp_runtime` 只包含本机 stdio bridge 的启动命令和当前服务地址；需要额外代码目录时才带 `PYTHONPATH`。不包含 Agent 凭证。该接口要求 Owner 凭证。
 
 | 路由 | 用途 |
 | --- | --- |
@@ -142,7 +144,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 
 `GET /api/v1/agent/session` 不属于上表的 Owner 路由，也不是 MCP 工具。它只根据凭证返回连接身份、启用状态、`policy_version` 和已授权的工具、类别，不返回记忆。客户端另外提交的名称或 `agent_id` 不参与识别。
 
-第一版客户端接入在 `services/client_connect.py`。名单是 WorkBuddy（`~/.workbuddy/mcp.json` 的 `mcpServers`）、ZCode（`~/.zcode/cli/config.json` 的 `mcp.servers`）、OpenCode（`~/.config/opencode/opencode.json` 的 `mcp`，`type: local`）、ChatGPT（桌面端、命令行和编辑器扩展共用 `~/.codex/config.toml` 的 `[mcp_servers.zhiwo]`）、Claude 桌面版（Windows 的 `%APPDATA%\Claude\claude_desktop_config.json` 的 `mcpServers`）和 Claude Code（`~/.claude.json` 用户级 `mcpServers`，`type: stdio`）。检测只看这些目录、配置文件或同名命令是否存在，不扫描进程。写入是合并一条 `zhiwo`，不替换文件里的其他服务。启动命令是当前 Python 的绝对路径加 `-m zhiwo.gateway.stdio_bridge`。凭证只放进该文件的环境变量。配置路径若经符号链接或目录联接跑到用户目录以外，拒绝写入。`ZHIWO_CLIENT_HOME` 只在 `ZHIWO_TEST_MODE=1` 时改写目标目录。
+第一版客户端接入在 `services/client_connect.py`。名单是 WorkBuddy（`~/.workbuddy/mcp.json` 的 `mcpServers`）、ZCode（`~/.zcode/cli/config.json` 的 `mcp.servers`）、OpenCode（`~/.config/opencode/opencode.json` 的 `mcp`，`type: local`）、ChatGPT（桌面端、命令行和编辑器扩展共用 `~/.codex/config.toml` 的 `[mcp_servers.zhiwo]`）、Claude 桌面版（Windows 的 `%APPDATA%\Claude\claude_desktop_config.json` 的 `mcpServers`）和 Claude Code（`~/.claude.json` 用户级 `mcpServers`，`type: stdio`）。检测看这些目录、配置文件、同名命令、Windows 用户和系统 PATH 里的同名命令，以及用户目录下这些客户端的常见安装文件。Claude 桌面版另认当前用户已注册的应用包 `Claude_*pzs8sxrjxfjjc`。不扫描进程，不搜索整盘。写入是合并一条 `zhiwo`，不替换文件里的其他服务。启动命令默认是正在运行这份服务的 Python，参数是 `-m zhiwo.gateway.stdio_bridge`；从源码运行时带上 `server` 目录的 `PYTHONPATH`。安装进程用 `ZHIWO_BRIDGE_PYTHON` 指向随包解释器，解释器还不能导入 `zhiwo` 时再用 `ZHIWO_BRIDGE_PYTHONPATH` 指向随包代码目录。凭证只放进该文件的环境变量。已有连接在配置文件替换成功之后才保存新凭证；写入失败时旧凭证和旧权限保持不变。重新写入可以带上当前的工具和类别，避免先被预设覆盖。配置路径若经符号链接或目录联接跑到用户目录以外，拒绝写入。安装文件若经联接跑到用户目录以外，不把它算作已安装。`ZHIWO_CLIENT_HOME` 只在 `ZHIWO_TEST_MODE=1` 时改写目标目录。
 
 P2.1 的权限变更在 `services/agents.py`。新连接的工具和类别为空，`policy_version` 从 1 开始。允许的工具是 `get_context`、`search_memory`、`propose_memory`、`explain_memory`；类别是 `identity`、`goal`、`preference`、`project`、`event`、`other`。未知值拒绝。`enabled`、工具、类别或凭证实际变化时 `policy_version` 加 1；只改名称不加。停用后的后续请求立即拒绝。重置使旧凭证立即失效，递增权限版本，并且不恢复已停用的连接。身份和权限用 `fetch_principal()` 一次连接查询读出。这个模块不读取、不写入记忆。
 

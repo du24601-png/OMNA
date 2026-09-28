@@ -112,13 +112,13 @@ export function AgentPage({ tick, online, runtime }: { tick: number; online: boo
       action: "重新写入",
       run: async () => {
         const preset = presetOf(agent.allowed_tools)
-        const done = await run(`reconnect:${client.id}:${agent.policy_version}`, async key => {
-          await api.connectClient(client.id, preset, key)
-          const restore = `restore:${agent.id}:${agent.policy_version}`
-          await api.updateAgent(agent.id, { allowed_tools: agent.allowed_tools, allowed_categories: agent.allowed_categories }, keyFor(restore))
-          requests.current.delete(restore)
-          return true
-        })
+        const done = await run(
+          `reconnect:${client.id}:${agent.policy_version}:${agent.allowed_tools.join(",")}:${agent.allowed_categories.join(",")}`,
+          key => api.connectClient(client.id, preset, key, {
+            allowed_tools: agent.allowed_tools,
+            allowed_categories: agent.allowed_categories,
+          }),
+        )
         if (done) setNotice(`已重新写入。重启 ${client.name} 后生效。`)
         refresh()
       },
