@@ -146,7 +146,7 @@ export function explain(error: unknown): string {
   if (error.code === "UNAUTHENTICATED") return "本机凭证不正确。"
   if (error.code === "MODEL_UNAVAILABLE") return "模型还没准备好，这次没有保存。"
   if (error.code === "CONFLICT" && error.message.includes("memory changed")) {
-    return "当前版本已经变化。请重新查看差异，这次没有覆盖最新内容。"
+    return "当前记忆已经更新，这条建议不能再改它。"
   }
   if (error.code === "CONFLICT" || error.code === "VALIDATION_ERROR") return error.message
   return error.message || "没有完成，请查看原因后重试。"

@@ -1,0 +1,181 @@
+{
+  "task": "review-edges",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "library": "temporary",
+  "real_user_library": false,
+  "cases": [
+    {
+      "id": "T01",
+      "name": "同目标同批双改",
+      "expected": "两条都可先进入待确认；用过期版本批准时不得覆盖；另存不影响原记忆",
+      "actual": "双 pending=True；先通过后版本 2；过期批准=409 CONFLICT the memory changed since this review; the proposal is still pending；当前仍是清晨且版本 2=[T01-a] 改成清晨骑行。/2；另存后原句未变=[T01-a] 改成清晨骑行。；界面不再提供按当前版本覆盖=True",
+      "verdict": "通过",
+      "proposal_id": "f39906db-ce1d-4ad1-a924-8fec9c4f5697|b78a935e-aec7-4e6c-a123-a2f680f7ae9a",
+      "request_id": "58cdcefe-1ec6-4dd2-99d1-21191ffdfe2e|647e5e8b-e025-4dd5-94d5-5ba4d00050df",
+      "target_id": "33d2f4dd-0d09-490b-b500-1c7442da931e"
+    },
+    {
+      "id": "T01-owner",
+      "name": "用户先改正式记忆，旧提案再批准",
+      "expected": "正式记忆保持用户刚保存的句子",
+      "actual": "用户版本=2；旧提案=409 CONFLICT the memory changed since this review; the proposal is still pending；当前=[T01] 用户自己已保存的新句。",
+      "verdict": "通过",
+      "proposal_id": "7d1dfcd7-f910-48b7-bb06-54f15547cb54",
+      "target_id": "6fba83ef-2969-4e63-8924-8c82d4673148"
+    },
+    {
+      "id": "T02",
+      "name": "连续修改阶梯",
+      "expected": "前两步通过并递增版本；过期版本在提交时被拒绝，正式记忆保持第三版",
+      "actual": "v2=2；v3=3；过期提交=409 CONFLICT the memory changed since this proposal was prepared；当前=[T02] 第三版。",
+      "verdict": "通过",
+      "proposal_id": "cae42bbe-e57a-4b6a-a1a5-81b878b0da43|530f3499-b8af-4339-8929-c5cda400ce7a",
+      "target_id": "6688f7eb-f5f3-4e59-a6f3-b442ab2816c8"
+    },
+    {
+      "id": "T03",
+      "name": "跨字段修改",
+      "expected": "非法 kind 拒绝；合法 category 变更在批准后生效",
+      "actual": "非法 kind=400 VALIDATION_ERROR kind or category is not supported；批准后 category=goal kind=fact revision=2",
+      "verdict": "通过",
+      "proposal_id": "a6ae14ac-35c7-42e5-86ac-78fd9ae118b3",
+      "target_id": "20c2c0e6-bb8e-4c72-a4ec-b1a35203d619"
+    },
+    {
+      "id": "T04",
+      "name": "空修改",
+      "expected": "方案希望无变化不产生新版本；产品未要求拒绝",
+      "actual": "提案=pending；批准版本=2；正文未变=True",
+      "verdict": "记录 S3：相同正文仍新增一个版本",
+      "proposal_id": "a6de20e0-03d7-4932-9a1a-3a971a171ffa",
+      "target_id": "1998e5be-e097-41f0-ad28-691dcba5fc1e"
+    },
+    {
+      "id": "T05",
+      "name": "改回旧版",
+      "expected": "用当前版本号可以把正文改回旧句，并产生新版本",
+      "actual": "中间版本=2；改回版本=3；正文=[T05] 最初的句子。",
+      "verdict": "通过",
+      "proposal_id": "36498818-7665-4738-b728-493c5d4e79c7",
+      "target_id": "53312d5f-363e-4e42-beed-e39e76135dea"
+    },
+    {
+      "id": "T06",
+      "name": "request_id 重放",
+      "expected": "同载荷返回原提案；不同载荷冲突",
+      "actual": "两次 id 相同=True；不同载荷=409 CONFLICT this request id was already used with a different payload",
+      "verdict": "通过",
+      "proposal_id": "c8e1bd41-d25b-4647-beba-ff14da3b8157",
+      "request_id": "e9bc4a35-03d7-4198-9f3f-6eb0ab8f4acb"
+    },
+    {
+      "id": "T07",
+      "name": "内容克隆",
+      "expected": "方案希望审核侧提示重复；服务允许两条待确认",
+      "actual": "两条不同提案=True；服务不查重。待确认的相似判断只对比已加载的正式记忆，不对比其他待确认",
+      "verdict": "记录 S2：两条相同新增都会作为普通新增",
+      "proposal_id": "b448eb79-fc44-4c19-b291-af1987bbd912|d6b9bcb7-3d54-4183-a80b-2f7c5634445b"
+    },
+    {
+      "id": "T08",
+      "name": "与正式库撞车",
+      "expected": "审核侧对逐字相同的新增给出相似提示",
+      "actual": "逐字提案=pending；界面相似分=1；带编号变体相似分=1。服务不拦截。正式记忆 id=147623c2-2c86-4af1-9207-3cbd1f8f7eaa",
+      "verdict": "记录：服务不拦截；逐字相同会进入待确认的相似分支，不能直接改原来那一条",
+      "proposal_id": "3e56e257-2d87-423a-869b-1c02416c921e|6b1bf778-33c4-450d-9c2f-29f57954ca49",
+      "target_id": "147623c2-2c86-4af1-9207-3cbd1f8f7eaa"
+    },
+    {
+      "id": "T09",
+      "name": "繁简与标点变体",
+      "expected": "记录审核侧能识别到哪一种",
+      "actual": "繁体=pending 相似分=0.5217391304347826；半角标点=pending 相似分=0.8695652173913043；同义改写=pending 相似分=0.23529411764705882。相似阈值是 0.62，只在待确认页面对比已加载正式记忆",
+      "verdict": "能力基线"
+    },
+    {
+      "id": "T10",
+      "name": "超长文本",
+      "expected": "拒绝并说明长度上限",
+      "actual": "提案=None；400 VALIDATION_ERROR content must contain 1 to 2000 characters",
+      "verdict": "通过"
+    },
+    {
+      "id": "T11",
+      "name": "特殊字符",
+      "expected": "批准后正文与提交逐字一致",
+      "actual": "入库一致=True；搜索命中=[True]",
+      "verdict": "通过",
+      "proposal_id": "33c1ea2c-2f39-4ba3-a619-e828fb673409",
+      "target_id": "0d62d278-f2d8-4298-a380-96082b67191c"
+    },
+    {
+      "id": "T12",
+      "name": "极短内容",
+      "expected": "空内容拒绝；非空短句按 1 到 2000 字接受",
+      "actual": "短句=pending；仅编号=pending；空格=400 VALIDATION_ERROR content must contain 1 to 2000 characters",
+      "verdict": "通过"
+    },
+    {
+      "id": "T13",
+      "name": "伪证据",
+      "expected": "记录证据是否只做形式校验",
+      "actual": "提案=pending；verification=unverified；note=Agent 提供，未核实。待确认只在证据文本为空时提示缺少依据，不比较证据和正文是否相关",
+      "verdict": "记录 S3：无关证据可提交，页面不标红",
+      "proposal_id": "1d458478-a1f1-4b5c-9972-3561f57e7b9f"
+    },
+    {
+      "id": "T14",
+      "name": "先审修改、新增仍待确认",
+      "expected": "不能把未批准提案当修改目标；先批准另一条修改不产生孤儿",
+      "actual": "指向提案=404 NOT_FOUND memory not found；已存在记忆改为=[T14] 修改已存在的句子。 版本=2；新增仍=pending",
+      "verdict": "通过",
+      "proposal_id": "a1936001-4534-4e71-bddd-5176a9bc3db0|1927d798-2889-4788-9533-b84f809b2943",
+      "target_id": "ca734cff-d2c8-4de9-bf1e-cb15a5102d96"
+    },
+    {
+      "id": "T15",
+      "name": "拒绝后再改",
+      "expected": "拒绝后不能写入；提示不需要区分已拒绝和不存在",
+      "actual": "拒绝={'proposal_id': '6ceaeb75-0659-4f2d-8209-a42382e9c841', 'status': 'rejected', 'decision': 'reject'}；再改=404 NOT_FOUND memory not found；解释=404 NOT_FOUND memory not found",
+      "verdict": "通过；提示是 memory not found，不写已被拒绝",
+      "proposal_id": "6ceaeb75-0659-4f2d-8209-a42382e9c841"
+    },
+    {
+      "id": "T16",
+      "name": "explain 各状态",
+      "expected": "待确认、已拒绝、不可见、已删除返回相同的不存在",
+      "actual": "404 NOT_FOUND memory not found / 404 NOT_FOUND memory not found / 404 NOT_FOUND memory not found / 404 NOT_FOUND memory not found",
+      "verdict": "通过",
+      "target_id": "9149c8b2-ccad-442d-b0ae-1c449085bc37|7d9b9b1c-6654-40b2-9f13-1278606c51f0"
+    },
+    {
+      "id": "T17",
+      "name": "未批准就想改",
+      "expected": "方案希望提示先拒绝再重提；现有文案只说明找不到记忆",
+      "actual": "新增=pending；再改=404 NOT_FOUND memory not found",
+      "verdict": "记录 S3：没有下一步指引",
+      "proposal_id": "186422d7-7033-4ad1-a831-0c3cf8c70013"
+    },
+    {
+      "id": "T18",
+      "name": "批量提交",
+      "expected": "13 条都返回且正文不串",
+      "actual": "条数=13；id 唯一=True；逐字一致=True",
+      "verdict": "通过",
+      "proposal_id": "250031f2-48ce-4822-aae8-ae98b9291572,93ea34ca-26a6-460a-b919-0c659ab1d585,7ac7bb49-aef8-4423-ac7f-63e2afcf7985,9fb51cab-5d0e-445c-af6c-f744daac4220,13c67c08-f528-493d-a7a4-e9b752b872d9,71ebd79d-57a0-4cb4-a6e4-fdf8d544e89e,aae4794c-a33d-4d22-a79c-4270ac934199,c7d1f84f-329f-4947-943b-6d460d2b5e97,6363ce03-08c5-4a9a-b6bb-b3d96bbeeba1,a3446711-8f88-49bf-a752-9500f91bdc00,52a4d684-740d-4248-9bdc-26d0161b31af,2b540ba1-7280-4b5b-9c3c-9869d2d86cdf,d63d51ef-38ff-4021-9190-2363f6e9be92",
+      "target_id": "cef3b42d-8a39-4a3c-bd95-97fa9fae6896"
+    },
+    {
+      "id": "T19",
+      "name": "目标顺延三次",
+      "expected": "版本递增到 3，当前正文是十二月；旧版本不作为搜索或按任务获取的结果",
+      "actual": "版本=3；正文=[T19] 目标：十二月底前完成青柠目标。；搜索=['[T19] 目标：十二月底前完成青柠目标。', '测试标记青柠回声：回答前先用一句话复述我的要求。', '[T03] 类别改成目标。']；旧句搜索=['[T19] 目标：十二月底前完成青柠目标。', '测试标记青柠回声：回答前先用一句话复述我的要求。', '[T03] 类别改成目标。', '[T01-a] 改成清晨骑行。', '[T01-b] 改成夜晚骑行。']；按任务=['[T19] 目标：十二月底前完成青柠目标。', '测试标记青柠回声：回答前先用一句话复述我的要求。', '[T03] 类别改成目标。']",
+      "verdict": "通过",
+      "proposal_id": "8a36fa9c-a579-43df-88d2-80f3f4b1e75a|22b6f0b7-6434-4566-bb1a-834c15339646|525d0814-6e96-44a2-9d5b-5a1760745be7",
+      "target_id": "6160ea56-13f2-4fc4-9f6b-e50ab83173c5"
+    }
+  ],
+  "schema_version": 7,
+  "s0_failures": []
+}

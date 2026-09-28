@@ -107,7 +107,6 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   const [keeping, setKeeping] = useState(false)
   const [error, setError] = useState("")
   const [conflict, setConflict] = useState(false)
-  const [adopted, setAdopted] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const attempt = useRef<{ sig: string; key: string } | null>(null)
   const running = useRef(false)
@@ -118,7 +117,8 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   const text = draft.trim()
   const lane = useMemo(() => classify(proposal, text, library, libraryReady), [proposal, text, library, libraryReady])
   const similar = useMemo(() => proposal.target_id ? null : findSimilar(text, library), [proposal.target_id, text, library])
-  const mismatched = !!current && proposal.base_revision != null && current.revision !== proposal.base_revision && adopted !== current.revision
+  const stale = !!current && proposal.base_revision != null && current.revision !== proposal.base_revision
+  const blocked = stale || conflict
   const dirty = draft !== proposal.payload.content || shareTouched
   useUnsaved(dirty && focused, busy)
   useEffect(() => { if (mode === "edit") editor.current?.focus() }, [mode])
@@ -137,7 +137,6 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
     setKeeping(false)
     setError("")
     setConflict(false)
-    setAdopted(null)
   }, [focused, open, proposal.payload.content, proposal.payload.share_enabled, busy])
   async function send(body: Record<string, unknown>) {
     if (running.current) return
@@ -177,30 +176,14 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
     await send(bodyFor(decision))
   }
   async function updateOriginal() {
-    if (!proposal.target_id) return
+    if (!proposal.target_id || blocked) return
     if (!current) { setError("当前记忆还未加载成功，请重试。"); return }
-    if (mismatched) { setConflict(true); return }
-    const revision = adopted ?? proposal.base_revision ?? current.revision
-    await send(bodyFor("update", { target_id: proposal.target_id, base_revision: revision }))
+    if (proposal.base_revision == null || current.revision !== proposal.base_revision) return
+    await send(bodyFor("update", { target_id: proposal.target_id, base_revision: proposal.base_revision }))
   }
   async function keepBoth() {
     if (!scope.trim()) { setError("另存一条需要填写适用场景。"); return }
     await send(bodyFor("keep_both", { scope: scope.trim() }))
-  }
-  async function adoptCurrent() {
-    if (!proposal.target_id || running.current) return
-    setBusy(true)
-    setError("")
-    try {
-      const value = await api.memory(proposal.target_id)
-      setAdopted(value.revision)
-      setConflict(false)
-      target.reload()
-    } catch (err) {
-      setError(explain(err))
-    } finally {
-      setBusy(false)
-    }
   }
   async function ignore() {
     if (!online) return
@@ -246,14 +229,13 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
         if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void remember() }
       }} /> : <p className="inbox-sentence">{draft}</p>}
       {open && mode === "edit" && <label className="inbox-share"><input type="checkbox" checked={onlySelf} disabled={busy} onChange={event => { setOnlySelf(event.target.checked); setShareTouched(true) }} />仅自己可见</label>}
-      {open && mode !== "edit" && lane === "update" && <p className="inbox-hint">{was ? `替换「${was}」` : "替换一条已有记忆"}</p>}
+      {open && mode !== "edit" && lane === "update" && !blocked && <p className="inbox-hint">{was ? `替换「${was}」` : "替换一条已有记忆"}</p>}
       {open && mode !== "edit" && lane === "similar" && <p className="inbox-hint">已有一条几乎一样的记忆</p>}
       {open && mode !== "edit" && lane === "long" && <p className="inbox-hint">这条太长，先改短再保存。</p>}
       {open && mode !== "edit" && lane === "evidence" && <p className="inbox-hint">缺少依据，不能直接保存。</p>}
       {showChoice && lane === "update" && <div className="inbox-choices">
-        {(mismatched || conflict) && <p className="inbox-hint">当前记忆已经更新。核对后再决定。</p>}
-        <button type="button" className="primary" disabled={busy || !online || !current || mismatched || conflict} onClick={press(() => void updateOriginal())}>更新原记忆</button>
-        {(mismatched || conflict) && <button type="button" disabled={busy || !online} onClick={press(() => void adoptCurrent())}>按当前版本更新</button>}
+        {blocked && <p className="inbox-hint">当前记忆已经更新，这条建议不能再改它。</p>}
+        {!blocked && <button type="button" className="primary" disabled={busy || !online || !current} onClick={press(() => void updateOriginal())}>更新原记忆</button>}
         <button type="button" disabled={busy} onClick={press(() => setKeeping(true))}>另存一条</button>
       </div>}
       {showChoice && keeping && <input className="inbox-scope" aria-label="适用场景" placeholder="适用场景，例如：正式报告" value={scope} disabled={busy} onClick={event => event.stopPropagation()} onChange={event => setScope(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); void keepBoth() } }} />}
