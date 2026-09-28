@@ -91,6 +91,7 @@ export function App() {
   if (!authed) return <Gate onReady={() => setAuthed(true)}/>
   const serviceLabel = online ? "本地服务正常" : service.status === "checking" ? "正在检查本地服务" : service.status === "offline" ? "本地服务未运行" : "无法读取服务配置"
   return <div className="app-shell">
+    <LiquidFilter/>
     <DockNav page={page} settingsOpen={settingsOpen} onNavigate={navigate} onOpenSettings={openSettings}/>
     <div className="app-body">
       {service.status === "offline" && <div className="global-notice" role="alert">本地服务未运行。已有内容为上次加载的数据，草稿仍保留；恢复连接后可继续操作。<button className="text-button" onClick={retry}>重试</button></div>}
@@ -111,6 +112,15 @@ export function App() {
     {composer && <Composer kind={composer} service={service} onClose={() => setComposer(null)} onRefresh={refresh} onSaved={id => { setComposer(null); refresh(); if (id) setSelected(id) }} onReview={() => { setComposer(null); navigate("review"); refresh() }}/>}
     {settingsOpen && <SettingsDialog onClose={closeSettings} onChanged={retry}/>}
   </div>
+}
+function LiquidFilter() {
+  return <svg className="liquid-defs" aria-hidden="true" focusable="false">
+    <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="4" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="1.4" result="map"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
 }
 function DockNav({ page, settingsOpen, onNavigate, onOpenSettings }: { page: Page; settingsOpen: boolean; onNavigate: (next: Page) => void; onOpenSettings: () => void }) {
   const items = useRef<(HTMLButtonElement | null)[]>([])
@@ -287,7 +297,6 @@ function ProfileSummaryPanel({ tick, online }: { tick: number; online: boolean }
       <header className="profile-summary-head"><span className="summary-kicker">AI 摘要</span></header>
       <button type="button" className="button primary" disabled={disabled} onClick={generate}>{busy ? "正在生成…" : "生成摘要"}</button>
       {!summary?.extractor_configured && summary && <strong>请先在设置中配置提取模型</strong>}
-      <p className="profile-summary-disclosure">生成时会将当前已确认记忆和上一版摘要发送给已配置模型。</p>
       {notice && <p className="profile-summary-error" role="alert">{notice}</p>}
     </div>}
     {text && notice && <p className="profile-summary-error" role="alert">{notice}</p>}
