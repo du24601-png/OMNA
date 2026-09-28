@@ -242,6 +242,16 @@ class ClientConnectTest(unittest.TestCase):
         self.assertEqual(entry["env"]["ZHIWO_API_ORIGIN"], "http://127.0.0.1:8765")
         self.assertNotIn(entry["env"]["ZHIWO_AGENT_CREDENTIAL"], json.dumps({key: value for key, value in entry["env"].items() if key != "ZHIWO_AGENT_CREDENTIAL"}))
 
+    def test_installed_runtime_runs_isolated(self) -> None:
+        python = self.directory / "python.exe"
+        python.write_bytes(b"")
+        os.environ["ZHIWO_BRIDGE_PYTHON"] = str(python)
+        connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
+        entry = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))["mcpServers"]["zhiwo"]
+        self.assertEqual(entry["command"], str(python.resolve()))
+        self.assertEqual(entry["args"], ["-I", "-X", "utf8", "-m", "zhiwo.gateway.stdio_bridge"])
+        self.assertNotIn("PYTHONPATH", entry["env"])
+
     def test_missing_bundled_python_writes_nothing(self) -> None:
         os.environ["ZHIWO_BRIDGE_PYTHON"] = str(self.directory / "missing.exe")
         with self.assertRaises(ApiError) as error:

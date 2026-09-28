@@ -44,6 +44,8 @@ Thumbs.db
 # Build outputs
 apps/desktop/out/
 apps/desktop/dist/
+apps/desktop/runtime/
+!apps/desktop/build/
 apps/web/dist/
 *.exe
 *.msi

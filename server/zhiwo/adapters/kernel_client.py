@@ -6,6 +6,7 @@ flags are only applied when the process is explicitly in connect-only mode.
 
 from __future__ import annotations
 
+import logging
 import os
 import sqlite3
 from dataclasses import dataclass
@@ -15,6 +16,7 @@ from zhiwo.adapters.derived_cleanup import REQUIRED_VERSION, cleanup_derived_row
 from zhiwo.adapters.kernel_session import kernel_session
 from zhiwo.adapters.retention import remember_within_cap
 
+_log = logging.getLogger(__name__)
 SERVICE_SESSION = "zhiwo-service"
 EMBEDDING_MODEL = "BAAI/bge-small-zh-v1.5"
 SESSION_CAP = 1_000_000
@@ -213,9 +215,19 @@ def _close_transient(memory) -> None:
 def _probe_embeddings(embedding_module) -> bool:
     try:
         vector = embedding_module.embed(["就绪"])
-    except Exception:
+    except Exception as exc:
+        _log.warning("local embedding model failed to load: %s: %s", type(exc).__name__, exc)
         return False
-    return vector is not None and len(vector) == 1
+    if vector is not None and len(vector) == 1:
+        return True
+    # Mnemosyne returns None when fastembed cannot be imported and drops the reason.
+    try:
+        from fastembed import TextEmbedding  # noqa: F401
+    except Exception as exc:
+        _log.warning("local embedding runtime could not be imported: %s: %s", type(exc).__name__, exc)
+    else:
+        _log.warning("local embedding model returned no vector")
+    return False
 
 
 def _isolate(kernel_dir: Path, cache_dir: Path, *, connect_only: bool) -> None:

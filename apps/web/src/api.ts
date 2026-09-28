@@ -128,9 +128,15 @@ export type ImportJob = {
   proposals: { id: string; status: string; payload: { content: string } }[]
 }
 
-let credential = sessionStorage.getItem("zhiwo-owner-credential") || ""
+declare global {
+  interface Window { omna?: { ownerCredential?: string } }
+}
+
+const desktopCredential = window.omna?.ownerCredential || ""
+let credential = desktopCredential || sessionStorage.getItem("zhiwo-owner-credential") || ""
 
 export function setCredential(value: string) {
+  if (desktopCredential) return
   credential = value
   if (value) sessionStorage.setItem("zhiwo-owner-credential", value)
   else sessionStorage.removeItem("zhiwo-owner-credential")
@@ -140,10 +146,17 @@ export function getCredential() {
   return credential
 }
 
+export const embeddingHelp = desktopCredential
+  ? "请从托盘菜单「打开日志文件夹」查看 service.log，或重新安装 OMNA。"
+  : "请查看本地服务日志。"
+
 export function explain(error: unknown): string {
   if (!(error instanceof ApiError)) return error instanceof Error ? error.message : "没有完成，请稍后重试。"
   if (error.status === 0 || error.code === "UNAVAILABLE") return "本地服务未运行。刚才的内容还在，可以重试。"
-  if (error.code === "UNAUTHENTICATED") return "本机凭证不正确。"
+  if (error.code === "UNAUTHENTICATED") return desktopCredential ? "本地服务没有认出这个窗口，请从托盘退出后重新打开 OMNA。" : "本机凭证不正确。"
+  if (error.code === "MODEL_UNAVAILABLE" && error.message === "local embedding model is not ready") {
+    return `本地向量模型没有加载，这次没有保存。重试不会改变结果，${embeddingHelp}`
+  }
   if (error.code === "MODEL_UNAVAILABLE") return "模型还没准备好，这次没有保存。"
   if (error.code === "CONFLICT" && error.message.includes("memory changed")) {
     return "当前记忆已经更新，这条建议不能再改它。"
@@ -196,6 +209,7 @@ export const api = {
     return request("/api/v1/health") as Promise<{
       status: string
       embeddings_loaded: boolean
+      connect_only: boolean
       extractor_configured: boolean
       test_mode: boolean
       mcp_runtime?: { command: string[]; environment: Record<string, string> }

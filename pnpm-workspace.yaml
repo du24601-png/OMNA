@@ -3,3 +3,8 @@ packages:
 allowBuilds:
   "@tailwindcss/oxide": true
   esbuild: true
+  electron: true
+  electron-winstaller: false
+overrides:
+  # app-builder-lib 26.15.3 declares ^3.0.0 but reads ElectronDownloadCacheMode, added in 3.1.0.
+  "app-builder-lib>@electron/get": 3.1.0

@@ -1,0 +1,98 @@
+{
+  "task": "P3.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "installer": "OMNA-Setup-1.0.0.exe",
+  "installer_mb": 210.3,
+  "installer_sha256": "ff8b5683ca1f4e4ef0c8ef0969e0e598ae2205b390d42ea2f021189e806088ab",
+  "signature": "NotSigned",
+  "clean_machine": "NOT_RUN",
+  "offline_after_install": "NOT_RUN",
+  "stage_complete": false,
+  "preexisting_install": false,
+  "install_exit": 0,
+  "install_seconds": 142.9,
+  "installed_files": true,
+  "installed_mb": 664.3,
+  "shortcuts_after_install": {
+    "desktop": true,
+    "start_menu": true
+  },
+  "uninstall_entry_after_install": true,
+  "first_ready_seconds": 25.6,
+  "owner_health": 200,
+  "unauthenticated_health": 401,
+  "credential_file_created": true,
+  "extractor_key_not_inherited": true,
+  "test_mode_not_inherited": true,
+  "kernel_under_user_data": true,
+  "mnemosyne_env_not_used": true,
+  "embeddings_loaded": true,
+  "service_python": [
+    "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\python.exe"
+  ],
+  "service_parent_is_omna": true,
+  "service_isolated": true,
+  "bridge_command": [
+    "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\python.exe",
+    "-I",
+    "-X",
+    "utf8",
+    "-m",
+    "zhiwo.gateway.stdio_bridge"
+  ],
+  "bridge_uses_installed_python": true,
+  "page_served": true,
+  "vc_runtime_modules": {
+    "msvcp140.dll": [
+      "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\MSVCP140.dll"
+    ],
+    "msvcp140_1.dll": [
+      "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\MSVCP140_1.dll"
+    ],
+    "vcruntime140.dll": [
+      "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\VCRUNTIME140.dll"
+    ],
+    "vcruntime140_1.dll": [
+      "C:\\Users\\example\\AppData\\Local\\Temp\\omna-p32-0uddmcc8\\app\\resources\\python\\VCRUNTIME140_1.dll"
+    ]
+  },
+  "vc_runtime_from_install_dir": true,
+  "save_status": 200,
+  "owner_search_finds": true,
+  "bridge_tools": [
+    "explain_memory",
+    "get_context",
+    "propose_memory",
+    "search_memory"
+  ],
+  "bridge_search_finds": true,
+  "bridge_agent_status": "verified",
+  "opencode_exit": 0,
+  "opencode_search_finds": true,
+  "opencode_agent_status": "verified",
+  "first_quit": {
+    "electron_exited": true,
+    "python_left": 0,
+    "port_free": true,
+    "seconds": 1.9
+  },
+  "second_ready_seconds": 2.6,
+  "restart_keeps_memory": true,
+  "restart_same_credential": true,
+  "second_quit": {
+    "electron_exited": true,
+    "python_left": 0,
+    "port_free": true,
+    "seconds": 1.8
+  },
+  "uninstall_seconds": 14.4,
+  "uninstall_removed_app": true,
+  "shortcuts_after_uninstall": {
+    "desktop": false,
+    "start_menu": false
+  },
+  "uninstall_entry_after_uninstall": false,
+  "user_data_kept_after_uninstall": true,
+  "credential_in_result": false,
+  "pass": true
+}

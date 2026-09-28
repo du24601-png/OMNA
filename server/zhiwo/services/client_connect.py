@@ -75,13 +75,14 @@ def client_home() -> Path:
 def bridge_launch(port: int) -> dict:
     command, pythonpath = _bridge_runtime()
     env = {"ZHIWO_API_ORIGIN": f"http://127.0.0.1:{port}"}
+    args = ["-m", "zhiwo.gateway.stdio_bridge"]
     if pythonpath:
         env["PYTHONPATH"] = pythonpath
-    return {
-        "command": command,
-        "args": ["-m", "zhiwo.gateway.stdio_bridge"],
-        "env": env,
-    }
+    else:
+        # -I keeps the client's PYTHON* variables and user site-packages from
+        # shadowing the installed packages; it also drops PYTHONUTF8.
+        args = ["-I", "-X", "utf8", *args]
+    return {"command": command, "args": args, "env": env}
 
 
 def _bridge_runtime() -> tuple[str, str | None]:

@@ -3,7 +3,7 @@ import { Menu } from "@base-ui/react/menu"
 import { Popover } from "@base-ui/react/popover"
 import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { ApiError, api, explain, getCredential, setCredential, type Memory } from "./api"
+import { ApiError, api, embeddingHelp, explain, getCredential, setCredential, type Memory } from "./api"
 import { Detail } from "./Detail"
 import { CATEGORIES, categoryLabel, dateLabel, listTime } from "./format"
 import { canLeave, Empty, Icon, Notice, ResourceNotice, Skeleton, SourceMark, useResource } from "./ui"
@@ -15,7 +15,7 @@ import { BrandLockup, BrandMark } from "./Brand"
 import { ReadTrend } from "./Trend"
 
 type Page = "profile" | "memories" | "review" | "agents"
-export type Service = { status: "checking" | "online" | "offline" | "error"; extractor: boolean | null; testMode: boolean; runtime?: { command: string[]; environment: Record<string, string> } }
+export type Service = { status: "checking" | "online" | "offline" | "error"; extractor: boolean | null; embeddings?: boolean; testMode: boolean; runtime?: { command: string[]; environment: Record<string, string> } }
 const NAV: [Page, string][] = [["profile", "关于我"], ["memories", "记忆"], ["review", "待确认"], ["agents", "我的 Agent"]]
 function rawHash() { return location.hash.replace(/^#\/?/, "") }
 function pageFromHash(): Page { const page = rawHash(); return ["memories", "review", "agents"].includes(page) ? page as Page : "profile" }
@@ -49,7 +49,7 @@ export function App() {
       try {
         const health = await api.ownerHealth()
         if (!alive) return
-        setService({ status: "online", extractor: health.extractor_configured, testMode: health.test_mode, runtime: health.mcp_runtime })
+        setService({ status: "online", extractor: health.extractor_configured, embeddings: health.embeddings_loaded || health.connect_only, testMode: health.test_mode, runtime: health.mcp_runtime })
         if (previousHealth.current && previousHealth.current !== "online") refresh()
         previousHealth.current = "online"
       } catch (err) {
@@ -96,6 +96,7 @@ export function App() {
     <div className="app-body">
       {service.status === "offline" && <div className="global-notice" role="alert">本地服务未运行。已有内容为上次加载的数据，草稿仍保留；恢复连接后可继续操作。<button className="text-button" onClick={retry}>重试</button></div>}
       {service.status === "error" && <div className="global-notice" role="alert">无法读取本地服务配置，请重试或检查本机凭证。提取模型配置尚未确认。<button className="text-button" onClick={retry}>重试</button></div>}
+      {online && service.embeddings === false && <div className="global-notice" role="alert">本地向量模型没有加载，暂时不能保存或批准记忆。重试不会改变结果，{embeddingHelp}</div>}
       {online && service.extractor === false && <div className="model-notice">提取模型未配置，仍可手动添加和查看已有记忆。</div>}
       <div className="workspace">
         <div className="workspace-scroll">

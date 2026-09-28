@@ -1,0 +1,40 @@
+appId: app.omna.desktop
+productName: OMNA
+copyright: OMNA
+directories:
+  output: dist
+  buildResources: build
+files:
+  - src/**/*
+  - package.json
+asar: true
+electronLanguages:
+  - zh-CN
+  - en-US
+extraResources:
+  - from: runtime/python
+    to: python
+  - from: runtime/web
+    to: web
+  - from: runtime/model
+    to: model
+  - from: runtime/icon.png
+    to: icon.png
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: runtime/icon.png
+  executableName: OMNA
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: OMNA
+  uninstallDisplayName: OMNA
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+  artifactName: OMNA-Setup-${version}.${ext}

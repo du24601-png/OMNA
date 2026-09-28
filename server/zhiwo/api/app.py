@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
+import os
 import uuid
 from pathlib import Path
 from typing import Annotated, Literal
@@ -11,13 +12,14 @@ from typing import Annotated, Literal
 from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from zhiwo.adapters.kernel_client import KernelHandle, connect
 from zhiwo.api.auth import OwnerAuthError, bearer_token, install_redaction, owner_auth_error, require_owner
 from zhiwo.api.channel import ChannelApp
 from zhiwo.api.errors import ApiError, api_error
-from zhiwo.config import load_settings
+from zhiwo.config import ConfigError, load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
 from zhiwo.services.access import get_access_event, list_access_events, read_counts
@@ -506,6 +508,13 @@ def create_app() -> FastAPI:
             _request_id(idempotency_key),
         )
 
+    web_dist = os.environ.get("ZHIWO_WEB_DIST", "").strip()
+    if web_dist:
+        root = Path(web_dist).expanduser().resolve()
+        if not (root / "index.html").is_file():
+            raise ConfigError("ZHIWO_WEB_DIST must contain index.html")
+        app.mount("/", _WebFiles(directory=root, html=True), name="web")
+
     return ChannelApp(app)
 
 
@@ -678,6 +687,27 @@ class ImportBody(BaseModel):
     name: str | None = None
     text: str | None = None
     content_base64: str | None = None
+
+
+_WEB_HEADERS = {
+    "Content-Security-Policy": (
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+    ),
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+}
+
+
+class _WebFiles(StaticFiles):
+    """The built Owner UI. It holds no data; every API call still needs the Owner credential."""
+
+    async def get_response(self, path: str, scope) -> Response:
+        response = await super().get_response(path, scope)
+        response.headers.update(_WEB_HEADERS)
+        if path in {"", ".", "index.html"}:
+            response.headers["Cache-Control"] = "no-store"
+        return response
 
 
 def _validation_error(_request: Request, _exc: RequestValidationError) -> JSONResponse:
