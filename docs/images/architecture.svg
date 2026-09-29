@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+<title id="title">OMNA 简要架构：本地记忆，按授权复用</title>
+<desc id="desc">用户通过桌面界面管理记忆。本地服务执行确认发布、权限检查与访问记录，通过适配层连接 Mnemosyne 正式记忆库，并单独保存来源、提案和授权记录。AI 工具通过 MCP 读取获准记忆或提交待审核提案。提取与摘要由用户配置的模型提供，可使用远程服务。</desc>
+<defs>
+ <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#64748b" stroke-width="1.6"/></marker>
+ <style>text{font-family:Segoe UI,Microsoft YaHei,PingFang SC,sans-serif;fill:#20252c}.heading{font-size:24px;font-weight:650}.label{font-size:18px}.small{font-size:15px;fill:#647080}.meta{font-size:14px;fill:#647080}.line{fill:none;stroke:#64748b;stroke-width:1.6;marker-end:url(#arrow)}.card{fill:#fff;stroke:#dce1e7;stroke-width:1.2}</style>
+</defs>
+<rect width="1200" height="680" rx="24" fill="#ffffff"/>
+<text x="52" y="59" font-size="30" font-weight="700">一份本地记忆，连接不同 AI 工具</text>
+<text x="52" y="91" class="label" fill="#647080">你决定记住什么，也决定分享给谁。</text>
+<path d="M56 125H780Q804 125 804 149V555Q804 579 780 579H410Q386 579 386 555V400H56Q32 400 32 376V149Q32 125 56 125Z" fill="#f5f6f8"/>
+<text x="56" y="158" class="small">OMNA · 你的电脑</text>
+<!-- Desktop and shared service -->
+<rect x="56" y="194" width="242" height="156" rx="16" class="card"/>
+<text x="80" y="230" class="heading">记忆管理界面</text>
+<text x="80" y="263" class="label">添加 · 导入 · 确认 · 纠正</text>
+<text x="80" y="290" class="small">查看画像与访问记录</text>
+<text x="80" y="324" class="meta">Electron + React</text>
+<path d="M298 273H404" class="line"/>
+<text x="352" y="251" text-anchor="middle" class="small">用户操作</text>
+<rect x="410" y="194" width="366" height="156" rx="16" fill="#252a32"/>
+<text x="434" y="230" class="heading" style="fill:#fff">本地记忆服务</text>
+<text x="434" y="264" class="label" style="fill:#fff">确认发布 · 权限检查 · 访问记录</text>
+<text x="434" y="292" class="small" style="fill:#ccd2dc">只返回已确认、有效且获准的记忆</text>
+<text x="434" y="324" class="meta" style="fill:#ccd2dc">Python + FastAPI</text>
+<!-- Agent interface -->
+<rect x="952" y="194" width="216" height="156" rx="16" class="card"/>
+<text x="976" y="230" class="heading">AI 工具</text>
+<text x="976" y="265" font-size="16">OpenCode · Claude</text>
+<text x="976" y="293" font-size="16">Codex · WorkBuddy 等</text>
+<text x="976" y="324" class="meta">通过 MCP Bridge 接入</text>
+<path d="M776 250H944" class="line"/>
+<text x="864" y="235" text-anchor="middle" class="small">获准记忆</text>
+<path d="M952 306H784" class="line"/>
+<text x="864" y="331" text-anchor="middle" class="small">查询 / 提交提案</text>
+<!-- Storage separation -->
+<path d="M503 350V369 M503 410V432" class="line"/>
+<text x="503" y="397" text-anchor="middle" class="meta">经 Adapter 读写</text>
+<path d="M689 350V369 M689 410V432" class="line"/>
+<text x="689" y="397" text-anchor="middle" class="meta">控制与审计</text>
+<rect x="410" y="439" width="177" height="114" rx="14" class="card"/>
+<text x="428" y="470" font-size="20" font-weight="650">正式记忆</text>
+<text x="428" y="499" class="small" style="font-size:13px">正文 · 版本 · 本地检索</text>
+<text x="428" y="529" class="meta">Mnemosyne / SQLite</text>
+<rect x="603" y="439" width="173" height="114" rx="14" class="card"/>
+<text x="621" y="470" font-size="20" font-weight="650">管理记录</text>
+<text x="621" y="499" class="small" style="font-size:13px">来源 · 提案 · 授权 · 访问</text>
+<text x="621" y="529" class="meta">zhiwo.db / SQLite</text>
+<!-- Model capability is optional and may be remote -->
+<rect x="56" y="439" width="242" height="114" rx="14" fill="#fff" stroke="#b7c0cb" stroke-dasharray="5 4"/>
+<text x="76" y="470" font-size="20" font-weight="650">你配置的 AI 模型</text>
+<text x="76" y="499" class="small">提取候选 · 生成摘要</text>
+<text x="76" y="529" class="meta">按需调用，可使用远程服务</text>
+<path d="M410 315H357V496H306" class="line" stroke-dasharray="5 4"/>
+<text x="952" y="400" class="small">读取按权限过滤</text>
+<text x="952" y="428" class="small">提案经用户确认后生效</text>
+<text x="56" y="620" class="small">手动保存即确认；导入与 Agent 提案先审核。AI 模型不直接写入正式记忆。</text>
+<text x="56" y="647" class="meta">模型服务与外部 Agent 可能调用云端模型；“本地”指记忆存储与权限控制。</text>
+</svg>

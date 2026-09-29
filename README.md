@@ -31,6 +31,10 @@ OMNA（知我）是一款本地个人记忆工具，把你的背景、偏好和�
 
 ![记忆列表：主题、来源与时间](docs/images/memories.png)
 
+## 工作原理
+
+![OMNA 简要架构：用户管理本地记忆，AI 工具通过 MCP 按授权访问](docs/images/architecture.svg)
+
 ## Agent 能用的四个工具
 
 OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读取原始导入文本的接口。
