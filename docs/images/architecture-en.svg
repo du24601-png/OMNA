@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+<title id="title">OMNA architecture: local memory shared with AI tools under your control</title>
+<desc id="desc">Manage memories in the desktop app. The local service handles approval, permissions, and access history. It connects to the Mnemosyne memory store through an adapter and keeps sources, proposals, and permissions separately. AI tools use MCP to read permitted memories or submit proposals for review. Extraction and summaries use the model you configure, which may be remote.</desc>
+<defs>
+ <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#64748b" stroke-width="1.6"/></marker>
+ <style>text{font-family:Segoe UI,Arial,sans-serif;fill:#20252c}.heading{font-size:24px;font-weight:650}.label{font-size:18px}.small{font-size:15px;fill:#647080}.meta{font-size:14px;fill:#647080}.line{fill:none;stroke:#64748b;stroke-width:1.6;marker-end:url(#arrow)}.card{fill:#fff;stroke:#dce1e7;stroke-width:1.2}</style>
+</defs>
+<rect width="1200" height="680" rx="24" fill="#ffffff"/>
+<text x="52" y="59" font-size="30" font-weight="700">One local memory, shared across AI tools</text>
+<text x="52" y="91" class="label" fill="#647080">You decide what to remember and who can access it.</text>
+<path d="M56 125H780Q804 125 804 149V555Q804 579 780 579H410Q386 579 386 555V400H56Q32 400 32 376V149Q32 125 56 125Z" fill="#f5f6f8"/>
+<text x="56" y="158" class="small">OMNA · YOUR DEVICE</text>
+<!-- Desktop and shared service -->
+<rect x="56" y="194" width="242" height="156" rx="16" class="card"/>
+<text x="80" y="230" class="heading">Memory manager</text>
+<text x="80" y="263" class="label" style="font-size:14px">Add · import · approve · correct</text>
+<text x="80" y="290" class="small">Profile and access history</text>
+<text x="80" y="324" class="meta">Electron + React</text>
+<path d="M298 273H404" class="line"/>
+<text x="352" y="251" text-anchor="middle" class="small">Owner actions</text>
+<rect x="410" y="194" width="366" height="156" rx="16" fill="#252a32"/>
+<text x="434" y="230" class="heading" style="fill:#fff">Local memory service</text>
+<text x="434" y="264" class="label" style="fill:#fff;font-size:14px">Approval · permissions · access history</text>
+<text x="434" y="292" class="small" style="fill:#ccd2dc;font-size:13px">Returns only approved, active, permitted memories</text>
+<text x="434" y="324" class="meta" style="fill:#ccd2dc">Python + FastAPI</text>
+<!-- Agent interface -->
+<rect x="952" y="194" width="216" height="156" rx="16" class="card"/>
+<text x="976" y="230" class="heading">AI tools</text>
+<text x="976" y="265" font-size="16">OpenCode · Claude</text>
+<text x="976" y="293" font-size="16">Codex · WorkBuddy</text>
+<text x="976" y="324" class="meta">Connected through MCP</text>
+<path d="M776 250H944" class="line"/>
+<text x="864" y="235" text-anchor="middle" class="small">Permitted memories</text>
+<path d="M952 306H784" class="line"/>
+<text x="864" y="331" text-anchor="middle" class="small">Query / propose</text>
+<!-- Storage separation -->
+<path d="M503 350V369 M503 410V432" class="line"/>
+<text x="503" y="397" text-anchor="middle" class="meta">Read/write via adapter</text>
+<path d="M689 350V369 M689 410V432" class="line"/>
+<text x="689" y="397" text-anchor="middle" class="meta">Control and audit</text>
+<rect x="410" y="439" width="177" height="114" rx="14" class="card"/>
+<text x="428" y="470" font-size="20" font-weight="650">Memories</text>
+<text x="428" y="499" class="small" style="font-size:12px">Content · versions · search</text>
+<text x="428" y="529" class="meta" style="font-size:12px">Mnemosyne / SQLite</text>
+<rect x="603" y="439" width="173" height="114" rx="14" class="card"/>
+<text x="621" y="470" font-size="20" font-weight="650">Control records</text>
+<text x="621" y="499" class="small" style="font-size:11px">Sources · proposals · access</text>
+<text x="621" y="529" class="meta">zhiwo.db / SQLite</text>
+<!-- Model capability is optional and may be remote -->
+<rect x="56" y="439" width="242" height="114" rx="14" fill="#fff" stroke="#b7c0cb" stroke-dasharray="5 4"/>
+<text x="76" y="470" font-size="20" font-weight="650">Your AI model</text>
+<text x="76" y="499" class="small">Extract suggestions · summarize</text>
+<text x="76" y="529" class="meta">On demand; may be remote</text>
+<path d="M410 315H357V496H306" class="line" stroke-dasharray="5 4"/>
+<text x="952" y="400" class="small">Reads are permission-filtered</text>
+<text x="952" y="428" class="small">Proposals need your approval</text>
+<text x="56" y="620" class="small">Manual saves are approved immediately. Imports and Agent proposals await review. AI never writes directly to confirmed memories.</text>
+<text x="56" y="647" class="meta">Your model provider and external Agents may use cloud models. “Local” refers to memory storage and access control.</text>
+</svg>

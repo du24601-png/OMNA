@@ -9,6 +9,8 @@
 
 <p align="center">Windows 桌面应用 · 1.0.0 · 数据保存在本机</p>
 
+<p align="center"><a href="README.md"><img alt="简体中文" src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2-252a32?style=for-the-badge"></a> <a href="README_EN.md"><img alt="English" src="https://img.shields.io/badge/English-Read-687386?style=for-the-badge"></a></p>
+
 OMNA（知我）是一款本地个人记忆工具，把你的背景、偏好和项目信息保存在一处，供不同 AI 工具按授权使用。AI 帮你整理，你决定记住什么、分享给谁，并能随时查看和纠正。
 
 ## 视频 Demo
