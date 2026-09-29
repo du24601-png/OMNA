@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
+<title id="title">竞品定位：记忆能否带走 × 用户是否把关</title>
+<desc id="desc">横轴是记忆能否跨 AI 工具使用，纵轴是用户对写入和读取的把关程度。ChatGPT、Claude、Gemini、豆包和 Kimi 的内置记忆位于左下；OpenMemory 与 Basic Memory 位于右下；手动维护自我介绍位于左上；OMNA 位于右上。</desc>
+<defs>
+ <style>text{font-family:Segoe UI,Microsoft YaHei,PingFang SC,sans-serif;fill:#20252c}.name{font-size:17px;font-weight:600}.note{font-size:14px;fill:#647080}.quad{font-size:15px;fill:#98a2b0}.axis{font-size:16px;fill:#647080}.axis-title{font-size:16px;font-weight:650}.grid{fill:none;stroke:#d5dbe2;stroke-width:1.2;stroke-dasharray:6 5}.platform{fill:#c3cad4}.tool{fill:#fff;stroke:#64748b;stroke-width:2}.manual{fill:#fff;stroke:#8a94a3;stroke-width:2;stroke-dasharray:4 3}</style>
+</defs>
+<rect width="1200" height="780" rx="24" fill="#ffffff"/>
+<text x="52" y="59" font-size="30" font-weight="700">竞品定位：记忆能否带走 × 用户是否把关</text>
+<text x="52" y="91" font-size="18" fill="#647080">大多数方案只做到其中一项。</text>
+
+<rect x="120" y="150" width="960" height="500" rx="16" fill="#f5f6f8"/>
+<path d="M600 150V650M120 400H1080" class="grid"/>
+
+<text x="140" y="182" class="quad">手动可控，但全靠自己维护</text>
+<text x="1060" y="182" text-anchor="end" class="quad">跨工具，且用户把关</text>
+<text x="140" y="632" class="quad">平台内自动记忆</text>
+<text x="1060" y="632" text-anchor="end" class="quad">跨工具，但由 AI 直接写入</text>
+
+<text x="120" y="684" class="axis">← 只在单一平台内使用</text>
+<text x="600" y="684" text-anchor="middle" class="axis-title">记忆能否带走</text>
+<text x="1080" y="684" text-anchor="end" class="axis">跨 AI 工具共享 →</text>
+<text transform="translate(90 650) rotate(-90)" class="axis">AI 自动写入</text>
+<text transform="translate(90 400) rotate(-90)" text-anchor="middle" class="axis-title">用户把关程度</text>
+<text transform="translate(90 150) rotate(-90)" text-anchor="end" class="axis">用户逐条确认</text>
+
+<!-- 平台内置记忆 -->
+<circle cx="254" cy="455" r="10" class="platform"/>
+<text x="272" y="451" class="name">ChatGPT 记忆</text>
+<text x="272" y="473" class="note">来源可查 · 摘要可改 · 可恢复旧版</text>
+<circle cx="360" cy="510" r="10" class="platform"/>
+<text x="378" y="506" class="name">Claude</text>
+<text x="378" y="528" class="note">可一次性导入他家记忆</text>
+<circle cx="430" cy="585" r="10" class="platform"/>
+<text x="448" y="581" class="name">Gemini</text>
+<text x="448" y="603" class="note">可导入记忆和聊天记录</text>
+<circle cx="190" cy="560" r="10" class="platform"/>
+<text x="208" y="556" class="name">豆包 / Kimi</text>
+<text x="208" y="578" class="note">设置里查看、删除</text>
+
+<!-- 手动替代方案 -->
+<circle cx="350" cy="290" r="10" class="manual"/>
+<text x="368" y="286" class="name">手动维护自我介绍</text>
+<text x="368" y="308" class="note">复制粘贴 · Custom Instructions</text>
+<text x="368" y="328" class="note">AGENTS.md 等规则文件</text>
+
+<!-- 开发者 / 本地 MCP 工具 -->
+<circle cx="926" cy="370" r="10" class="tool"/>
+<text x="906" y="366" text-anchor="end" class="name">OpenMemory（mem0）</text>
+<text x="906" y="388" text-anchor="end" class="note">已停止维护 · 按应用授权与审计</text>
+<circle cx="888" cy="462" r="10" class="tool"/>
+<text x="868" y="458" text-anchor="end" class="name">Basic Memory</text>
+<text x="868" y="480" text-anchor="end" class="note">Markdown 文件 · AI 可直接写改删</text>
+
+<!-- OMNA -->
+<circle cx="946" cy="214" r="13" fill="#252a32"/>
+<text x="924" y="220" text-anchor="end" font-size="20" font-weight="700">OMNA</text>
+<text x="924" y="244" text-anchor="end" class="note">逐条确认 · 按 Agent 授权 · 访问留痕</text>
+
+<circle cx="130" cy="716" r="8" class="platform"/>
+<text x="146" y="721" class="note">平台内置记忆</text>
+<circle cx="276" cy="716" r="8" class="tool"/>
+<text x="292" y="721" class="note">开发者 / 本地 MCP 工具</text>
+<circle cx="480" cy="716" r="8" class="manual"/>
+<text x="496" y="721" class="note">手动替代方案</text>
+<circle cx="626" cy="716" r="9" fill="#252a32"/>
+<text x="642" y="721" class="note">OMNA</text>
+<text x="120" y="754" class="note">位置是依据公开文档所做的定性判断，不是量化测量；资料截至 2026-09-28。</text>
+</svg>
