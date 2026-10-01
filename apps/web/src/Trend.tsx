@@ -115,8 +115,8 @@ export function ReadTrend({ tick }: { tick: number }) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={rows} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} interval={range === "24h" ? 3 : range === 14 ? 1 : 0} tick={{ fill: "var(--muted)", fontSize: 11 }} />
-            <YAxis allowDecimals={false} width={28} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} interval={range === "24h" ? 3 : range === 14 ? 1 : 0} tick={{ fill: "var(--muted)", fontSize: 12 }} />
+            <YAxis allowDecimals={false} width={28} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 12 }} />
             <Tooltip content={<TrendTip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} />
             {view.series.filter(item => !hiddenSet.has(item.id)).map(item => {
               const color = colorOf(view.series.findIndex(series => series.id === item.id))

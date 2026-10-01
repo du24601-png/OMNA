@@ -99,7 +99,6 @@ export function App() {
       {service.status === "offline" && <div className="global-notice" role="alert">本地服务未运行。已有内容为上次加载的数据，草稿仍保留；恢复连接后可继续操作。<button className="text-button" onClick={retry}>重试</button></div>}
       {service.status === "error" && <div className="global-notice" role="alert">无法读取本地服务配置，请重试或检查本机凭证。提取模型配置尚未确认。<button className="text-button" onClick={retry}>重试</button></div>}
       {online && service.embeddings === false && <div className="global-notice" role="alert">本地向量模型没有加载，暂时不能保存或批准记忆。重试不会改变结果，{embeddingHelp}</div>}
-      {online && service.extractor === false && <div className="model-notice">提取模型未配置，仍可手动添加和查看已有记忆。</div>}
       <div className="workspace">
         <div className="workspace-scroll">
           <main className="main-content" ref={main} id="main-content">
@@ -223,7 +222,7 @@ function ProfilePage({ tick, service, serviceLabel, onRetry, openLayout, onOpen,
     {resource.loading && !data && !resource.error && <ProfileSkeleton/>}
     {data && <div className="profile-split">
       <section className="profile-night" aria-label="已确认的记忆">
-        {empty && !resource.loading && !resource.error ? <Empty title="从一条真实的记忆开始" action={<><button className="button primary" onClick={onAdd}>添加第一条记忆</button><button className="button secondary" onClick={onImport}>导入已有文本</button></>}>记录你的偏好、目标或正在做的事。只有你确认过的内容，才会出现在这里。</Empty> : <NightWall cards={filled} vacant={vacant} openLayout={openLayout} onOpen={onOpen} onAdd={onAdd}/>}
+        {empty && !resource.loading && !resource.error ? <Empty title="从一条真实的记忆开始" action={<><button className="button secondary" onClick={onAdd}>添加第一条记忆</button><button className="button secondary" onClick={onImport}>导入已有文本</button></>}>记录你的偏好、目标或正在做的事。只有你确认过的内容，才会出现在这里。</Empty> : <NightWall cards={filled} vacant={vacant} openLayout={openLayout} onOpen={onOpen} onAdd={onAdd}/>}
       </section>
       <div className="profile-side">
         <ProfileSummaryPanel tick={tick} online={online}/>

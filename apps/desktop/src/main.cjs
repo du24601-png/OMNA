@@ -330,8 +330,8 @@ function main() {
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <style>
 body{margin:0;height:100vh;display:grid;place-items:center;font:15px/1.7 "Segoe UI","Microsoft YaHei UI",sans-serif;background:#f6f6f7;color:#1d1d1f}
-.chrome{position:fixed;top:12px;right:8px;display:flex}
-.chrome button{width:46px;height:32px;border:0;border-radius:6px;background:transparent;color:#1d1d1f;font:16px/1 "Segoe UI Symbol",sans-serif}
+.chrome{position:fixed;top:0;right:0;display:flex}
+.chrome button{width:46px;height:40px;border:0;border-radius:0;background:transparent;color:#1d1d1f;font:16px/1 "Segoe UI Symbol",sans-serif}
 .chrome button:hover{background:#ececee}
 .chrome button.close:hover{background:#e81123;color:#fff}
 main{max-width:520px;padding:32px}

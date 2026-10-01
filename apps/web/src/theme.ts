@@ -1,24 +1,26 @@
-export type ThemeMode = "light" | "dark"
-export type ThemeAccent = "default" | "orange" | "blue" | "green" | "violet"
-export type Theme = { mode: ThemeMode; accent: ThemeAccent }
+export type ThemeMode = "light" | "dark" | "system"
+export type Theme = { mode: ThemeMode }
 
 const KEY = "zhiwo.theme"
-const MODES = new Set<ThemeMode>(["light", "dark"])
-const ACCENTS = new Set<ThemeAccent>(["default", "orange", "blue", "green", "violet"])
+const MODES = new Set<ThemeMode>(["light", "dark", "system"])
 
 export function loadTheme(): Theme {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) || "")
-    return {
-      mode: MODES.has(raw.mode) ? raw.mode : "light",
-      accent: ACCENTS.has(raw.accent) ? raw.accent : "default",
-    }
+    return { mode: MODES.has(raw.mode) ? raw.mode : "light" }
   } catch {
-    return { mode: "light", accent: "default" }
+    return { mode: "light" }
   }
 }
 
+function resolvedMode(mode: ThemeMode): "light" | "dark" {
+  if (mode !== "system") return mode
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
+
 let themeReady = false
+let stopSystem: (() => void) | null = null
+
 export function applyTheme(theme: Theme) {
   const root = document.documentElement
   if (themeReady && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -26,10 +28,17 @@ export function applyTheme(theme: Theme) {
     window.setTimeout(() => root.classList.remove("theme-shift"), 400)
   }
   themeReady = true
-  if (theme.mode === "dark") root.dataset.mode = "dark"
+  if (resolvedMode(theme.mode) === "dark") root.dataset.mode = "dark"
   else delete root.dataset.mode
-  if (theme.accent === "default") delete root.dataset.accent
-  else root.dataset.accent = theme.accent
+  delete root.dataset.accent
+  stopSystem?.()
+  stopSystem = null
+  if (theme.mode === "system") {
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+    const onChange = () => applyTheme(theme)
+    media.addEventListener("change", onChange)
+    stopSystem = () => media.removeEventListener("change", onChange)
+  }
 }
 
 export function saveTheme(theme: Theme) {

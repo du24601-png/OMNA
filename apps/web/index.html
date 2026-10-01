@@ -8,8 +8,9 @@
     <script>
       try {
         var theme = JSON.parse(localStorage.getItem("zhiwo.theme") || "")
-        if (theme.mode === "dark") document.documentElement.dataset.mode = "dark"
-        if (theme.accent === "blue" || theme.accent === "green" || theme.accent === "violet") document.documentElement.dataset.accent = theme.accent
+        var mode = theme.mode
+        if (mode === "system") mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+        if (mode === "dark") document.documentElement.dataset.mode = "dark"
       } catch (e) {}
     </script>
   </head>
