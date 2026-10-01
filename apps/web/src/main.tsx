@@ -4,6 +4,7 @@ import { App } from "./App"
 import { applyTheme, loadTheme } from "./theme"
 import "./styles.css"
 
+if (window.omna) document.documentElement.classList.add("omna-desktop")
 applyTheme(loadTheme())
 
 createRoot(document.getElementById("root")!).render(

@@ -88,10 +88,12 @@ export function App() {
   const compose = (kind: "add" | "import") => { if (canLeave()) { closeMemory(); setComposer(kind) } }
   const retry = () => { setHealthTick(n => n + 1); refresh() }
   const online = service.status === "online"
-  if (!authed) return <Gate onReady={() => setAuthed(true)}/>
+  if (!authed) return <><WindowDrag/><WindowControls/><Gate onReady={() => setAuthed(true)}/></>
   const serviceLabel = online ? "本地服务正常" : service.status === "checking" ? "正在检查本地服务" : service.status === "offline" ? "本地服务未运行" : "无法读取服务配置"
   return <div className="app-shell">
     <LiquidFilter/>
+    <WindowDrag/>
+    <WindowControls/>
     <DockNav page={page} settingsOpen={settingsOpen} onNavigate={navigate} onOpenSettings={openSettings}/>
     <div className="app-body">
       {service.status === "offline" && <div className="global-notice" role="alert">本地服务未运行。已有内容为上次加载的数据，草稿仍保留；恢复连接后可继续操作。<button className="text-button" onClick={retry}>重试</button></div>}
@@ -112,6 +114,23 @@ export function App() {
     </div>
     {composer && <Composer kind={composer} service={service} onClose={() => setComposer(null)} onRefresh={refresh} onSaved={id => { setComposer(null); refresh(); if (id) setSelected(id) }} onReview={() => { setComposer(null); navigate("review"); refresh() }}/>}
     {settingsOpen && <SettingsDialog onClose={closeSettings} onChanged={retry}/>}
+  </div>
+}
+function WindowDrag() {
+  if (!window.omna) return null
+  return <div className="window-drag" />
+}
+function WindowControls() {
+  const [maximized, setMaximized] = useState(() => window.omna?.maximized?.() === true)
+  useEffect(() => window.omna?.onMaximized?.(setMaximized), [])
+  if (!window.omna?.windowAction) return null
+  const run = (action: "minimize" | "maximize" | "close") => () => window.omna?.windowAction?.(action)
+  return <div className="window-controls">
+    <button type="button" aria-label="最小化" onClick={run("minimize")}><svg viewBox="0 0 12 12"><path d="M2 6h8" /></svg></button>
+    <button type="button" aria-label={maximized ? "还原" : "最大化"} onClick={run("maximize")}>{maximized
+      ? <svg viewBox="0 0 12 12"><rect x="3.5" y="1.5" width="7" height="7" /><path d="M1.5 3.5h7v7h-7z" /></svg>
+      : <svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" /></svg>}</button>
+    <button type="button" className="close" aria-label="关闭" onClick={run("close")}><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3L3 9" /></svg></button>
   </div>
 }
 function LiquidFilter() {

@@ -81,6 +81,17 @@ function main() {
     const url = event.senderFrame ? event.senderFrame.url : ""
     event.returnValue = ready && url.startsWith(`${ORIGIN}/`) ? credential : ""
   })
+  ipcMain.on("omna:window", (event, action) => {
+    if (!win || win.isDestroyed() || event.sender !== win.webContents) return
+    if (action === "minimize") win.minimize()
+    else if (action === "maximize") {
+      if (win.isMaximized()) win.unmaximize()
+      else win.maximize()
+    } else if (action === "close") win.close()
+  })
+  ipcMain.on("omna:maximized", event => {
+    event.returnValue = Boolean(win && !win.isDestroyed() && win.isMaximized())
+  })
   app.whenReady().then(start)
 
   async function start() {
@@ -243,8 +254,9 @@ function main() {
       show: false,
       title: "OMNA",
       icon: paths.icon,
-      backgroundColor: "#f5f5f7",
+      backgroundColor: "#f6f6f7",
       autoHideMenuBar: true,
+      frame: false,
       webPreferences: {
         preload: path.join(__dirname, "preload.cjs"),
         contextIsolation: true,
@@ -255,6 +267,11 @@ function main() {
       },
     })
     win.removeMenu()
+    const tellMaximized = () => {
+      if (win && !win.isDestroyed()) win.webContents.send("omna:maximized", win.isMaximized())
+    }
+    win.on("maximize", tellMaximized)
+    win.on("unmaximize", tellMaximized)
     win.once("ready-to-show", () => win.show())
     win.on("page-title-updated", event => event.preventDefault())
     win.on("close", event => {
@@ -310,9 +327,13 @@ function main() {
   function page(title, detail, failed) {
     const escape = text => String(text).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch])
     const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>OMNA</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <style>
-body{margin:0;height:100vh;display:grid;place-items:center;font:15px/1.7 "Segoe UI","Microsoft YaHei UI",sans-serif;background:#f5f5f7;color:#1d1d1f}
+body{margin:0;height:100vh;display:grid;place-items:center;font:15px/1.7 "Segoe UI","Microsoft YaHei UI",sans-serif;background:#f6f6f7;color:#1d1d1f}
+.chrome{position:fixed;top:12px;right:8px;display:flex}
+.chrome button{width:46px;height:32px;border:0;border-radius:6px;background:transparent;color:#1d1d1f;font:16px/1 "Segoe UI Symbol",sans-serif}
+.chrome button:hover{background:#ececee}
+.chrome button.close:hover{background:#e81123;color:#fff}
 main{max-width:520px;padding:32px}
 h1{font-size:22px;font-weight:600;margin:0 0 8px}
 p{margin:0;color:#6e6e73;white-space:pre-wrap;word-break:break-all}
@@ -320,7 +341,7 @@ p{margin:0;color:#6e6e73;white-space:pre-wrap;word-break:break-all}
 .bar i{display:block;width:30%;height:100%;background:#1d1d1f;animation:m 1.4s ease-in-out infinite}
 @keyframes m{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
 @media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
-</style></head><body><main role="${failed ? "alert" : "status"}"><h1>${escape(title)}</h1><p>${escape(detail)}</p>${failed ? "" : '<div class="bar"><i></i></div>'}</main></body></html>`
+</style></head><body><div class="chrome"><button type="button" aria-label="最小化" onclick="omna.windowAction('minimize')">&#8211;</button><button type="button" aria-label="最大化" onclick="omna.windowAction('maximize')">&#9633;</button><button type="button" class="close" aria-label="关闭" onclick="omna.windowAction('close')">&#10005;</button></div><main role="${failed ? "alert" : "status"}"><h1>${escape(title)}</h1><p>${escape(detail)}</p>${failed ? "" : '<div class="bar"><i></i></div>'}</main></body></html>`
     return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
   }
 

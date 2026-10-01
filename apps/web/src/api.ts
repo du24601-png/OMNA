@@ -129,7 +129,14 @@ export type ImportJob = {
 }
 
 declare global {
-  interface Window { omna?: { ownerCredential?: string } }
+  interface Window {
+    omna?: {
+      ownerCredential?: string
+      windowAction?: (action: "minimize" | "maximize" | "close") => void
+      maximized?: () => boolean
+      onMaximized?: (listener: (value: boolean) => void) => () => void
+    }
+  }
 }
 
 const desktopCredential = window.omna?.ownerCredential || ""

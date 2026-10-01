@@ -53,6 +53,13 @@ a { color:inherit; text-decoration:none; }
 .brand-logo { display:block; height:32px; width:auto; color:#171717; fill:currentColor; }
 :root[data-mode="dark"] .brand-logo { color:#fff; }
 .liquid-defs { position:absolute; width:0; height:0; overflow:hidden; }
+html.omna-desktop .window-drag { position:fixed; z-index:30; top:0; left:0; width:100%; height:80px; background:var(--bg); -webkit-app-region:drag; }
+html.omna-desktop .window-controls { position:fixed; z-index:80; top:22px; right:6px; display:flex; height:32px; -webkit-app-region:no-drag; }
+html.omna-desktop .window-controls button { width:46px; height:32px; display:grid; place-items:center; border:0; border-radius:6px; background:transparent; color:var(--text); }
+html.omna-desktop .window-controls button svg { width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:1.2; }
+html.omna-desktop .window-controls button:hover { background:var(--secondary); }
+html.omna-desktop .window-controls button.close:hover { background:#e81123; color:#fff; }
+html.omna-desktop :is(.dock, .home-brand, button, a, input, textarea, select, label, summary) { -webkit-app-region:no-drag; }
 .dock { position:fixed; top:16px; left:50%; z-index:31; transform:translateX(-50%); display:flex; align-items:center; justify-content:center; gap:2px; height:56px; padding:6px; border-radius:999px; background:rgba(255,255,255,.38); border:1px solid rgba(255,255,255,.62); box-shadow:0 10px 28px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.78), inset 0 -1px 0 rgba(255,255,255,.28); backdrop-filter:url(#liquid-glass) blur(16px) saturate(180%); }
 .dock::before { content:""; position:absolute; z-index:-1; inset:1px; border-radius:inherit; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 46%); }
 :root[data-mode="dark"] .dock { background:rgba(44,44,46,.46); border-color:rgba(255,255,255,.16); box-shadow:0 12px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.2); }
