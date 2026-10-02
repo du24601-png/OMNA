@@ -27,6 +27,7 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
     function onKey(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null
       if (target?.closest("input, textarea, select")) return
+      if (event.ctrlKey || event.metaKey || event.altKey) return
       const index = pending.findIndex(item => item.id === currentId)
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         const next = pending[event.key === "ArrowDown" ? index + 1 : index - 1]
@@ -39,8 +40,8 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
       if (target?.closest("button")) return
       if (!currentId || !live) return
       if (event.key === "e" || event.key === "E") { setOpenId(currentId); issue("edit") }
-      else if (event.key === "Backspace" || event.key === "x" || event.key === "X") issue("ignore")
-      else if (event.key === "Enter") issue("remember")
+      else if (event.key === "Backspace" || event.key === "x" || event.key === "X" || event.key === "n" || event.key === "N") issue("ignore")
+      else if (event.key === "Enter" || event.key === "y" || event.key === "Y") issue("remember")
       function issue(type: Command["type"]) {
         event.preventDefault()
         setCommand({ type, n: Date.now(), id: currentId! })
@@ -76,7 +77,6 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
       {!!pending.length && <ol className="inbox-rows">
         {pending.map(item => <InboxRow key={item.id} proposal={item} library={library} libraryReady={libraryReady} focused={item.id === currentId} open={item.id === openId} online={live} command={command} onSelect={toggle => choose(item.id, toggle)} onDone={finish} />)}
       </ol>}
-      {!!pending.length && <footer className="inbox-foot"><p>上下键选择 · E 编辑 · 退格忽略 · 回车记住</p></footer>}
     </div>
   </div>
 }
@@ -149,7 +149,7 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
       const result = await api.decide(proposal.id, body, attempt.current.key)
       if (result.status !== "accepted" && result.status !== "rejected") throw new Error("服务未确认审核结果，请重试核对。")
       onDone(proposal.id, {
-        text: result.status === "rejected" ? "已忽略，正式记忆没有改变。" : "已记住，画像与记忆列表已更新。",
+        text: result.status === "rejected" ? "已忽略，正式记忆没有改变。" : "已记住，记忆列表已更新。",
         id: result.memory_id,
       })
     } catch (err) {

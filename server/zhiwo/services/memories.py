@@ -158,7 +158,29 @@ def get_memory(db_path, handle: KernelHandle, memory_id: str) -> dict:
     active = [row for row in rows if row["lifecycle"] == "active"]
     row = active[0] if active else rows[-1]
     content = read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
-    return _item(row, content)
+    item = _item(row, content)
+    item["evidence"] = _approved_evidence(db_path, row["memory_id"], row["revision"])
+    return item
+
+
+def _approved_evidence(db_path, memory_id: str, revision: int) -> str | None:
+    """The evidence fragment the owner approved for this version, for the detail view."""
+    connection = sqlite3.connect(db_path)
+    try:
+        found = connection.execute(
+            "SELECT approved_evidence FROM memory_refs WHERE memory_id = ? AND revision = ?",
+            (memory_id, revision),
+        ).fetchone()
+    finally:
+        connection.close()
+    if found is None or not found[0]:
+        return None
+    try:
+        loaded = json.loads(found[0])
+    except json.JSONDecodeError:
+        return None
+    text = loaded.get("text") if isinstance(loaded, dict) else None
+    return text.strip() or None if isinstance(text, str) else None
 
 
 def update_memory(db_path, handle: KernelHandle, memory_id: str, request_id: str, payload: dict) -> dict:

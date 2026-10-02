@@ -12,8 +12,7 @@
     "lucide-react": "^1.48.0",
     "motion": "^13.4.3",
     "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "recharts": "2.15.4"
+    "react-dom": "19.1.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.13",

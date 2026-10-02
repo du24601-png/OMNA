@@ -1,10 +1,8 @@
-import { Dialog } from "@base-ui/react/dialog"
 import { Database, FolderArchive, Monitor, Moon, Palette, Sparkles, Sun, Trash2 } from "lucide-react"
-import { motion, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { ApiError, api, explain, type SettingsView } from "./api"
 import { loadTheme, saveTheme, type ThemeMode } from "./theme"
-import { Icon, Notice, ResourceNotice, useResource, useUnsaved } from "./ui"
+import { canLeave, Notice, ResourceNotice, useResource, useUnsaved } from "./ui"
 
 type Section = "appearance" | "model" | "library" | "backup" | "reset"
 const NAV: [Section, string, typeof Sun][] = [
@@ -16,30 +14,23 @@ const NAV: [Section, string, typeof Sun][] = [
 ]
 const MODES: [ThemeMode, string, typeof Sun][] = [["light", "浅色", Sun], ["dark", "深色", Moon], ["system", "遵循系统", Monitor]]
 
-export function SettingsDialog({ onClose, onChanged }: { onClose: () => void; onChanged: () => void }) {
-  const reduce = useReducedMotion()
+export function SettingsPage({ onChanged }: { onChanged: () => void }) {
   const resource = useResource(() => api.settings(), [])
   const [section, setSection] = useState<Section>("appearance")
-  return <Dialog.Root open modal onOpenChange={(open, details) => { if (!open) { details.cancel(); onClose() } }}>
-    <Dialog.Portal>
-      <Dialog.Backdrop className="dialog-backdrop"/>
-      <Dialog.Popup className="settings-dialog material" aria-labelledby="settings-title" render={<motion.div initial={reduce ? false : { y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={reduce ? { duration: 0 } : { duration: 0.16 }}/>}>
-        <h2 id="settings-title" className="settings-name">设置</h2>
-        <button className="icon-button settings-close" type="button" aria-label="关闭设置" onClick={onClose}><Icon name="close"/></button>
-        <div className="settings-body">
-          <div className="settings-nav">
-            <div role="tablist" aria-label="设置分区">{NAV.map(([id, label, Glyph]) => <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => setSection(id)}><Glyph size={16} strokeWidth={1.75} aria-hidden="true"/>{label}</button>)}</div>
-          </div>
-          <div className="settings-pane" role="tabpanel">
-            {section === "appearance" ? <Appearance/> : <>
-              <ResourceNotice resource={resource}/>
-              {resource.data && <SettingsForm section={section} initial={resource.data} onChanged={() => { resource.reload(); onChanged() }}/>}
-            </>}
-          </div>
-        </div>
-      </Dialog.Popup>
-    </Dialog.Portal>
-  </Dialog.Root>
+  return <div className="settings-dialog settings-page" aria-labelledby="settings-title">
+    <h1 id="settings-title" className="settings-name">设置</h1>
+    <div className="settings-body">
+      <div className="settings-nav">
+        <div role="tablist" aria-label="设置分区">{NAV.map(([id, label, Glyph]) => <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => { if (section === id || canLeave()) setSection(id) }}><Glyph size={16} strokeWidth={1.75} aria-hidden="true"/>{label}</button>)}</div>
+      </div>
+      <div className="settings-pane" role="tabpanel">
+        {section === "appearance" ? <Appearance/> : <>
+          <ResourceNotice resource={resource}/>
+          {resource.data && <SettingsForm section={section} initial={resource.data} onChanged={() => { resource.reload(); onChanged() }}/>}
+        </>}
+      </div>
+    </div>
+  </div>
 }
 
 function SettingsForm({ section, initial, onChanged }: { section: Section; initial: SettingsView; onChanged: () => void }) {

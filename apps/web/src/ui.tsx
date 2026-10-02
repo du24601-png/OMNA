@@ -106,13 +106,16 @@ export function Icon({ name }: { name: string }) {
 
 const SOURCE_CLIENTS = new Set(["omna", "workbuddy", "zcode", "opencode", "codex", "claude", "claude-code"])
 const SOURCE_DUAL = new Set(["omna", "opencode", "zcode", "codex"])
-export function SourceMark({ origin }: { origin?: { client: string; name: string } }) {
+export function SourceMark({ origin, compact = false }: { origin?: { client: string; name: string }; compact?: boolean }) {
   const client = origin?.client || "omna"
   const name = origin?.name || "OMNA"
+  if (compact && client === "omna") return <span className="memo-source compact" title="你自己添加或导入"><span className="source-you" aria-label="你">你</span></span>
+  const label = compact ? null : <span>{name}</span>
+  const title = compact ? name : undefined
   if (!SOURCE_CLIENTS.has(client)) {
     const mark = name === "Agent 提案" ? "" : Array.from(name)[0]
-    return <span className="memo-source"><span className="source-fallback" aria-hidden="true">{mark}</span><span>{name}</span></span>
+    return <span className={`memo-source${compact ? " compact" : ""}`} title={title}><span className="source-fallback" aria-hidden={!compact}>{mark}</span>{label}</span>
   }
   const dual = SOURCE_DUAL.has(client)
-  return <span className="memo-source"><img className={dual ? "source-mark light dual" : "source-mark"} src={sourceAsset(client)} alt="" />{dual && <img className="source-mark dark" src={sourceAsset(client, true)} alt="" />}<span>{name}</span></span>
+  return <span className={`memo-source${compact ? " compact" : ""}`} title={title}><img className={dual ? "source-mark light dual" : "source-mark"} src={sourceAsset(client)} alt={compact ? name : ""} />{dual && <img className="source-mark dark" src={sourceAsset(client, true)} alt="" />}{label}</span>
 }

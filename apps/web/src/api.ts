@@ -25,6 +25,8 @@ export type Memory = {
   origin?: { client: string; name: string }
   readable?: boolean
   created_at?: string
+  evidence?: string | null
+  reads_7d?: number
 }
 
 export type Version = Memory & { lifecycle: string }
@@ -41,21 +43,6 @@ export type Proposal = {
   source: { id: string; kind: string; name: string | null }
   requester?: { client: string; name: string }
   demo: boolean
-}
-
-export type Profile = {
-  groups: { id: string; title: string; cards: Memory[] }[]
-  recent: Memory[]
-}
-
-export type ProfileSummary = {
-  status: "empty" | "current" | "stale"
-  text: string | null
-  generated_at: string | null
-  model: string | null
-  memory_count: number
-  current_memory_count: number
-  extractor_configured: boolean
 }
 
 export type Source = {
@@ -103,14 +90,6 @@ export type AccessEvent = {
   returned?: string[]
 }
 
-export type AccessSeries = { id: string; name: string; counts: number[] }
-
-export type AccessReads = {
-  days: string[]
-  series: AccessSeries[]
-  last_24h?: { hours: string[]; series: AccessSeries[] }
-}
-
 export type AccessDetail = AccessEvent & {
   response: {
     items?: Memory[]
@@ -119,6 +98,14 @@ export type AccessDetail = AccessEvent & {
     proposal_id?: string
     status?: string
   }
+}
+
+export type TrayStatus = {
+  service: { ok: boolean; embeddings_loaded: boolean }
+  pending: { count: number; latest_at: string | null }
+  sharing: { paused: boolean; paused_until: string | null }
+  reads_today: { total: number; agents: { id: string; name: string; count: number }[] }
+  recent_reads: { event_id: string; agent_id: string | null; agent_name: string; tool: string; count: number; categories: Record<string, number>; at: string }[]
 }
 
 export type ImportJob = {
@@ -223,14 +210,14 @@ export const api = {
       mcp_runtime?: { command: string[]; environment: Record<string, string> }
     }>
   },
-  profile() {
-    return request("/api/v1/profile") as Promise<Profile>
+  status() {
+    return request(`/api/v1/status?utc_offset_minutes=${new Date().getTimezoneOffset()}`) as Promise<TrayStatus>
   },
-  profileSummary() {
-    return request("/api/v1/profile-summary") as Promise<ProfileSummary>
+  pauseSharing() {
+    return request("/api/v1/sharing/pause", { method: "POST" }) as Promise<TrayStatus["sharing"]>
   },
-  generateProfileSummary() {
-    return request("/api/v1/profile-summary/generate", { method: "POST" }) as Promise<ProfileSummary>
+  resumeSharing() {
+    return request("/api/v1/sharing/pause", { method: "DELETE" }) as Promise<TrayStatus["sharing"]>
   },
   memories(params: { query?: string; state?: string; category?: string; origin?: string; limit?: number; sort?: "newest" | "oldest"; cursor?: string }) {
     const search = new URLSearchParams()
@@ -318,10 +305,6 @@ export const api = {
       method: "POST",
       headers: { "Idempotency-Key": key },
     }) as Promise<AgentConnection>
-  },
-  accessReads() {
-    const offset = new Date().getTimezoneOffset()
-    return request(`/api/v1/access-reads?days=14&utc_offset_minutes=${offset}`) as Promise<AccessReads>
   },
   accessEvents(agentId: string) {
     return request(`/api/v1/access-events?agent_id=${encodeURIComponent(agentId)}`) as Promise<{ events: AccessEvent[] }>
