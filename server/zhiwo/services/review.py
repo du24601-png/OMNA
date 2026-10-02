@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime, timezone
 
 from zhiwo.adapters.kernel_client import KernelHandle
 from zhiwo.api.errors import ApiError
@@ -32,7 +33,8 @@ _DECISION_LABEL = {
 }
 
 
-def list_proposals(db_path, *, demo: bool = False, status: str | None = None) -> dict:
+def list_proposals(db_path, *, demo: bool = False, status: str | None = None, since: str | None = None) -> dict:
+    since_at = _since(since)
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     try:
@@ -42,15 +44,33 @@ def list_proposals(db_path, *, demo: bool = False, status: str | None = None) ->
             JOIN sources ON sources.id = proposals.source_id
         """
         values: list[str] = []
+        clauses: list[str] = []
         if status:
-            sql += " WHERE proposals.status = ?"
+            clauses.append("proposals.status = ?")
             values.append(status)
+        if since_at:
+            clauses.append("proposals.created_at > ?")
+            values.append(since_at)
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
         sql += " ORDER BY proposals.created_at, proposals.id"
         rows = connection.execute(sql, values).fetchall()
     finally:
         connection.close()
     agents, clients = requester_labels(db_path)
     return {"proposals": [_proposal_view(row, demo=demo, agents=agents, clients=clients) for row in rows]}
+
+
+def _since(value: str | None) -> str | None:
+    if value is None or value == "":
+        return None
+    try:
+        moment = datetime.fromisoformat(value)
+    except (TypeError, ValueError) as exc:
+        raise ApiError(400, "VALIDATION_ERROR", "since must be an ISO 8601 time") from exc
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).isoformat()
 
 
 def get_proposal(db_path, proposal_id: str, *, demo: bool = False) -> dict:
@@ -474,6 +494,8 @@ def _proposal_view(row, *, demo: bool = False, agents: dict | None = None, clien
         "status": row["status"],
         "decision": row["decision"],
         "operation_id": row["operation_id"],
+        "created_at": row["created_at"],
+        "batch_id": json.loads(row["payload_json"]).get("batch_id") or row["job_id"],
         "payload": json.loads(row["payload_json"]),
         "evidence": json.loads(row["evidence_json"]),
         "source": {

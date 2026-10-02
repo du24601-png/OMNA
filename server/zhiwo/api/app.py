@@ -23,6 +23,7 @@ from zhiwo.config import ConfigError, load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
 from zhiwo.services.agent_files import list_agent_files
+from zhiwo.services.batches import accept_additions, batch_summary, start_organize, undo_batch
 from zhiwo.services.access import attach_reads, get_access_event, list_access_events, read_counts
 from zhiwo.services.agent_tools import explain_memory, get_context, propose_memory, search_memory
 from zhiwo.services.agents import (
@@ -212,12 +213,31 @@ def create_app() -> FastAPI:
         return get_source(request.app.state.settings.control_db, source_id)
 
     @app.get("/api/v1/proposals", dependencies=[Depends(require_owner)])
-    def proposals(request: Request, status: str | None = None) -> dict:
+    def proposals(request: Request, status: str | None = None, since: str | None = None) -> dict:
         return list_proposals(
             request.app.state.settings.control_db,
             demo=request.app.state.settings.test_mode,
             status=status,
+            since=since,
         )
+
+    @app.post("/api/v1/agents/{agent_id}/organize", dependencies=[Depends(require_owner)])
+    def organize(request: Request, agent_id: str) -> dict:
+        return start_organize(request.app.state.settings.control_db, agent_id)
+
+    @app.get("/api/v1/batches/{batch_id}", dependencies=[Depends(require_owner)])
+    def batch(request: Request, batch_id: str) -> dict:
+        return batch_summary(request.app.state.settings.control_db, _request_id(batch_id))
+
+    @app.post("/api/v1/batches/{batch_id}/accept-additions", dependencies=[Depends(require_owner)])
+    def batch_accept(request: Request, batch_id: str, body: BatchAcceptBody) -> dict:
+        db_path = request.app.state.settings.control_db
+        kernel = request.app.state.kernel
+        return accept_additions(db_path, kernel, _request_id(batch_id), body.exclude, lambda: current_texts(db_path, kernel))
+
+    @app.post("/api/v1/batches/{batch_id}/undo", dependencies=[Depends(require_owner)])
+    def batch_undo(request: Request, batch_id: str, body: BatchUndoBody) -> dict:
+        return undo_batch(request.app.state.settings.control_db, request.app.state.kernel, _request_id(batch_id), body.confirm)
 
     @app.get("/api/v1/proposals/{proposal_id}", dependencies=[Depends(require_owner)])
     def proposal(request: Request, proposal_id: str) -> dict:
@@ -720,6 +740,18 @@ class DeleteBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     confirm: bool
+
+
+class BatchAcceptBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    exclude: list[str] = Field(default_factory=list, max_length=1000)
+
+
+class BatchUndoBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    confirm: bool = False
 
 
 class ImportBody(BaseModel):

@@ -196,11 +196,13 @@ v2 不改数据库结构（仍是 schema 8），不改发布和删除的核心�
 | `POST /imports` 的 `agent_file` | 请求体 `{kind: "agent_file", file_id}`，只认白名单 id，不收路径。服务自己以只读方式读一次（≤ 1 MiB，UTF-8），来源类型用现有的 `file`，名字记成 `~/...` 形式的路径；不改原文件 |
 | Agent 整理说明文件 | 首选路径。用户把一句话发给已连接、有 `propose_memory` 权限的 Agent，Agent 读自己的说明文件，逐条调用现有 `propose_memory`；不新增工具、不改 MCP 契约。拆分质量门（2026-10-02）：按结构拆分在调试集 65 条全对、在留出集 25 条类别只对 36%，负责人决定以 Agent 整理为主、按结构拆分只兜底 |
 | 按结构拆分 | 兜底路径。`services/split.py`，由 `imports._run_extraction` 调用。没配模型时，Markdown 文件、白名单说明文件，以及带标题或列表的粘贴文本改走拆分器：每个列表项或每行一条候选；只有「标签：」的列表项把标签带给子项；代码块、表格、分隔线跳过；最近一级标题定类别，标题说不出类别时按句子里的词判断，仍判断不出记 `other`；证据是原行，逐字取自原文；任务状态记 `extracted`。没有标题和列表的纯文本仍按 v1 记 `extractor_unavailable`。配了模型仍走原来的提取。无论哪条路，都会合并文字相同的候选（规整空格、全半角标点和句末标点后比较），并丢掉与当前记忆文字相同的；与已有记忆或同批候选很像的，在 `payload_json` 记 `similar_to`。相似判断是从审核页搬到服务端的字符二元组重叠（阈值 0.62）。合并条数记在 `import_jobs.extractor_config` 的 `merged_duplicates`，导入响应带 `method`（split / model）和 `merged_duplicates` |
-| `POST /imports/{job_id}/accept-additions` | 只处理该批次里未标相似、未被排除的待确认新增；逐条调用现有 `decide_proposal`（本身幂等），返回每条结果，失败的留在待确认 |
-| `POST /imports/{job_id}/undo` | 把这批经批量接受发布的记忆逐条走现有永久删除流程。只要其中有一条已不是当初发布的版本，就整批拒绝并说明 |
-| `GET /proposals` 的 `since` | 只列这个时间之后创建的待确认，给桌面壳决定要不要弹通知 |
+| `POST /agents/{id}/organize` | 开始一次「Agent 整理」：连接须已启用、有 `propose_memory` 和提案类别，否则 `CONFLICT`。在 `settings.organize_batch:{agent_id}` 记下批次 id 和 1 小时有效期，返回批次 id 和发给 Agent 的那句话。有效期内该 Agent 的新增提案在 `payload_json` 记 `batch_id`；修改类不进批次。`propose_memory` 判断同一建议时忽略 `batch_id` |
+| `GET /batches/{id}` | 批次概况：导入批次的 id 是 `job_id`，整理批次的 id 是 `batch_id`。返回待处理条数、可一键记住的新增条数、已产生的记忆条数、能否整批撤销 |
+| `POST /batches/{id}/accept-additions` | 请求体 `{exclude: [提案 id]}`。只处理该批次里的普通新增：排除的、修改类、标了 `similar_to` 的、过长的、缺证据的、与当前记忆文字相同或很像的都跳过并说明原因，留在待确认。其余逐条调用现有 `decide_proposal`，请求号由批次和提案派生，重复调用会接着做，不会重复发布。返回每条结果 |
+| `POST /batches/{id}/undo` | 请求体 `{confirm: true}`。把这批产生的新增记忆逐条走现有永久删除流程；只要有一条之后又被修改过就整批拒绝（`CONFLICT`）。永久删除会连带删掉含这些文字的来源及其余候选，所以导入批次撤销后整次导入都不在了。删除前先在 `settings.undo_batch:{id}` 记下要删的记忆，中途失败后再调用会接着删完 |
+| `GET /proposals` 的 `since` | 只列这个时间之后创建的提案，给桌面壳决定要不要弹通知。每条提案另带 `created_at` 和 `batch_id` |
 
-MCP 服务说明（`instructions`）另加两条：用到记忆时在回复末尾带一行「已参考你在 OMNA 的…」；提议后告诉用户「已提议，等你在 OMNA 里确认」。仍是四个工具。
+MCP 服务说明（`instructions`）要求只提交描述用户本人的内容（身份、长期偏好、目标、正在做的项目、发生过的事），不提交只对某个代码库成立的规则、命令、路径、给 AI 的操作步骤和推测；另加两条：用到记忆时在回复末尾带一行「已参考你在 OMNA 的…」；提议后告诉用户「已提议，等你在 OMNA 里确认」。仍是四个工具。
 
 桌面壳（`apps/desktop/src/main.cjs`、`preload.cjs`）：
 

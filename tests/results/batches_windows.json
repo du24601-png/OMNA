@@ -1,0 +1,30 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "pass": true,
+  "schema_version": 8,
+  "import_batch": {
+    "candidates": 14,
+    "accepted": 12,
+    "skipped": [
+      "excluded",
+      "similar"
+    ],
+    "repeat_accepted": 0
+  },
+  "import_undo": {
+    "interrupted_after_deleting": 3,
+    "resumed_and_deleted": 9,
+    "active_after": 1,
+    "readable_after": 0,
+    "source_and_leftover_candidates_removed": true
+  },
+  "organize_batch": {
+    "tagged_additions": 2,
+    "update_left_out": true,
+    "accepted": 2,
+    "undo_after_edit": "CONFLICT"
+  },
+  "expired_session_untagged": true,
+  "seconds": 11.5
+}

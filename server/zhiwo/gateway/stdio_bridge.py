@@ -30,6 +30,8 @@ _CATEGORY_HELP = "identity 身份；goal 目标；preference 偏好与习惯；p
 _INSTRUCTIONS = (
     "知我是用户本机的个人记忆库。读取只会返回用户已确认并允许你看的记忆。"
     "用户让你把内容记进知我时：每条记忆只写一件事，逐条调用 propose_memory；"
+    "只提交描述用户本人的内容：身份、长期偏好、目标、正在做的项目、发生过的事；"
+    "不要提交只对某个代码库成立的规则、命令、文件路径、给 AI 的操作步骤，也不要提交你自己的推测；"
     "category 只能从 identity、goal、preference、project、event、other 里选；"
     "evidence 逐字摘自用户给你的原文，不要改写标点；不要推算日期，也不要补充原文没有的信息。"
     "提交的都是待确认建议，用户在知我里确认后才生效。"

@@ -23,11 +23,11 @@
   "list_count": 2,
   "list_has_credential": false,
   "forged_status": 200,
-  "forged_agent_id": "e3180f7c-b65c-42b7-b9d2-539aab7fa1e5",
+  "forged_agent_id": "ca302e1f-8007-4502-aef4-1b778f5dd92a",
   "forged_name": "合成连接甲",
   "forged_identity_source": "credential",
   "other_agent_status": 200,
-  "other_agent_id": "fab9b20c-de9d-44c9-9f6e-fd13d4909afe",
+  "other_agent_id": "accda9df-bce5-4e9a-8b45-4d53fa8de21f",
   "owner_token_on_session": 401,
   "agent_on_owner_api": {
     "GET /api/v1/memories": {
@@ -45,7 +45,7 @@
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "GET /api/v1/sources/5e5ef195-6b15-40ed-a3da-d21750cbcb2e": {
+    "GET /api/v1/sources/3fdf4f61-99c6-4d71-8c73-e25f6c54427d": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false
@@ -55,12 +55,12 @@
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "PATCH /api/v1/agents/e3180f7c-b65c-42b7-b9d2-539aab7fa1e5": {
+    "PATCH /api/v1/agents/ca302e1f-8007-4502-aef4-1b778f5dd92a": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "POST /api/v1/agents/e3180f7c-b65c-42b7-b9d2-539aab7fa1e5/rotate-credential": {
+    "POST /api/v1/agents/ca302e1f-8007-4502-aef4-1b778f5dd92a/rotate-credential": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false

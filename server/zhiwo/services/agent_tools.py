@@ -20,6 +20,7 @@ from zhiwo.contracts.memory import CATEGORIES, TOOLS
 from zhiwo.services.access import bind_delivery, record_prepared
 from zhiwo.services.agents import fetch_principal
 from zhiwo.services.commit_gate import commit_lock
+from zhiwo.services.organize import open_session
 from zhiwo.services.policy import RECALL_WINDOW, memory_visible, select_visible
 from zhiwo.services.sharing import paused_error, paused_until
 
@@ -167,6 +168,10 @@ def propose_memory(
                 )
             verified = _source_matches(connection, principal, fragment, source_ref, now)
             source_id, job_id = _store_claim(connection, fragment, now)
+            stored_payload = dict(proposal["payload"])
+            batch_id = open_session(connection, principal.agent_id) if proposal["change_type"] == "add" else None
+            if batch_id:
+                stored_payload["batch_id"] = batch_id
             proposal_id = str(uuid.uuid4())
             connection.execute(
                 """
@@ -180,7 +185,7 @@ def propose_memory(
                     proposal["change_type"],
                     proposal["target_id"],
                     proposal["base_revision"],
-                    _dump(proposal["payload"]),
+                    _dump(stored_payload),
                     _dump(_evidence_record(fragment, source_ref, verified)),
                     source_id,
                     job_id,
@@ -556,6 +561,7 @@ def _same_proposal(existing, proposal: dict, fragment: str, source_ref: str | No
         evidence = json.loads(existing["evidence_json"])
     except json.JSONDecodeError:
         return False
+    stored.pop("batch_id", None)
     return stored == proposal["payload"] and evidence.get("text") == fragment and evidence.get("source_ref") == source_ref
 
 
