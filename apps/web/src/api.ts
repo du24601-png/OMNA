@@ -38,7 +38,7 @@ export type Proposal = {
   change_type: string
   target_id: string | null
   base_revision: number | null
-  payload: { content: string; kind: string; category: string; scope: string | null; share_enabled?: boolean; valid_until?: string | null }
+  payload: { content: string; kind: string; category: string; scope: string | null; share_enabled?: boolean; valid_until?: string | null; similar_to?: { memory_id?: string; content: string } }
   evidence: { text?: string; source_id?: string }
   source: { id: string; kind: string; name: string | null }
   requester?: { client: string; name: string }
@@ -113,6 +113,8 @@ export type ImportJob = {
   job_id: string
   status: string
   error_code: string | null
+  method?: "split" | "model" | null
+  merged_duplicates?: number
   proposals: { id: string; status: string; payload: { content: string } }[]
 }
 
@@ -413,9 +415,11 @@ export function importMessage(job: ImportJob, demo: boolean) {
   const prefix = demo ? "演示数据。" : ""
   if (job.status === "extracted") {
     const count = job.proposals?.length || 0
+    const merged = job.merged_duplicates ? `，重复的 ${job.merged_duplicates} 条已合并` : ""
+    const how = job.method === "split" ? "按结构拆出" : "已放入待确认"
     return count
-      ? `${prefix}已放入待确认 ${count} 条，还没有进入正式记忆。`
-      : `${prefix}提取完成，没有可审核的内容。来源已保存。`
+      ? `${prefix}${how} ${count} 条${merged}，确认后才进入正式记忆。`
+      : `${prefix}没有新的可审核内容${merged}。来源已保存。`
   }
   if (job.status === "extractor_unavailable") {
     return "提取模型未配置。来源已保存，没有生成待确认内容。"

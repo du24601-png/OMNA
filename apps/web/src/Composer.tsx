@@ -71,7 +71,7 @@ export function Composer({ kind, service, onClose, onRefresh, onSaved, onReview 
         <p className="helper">粘贴一段对话，或选择 UTF-8 TXT / Markdown 文件。单次最多 1 MiB。</p>
         <label className="file-picker">选择文本文件<input aria-label="文本或 Markdown 文件" accept=".txt,.md,.markdown" type="file" disabled={busy || reading} onChange={e => { void selectFile(e.target.files?.[0]); e.target.value = "" }}/></label>
         {reading && <p role="status">正在读取文件…</p>}{fileName && <p className="helper">已选择：{fileName}</p>}
-        <div className="privacy-note">{service.extractor === true && online ? "导入后，会将这次选择的文本发送给已配置的提取模型。生成的建议仍需你确认。" : service.extractor === false && online ? "提取模型未配置。这次会保存来源，不会生成候选；仍可手动添加记忆。" : "暂时无法确认提取模型配置。恢复服务后再导入。"}{service.testMode && " 当前为合成数据测试环境。"}</div>
+        <div className="privacy-note">{service.extractor === true && online ? "导入后，会将这次选择的文本发送给已配置的提取模型。生成的建议仍需你确认。" : service.extractor === false && online ? "提取模型未配置。带标题或列表的文本会按结构拆成候选，不调用模型；其他文本只保存来源。" : "暂时无法确认提取模型配置。恢复服务后再导入。"}{service.testMode && " 当前为合成数据测试环境。"}</div>
       </>}
       <label className="field">{kind === "add" ? "记忆内容" : "来源文本"}<textarea aria-label={kind === "add" ? "记忆内容" : "来源文本"} value={content} onChange={e => setContent(e.target.value)} rows={6} maxLength={kind === "add" ? 2000 : undefined} placeholder={kind === "add" ? "例如：日常沟通时，我更喜欢简洁、直接的回答。" : "在这里粘贴需要整理的文本…"} disabled={busy || reading}/></label>
       {kind === "add" && <><label className="check-row"><input type="checkbox" checked={onlySelf} disabled={busy} onChange={e => setOnlySelf(e.target.checked)}/>仅自己可见</label><p className="helper">{onlySelf ? "所有 Agent 都无法读取这条记忆。" : "允许已授权 Agent 读取；新建连接仍默认无权限。"}</p></>}

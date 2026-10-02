@@ -116,7 +116,7 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   const current = target.data && target.data.id === proposal.target_id ? target.data : null
   const text = draft.trim()
   const lane = useMemo(() => classify(proposal, text, library, libraryReady), [proposal, text, library, libraryReady])
-  const similar = useMemo(() => proposal.target_id ? null : findSimilar(text, library), [proposal.target_id, text, library])
+  const similar = useMemo(() => proposal.target_id ? null : findSimilar(text, library) || proposal.payload.similar_to || null, [proposal.target_id, proposal.payload.similar_to, text, library])
   const stale = !!current && proposal.base_revision != null && current.revision !== proposal.base_revision
   const blocked = stale || conflict
   const dirty = draft !== proposal.payload.content || shareTouched
@@ -230,7 +230,7 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
       }} /> : <p className="inbox-sentence">{draft}</p>}
       {open && mode === "edit" && <label className="inbox-share"><input type="checkbox" checked={onlySelf} disabled={busy} onChange={event => { setOnlySelf(event.target.checked); setShareTouched(true) }} />仅自己可见</label>}
       {open && mode !== "edit" && lane === "update" && !blocked && <p className="inbox-hint">{was ? `替换「${was}」` : "替换一条已有记忆"}</p>}
-      {open && mode !== "edit" && lane === "similar" && <p className="inbox-hint">已有一条几乎一样的记忆</p>}
+      {open && mode !== "edit" && lane === "similar" && <p className="inbox-hint">{similar && !("id" in similar) && !similar.memory_id ? "和这次导入里的另一条很像" : "已有一条几乎一样的记忆"}</p>}
       {open && mode !== "edit" && lane === "long" && <p className="inbox-hint">这条太长，先改短再保存。</p>}
       {open && mode !== "edit" && lane === "evidence" && <p className="inbox-hint">缺少依据，不能直接保存。</p>}
       {showChoice && lane === "update" && <div className="inbox-choices">
@@ -266,7 +266,7 @@ function classify(item: Proposal, content: string, memories: Memory[], ready: bo
   if (content.length > 2000) return "long"
   if (!ready) return "unchecked"
   if (!item.evidence?.text) return "evidence"
-  if (findSimilar(content, memories)) return "similar"
+  if (findSimilar(content, memories) || item.payload.similar_to) return "similar"
   return "quick"
 }
 

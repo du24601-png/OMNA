@@ -1,0 +1,239 @@
+{
+  "gate": "v2 split quality",
+  "set": "holdout",
+  "method": "split_markdown + dedupe, no model",
+  "files": 3,
+  "items": 25,
+  "category_accuracy": 0.36,
+  "manual_work_ratio": 0.64,
+  "thresholds": {
+    "category_accuracy": 0.8,
+    "manual_work_ratio": 0.2
+  },
+  "pass": false,
+  "per_file": [
+    {
+      "file": "h1_claude_typical.md",
+      "items": 9,
+      "candidates": 9,
+      "correct": 2,
+      "wrong_category": 7,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "9/9",
+      "rows": [
+        {
+          "expected": "Be concise. No emojis.",
+          "want": "preference",
+          "got": "other",
+          "content": "Be concise. No emojis.",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "When unsure, ask before making large changes.",
+          "want": "preference",
+          "got": "other",
+          "content": "When unsure, ask before making large changes.",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Always run the test suite before saying a task is done.",
+          "want": "preference",
+          "got": "preference",
+          "content": "Always run the test suite before saying a task is done.",
+          "result": "ok"
+        },
+        {
+          "expected": "macOS, zsh, Homebrew",
+          "want": "preference",
+          "got": "other",
+          "content": "macOS, zsh, Homebrew",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Node 22 via fnm; Python via uv",
+          "want": "preference",
+          "got": "other",
+          "content": "Node 22 via fnm; Python via uv",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Conventional commits (feat:, fix:, chore:)",
+          "want": "preference",
+          "got": "other",
+          "content": "Conventional commits (feat:, fix:, chore:)",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Never force-push to shared branches",
+          "want": "preference",
+          "got": "preference",
+          "content": "Never force-push to shared branches",
+          "result": "ok"
+        },
+        {
+          "expected": "Staff engineer working on payments infra",
+          "want": "identity",
+          "got": "project",
+          "content": "Staff engineer working on payments infra",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Based in Berlin (CET)",
+          "want": "identity",
+          "got": "other",
+          "content": "Based in Berlin (CET)",
+          "result": "wrong_category"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "h2_cn_typical.md",
+      "items": 9,
+      "candidates": 9,
+      "correct": 5,
+      "wrong_category": 4,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "9/9",
+      "rows": [
+        {
+          "expected": "我用 Windows 11，终端是 PowerShell 7",
+          "want": "preference",
+          "got": "preference",
+          "content": "我用 Windows 11，终端是 PowerShell 7",
+          "result": "ok"
+        },
+        {
+          "expected": "默认回复中文",
+          "want": "preference",
+          "got": "preference",
+          "content": "默认回复中文",
+          "result": "ok"
+        },
+        {
+          "expected": "修改代码前先读相关文件，不要凭空猜",
+          "want": "preference",
+          "got": "preference",
+          "content": "修改代码前先读相关文件，不要凭空猜",
+          "result": "ok"
+        },
+        {
+          "expected": "写完代码自己跑一遍 lint 和测试",
+          "want": "preference",
+          "got": "preference",
+          "content": "写完代码自己跑一遍 lint 和测试",
+          "result": "ok"
+        },
+        {
+          "expected": "在一家跨境电商公司做后端，主要写 Java 和 Kotlin",
+          "want": "identity",
+          "got": "preference",
+          "content": "在一家跨境电商公司做后端，主要写 Java 和 Kotlin",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "最近在把订单系统从单体拆成微服务",
+          "want": "project",
+          "got": "preference",
+          "content": "最近在把订单系统从单体拆成微服务",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "养了一只猫，叫豆包",
+          "want": "other",
+          "got": "preference",
+          "content": "养了一只猫，叫豆包",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "周末一般不看工作消息",
+          "want": "preference",
+          "got": "preference",
+          "content": "周末一般不看工作消息",
+          "result": "ok"
+        },
+        {
+          "expected": "计划明年考 PMP",
+          "want": "goal",
+          "got": "preference",
+          "content": "计划明年考 PMP",
+          "result": "wrong_category"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "h3_en_agents.md",
+      "items": 7,
+      "candidates": 7,
+      "correct": 2,
+      "wrong_category": 5,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "7/7",
+      "rows": [
+        {
+          "expected": "I'm a PhD student in computational biology at a university in Toronto.",
+          "want": "identity",
+          "got": "identity",
+          "content": "I'm a PhD student in computational biology at a university in Toronto.",
+          "result": "ok"
+        },
+        {
+          "expected": "Explain statistics step by step; I'm still learning Bayesian methods.",
+          "want": "preference",
+          "got": "other",
+          "content": "Explain statistics step by step; I'm still learning Bayesian methods.",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Prefer R for analysis and Python for pipelines.",
+          "want": "preference",
+          "got": "preference",
+          "content": "Prefer R for analysis and Python for pipelines.",
+          "result": "ok"
+        },
+        {
+          "expected": "Cite papers with DOI when you mention them.",
+          "want": "preference",
+          "got": "other",
+          "content": "Cite papers with DOI when you mention them.",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Thesis chapter 3: single-cell RNA-seq clustering benchmark",
+          "want": "project",
+          "got": "other",
+          "content": "Thesis chapter 3: single-cell RNA-seq clustering benchmark",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Reviewing a manuscript for a journal, due next Friday",
+          "want": "project",
+          "got": "other",
+          "content": "Reviewing a manuscript for a journal, due next Friday",
+          "result": "wrong_category"
+        },
+        {
+          "expected": "Learn Rust well enough to contribute to bioinformatics tools",
+          "want": "goal",
+          "got": "other",
+          "content": "Learn Rust well enough to contribute to bioinformatics tools",
+          "result": "wrong_category"
+        }
+      ],
+      "extra_candidates": []
+    }
+  ]
+}

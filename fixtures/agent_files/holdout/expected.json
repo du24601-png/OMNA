@@ -1,0 +1,48 @@
+{
+  "_about": "Held-out set, written after the splitter's keyword tables were fixed and scored without changing them. Same matching and gate rules as ../expected.json.",
+  "files": {
+    "h1_claude_typical.md": {
+      "client": "claude-code",
+      "duplicates": 0,
+      "items": [
+        ["preference", "Be concise. No emojis."],
+        ["preference", "When unsure, ask before making large changes."],
+        ["preference", "Always run the test suite before saying a task is done."],
+        ["preference", "macOS, zsh, Homebrew"],
+        ["preference", "Node 22 via fnm; Python via uv"],
+        ["preference", "Conventional commits (feat:, fix:, chore:)"],
+        ["preference", "Never force-push to shared branches"],
+        ["identity", "Staff engineer working on payments infra"],
+        ["identity", "Based in Berlin (CET)"]
+      ]
+    },
+    "h2_cn_typical.md": {
+      "client": "claude-code",
+      "duplicates": 0,
+      "items": [
+        ["preference", "我用 Windows 11，终端是 PowerShell 7"],
+        ["preference", "默认回复中文"],
+        ["preference", "修改代码前先读相关文件，不要凭空猜"],
+        ["preference", "写完代码自己跑一遍 lint 和测试"],
+        ["identity", "在一家跨境电商公司做后端，主要写 Java 和 Kotlin"],
+        ["project", "最近在把订单系统从单体拆成微服务"],
+        ["other", "养了一只猫，叫豆包"],
+        ["preference", "周末一般不看工作消息"],
+        ["goal", "计划明年考 PMP"]
+      ]
+    },
+    "h3_en_agents.md": {
+      "client": "codex",
+      "duplicates": 0,
+      "items": [
+        ["identity", "I'm a PhD student in computational biology at a university in Toronto."],
+        ["preference", "Explain statistics step by step; I'm still learning Bayesian methods."],
+        ["preference", "Prefer R for analysis and Python for pipelines."],
+        ["preference", "Cite papers with DOI when you mention them."],
+        ["project", "Thesis chapter 3: single-cell RNA-seq clustering benchmark"],
+        ["project", "Reviewing a manuscript for a journal, due next Friday"],
+        ["goal", "Learn Rust well enough to contribute to bioinformatics tools"]
+      ]
+    }
+  }
+}

@@ -1,0 +1,598 @@
+{
+  "gate": "v2 split quality",
+  "method": "split_markdown + dedupe, no model",
+  "files": 8,
+  "items": 65,
+  "category_accuracy": 1.0,
+  "manual_work_ratio": 0.0,
+  "thresholds": {
+    "category_accuracy": 0.8,
+    "manual_work_ratio": 0.2
+  },
+  "pass": true,
+  "per_file": [
+    {
+      "file": "claude_cn_structured.md",
+      "items": 14,
+      "candidates": 14,
+      "correct": 14,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "14/14",
+      "rows": [
+        {
+          "expected": "独立开发者，一个人运营一家小公司",
+          "want": "identity",
+          "got": "identity",
+          "content": "独立开发者，一个人运营一家小公司",
+          "result": "ok"
+        },
+        {
+          "expected": "做过 6 年后端，主力语言是 TypeScript 和 Python",
+          "want": "identity",
+          "got": "identity",
+          "content": "做过 6 年后端，主力语言是 TypeScript 和 Python",
+          "result": "ok"
+        },
+        {
+          "expected": "在杭州，时区 UTC+8",
+          "want": "identity",
+          "got": "identity",
+          "content": "在杭州，时区 UTC+8",
+          "result": "ok"
+        },
+        {
+          "expected": "先给结论，再讲原因，不需要客套",
+          "want": "preference",
+          "got": "preference",
+          "content": "先给结论，再讲原因，不需要客套",
+          "result": "ok"
+        },
+        {
+          "expected": "中文回答，技术名词保留英文",
+          "want": "preference",
+          "got": "preference",
+          "content": "中文回答，技术名词保留英文",
+          "result": "ok"
+        },
+        {
+          "expected": "不确定的地方直接说不确定，不要编",
+          "want": "preference",
+          "got": "preference",
+          "content": "不确定的地方直接说不确定，不要编",
+          "result": "ok"
+        },
+        {
+          "expected": "包管理用 pnpm，不用 npm",
+          "want": "preference",
+          "got": "preference",
+          "content": "包管理用 pnpm，不用 npm",
+          "result": "ok"
+        },
+        {
+          "expected": "测试框架用 Vitest",
+          "want": "preference",
+          "got": "preference",
+          "content": "测试框架用 Vitest",
+          "result": "ok"
+        },
+        {
+          "expected": "代码里不要加自动生成的注释",
+          "want": "preference",
+          "got": "preference",
+          "content": "代码里不要加自动生成的注释",
+          "result": "ok"
+        },
+        {
+          "expected": "git 提交信息用中文，动词开头",
+          "want": "preference",
+          "got": "preference",
+          "content": "git 提交信息用中文，动词开头",
+          "result": "ok"
+        },
+        {
+          "expected": "本地优先的笔记应用「纸鸢」，计划下个月开放内测",
+          "want": "project",
+          "got": "project",
+          "content": "本地优先的笔记应用「纸鸢」，计划下个月开放内测",
+          "result": "ok"
+        },
+        {
+          "expected": "记账小程序从 Taro 迁回原生微信小程序",
+          "want": "project",
+          "got": "project",
+          "content": "记账小程序从 Taro 迁回原生微信小程序",
+          "result": "ok"
+        },
+        {
+          "expected": "年底前让「纸鸢」有 100 个付费用户",
+          "want": "goal",
+          "got": "goal",
+          "content": "年底前让「纸鸢」有 100 个付费用户",
+          "result": "ok"
+        },
+        {
+          "expected": "11 月做一场独立开发者主题的分享",
+          "want": "goal",
+          "got": "goal",
+          "content": "11 月做一场独立开发者主题的分享",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "claude_en_dev.md",
+      "items": 11,
+      "candidates": 11,
+      "correct": 11,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "11/11",
+      "rows": [
+        {
+          "expected": "Frontend engineer at a small fintech startup in Shenzhen",
+          "want": "identity",
+          "got": "identity",
+          "content": "Frontend engineer at a small fintech startup in Shenzhen",
+          "result": "ok"
+        },
+        {
+          "expected": "I mostly write React and Go",
+          "want": "identity",
+          "got": "identity",
+          "content": "I mostly write React and Go",
+          "result": "ok"
+        },
+        {
+          "expected": "Keep answers short; skip the preamble",
+          "want": "preference",
+          "got": "preference",
+          "content": "Keep answers short; skip the preamble",
+          "result": "ok"
+        },
+        {
+          "expected": "Explain trade-offs before recommending a library",
+          "want": "preference",
+          "got": "preference",
+          "content": "Explain trade-offs before recommending a library",
+          "result": "ok"
+        },
+        {
+          "expected": "Use metric units and 24-hour time",
+          "want": "preference",
+          "got": "preference",
+          "content": "Use metric units and 24-hour time",
+          "result": "ok"
+        },
+        {
+          "expected": "Prefer functional components and hooks",
+          "want": "preference",
+          "got": "preference",
+          "content": "Prefer functional components and hooks",
+          "result": "ok"
+        },
+        {
+          "expected": "Two-space indentation, no semicolons",
+          "want": "preference",
+          "got": "preference",
+          "content": "Two-space indentation, no semicolons",
+          "result": "ok"
+        },
+        {
+          "expected": "Never commit directly to main",
+          "want": "preference",
+          "got": "preference",
+          "content": "Never commit directly to main",
+          "result": "ok"
+        },
+        {
+          "expected": "Migrating the payments dashboard from Redux to Zustand",
+          "want": "project",
+          "got": "project",
+          "content": "Migrating the payments dashboard from Redux to Zustand",
+          "result": "ok"
+        },
+        {
+          "expected": "Writing an internal design system called \"Kite\"",
+          "want": "project",
+          "got": "project",
+          "content": "Writing an internal design system called \"Kite\"",
+          "result": "ok"
+        },
+        {
+          "expected": "Pass the AWS Solutions Architect exam this year",
+          "want": "goal",
+          "got": "goal",
+          "content": "Pass the AWS Solutions Architect exam this year",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "codex_mixed.md",
+      "items": 7,
+      "candidates": 7,
+      "correct": 7,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 1,
+      "merged": 1,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "8/8",
+      "rows": [
+        {
+          "expected": "我是数据分析师，日常用 Python 和 SQL。",
+          "want": "identity",
+          "got": "identity",
+          "content": "我是数据分析师，日常用 Python 和 SQL。",
+          "result": "ok"
+        },
+        {
+          "expected": "回答用中文，代码注释用英文",
+          "want": "preference",
+          "got": "preference",
+          "content": "回答用中文，代码注释用英文",
+          "result": "ok"
+        },
+        {
+          "expected": "画图默认用 matplotlib，不要用 seaborn",
+          "want": "preference",
+          "got": "preference",
+          "content": "画图默认用 matplotlib，不要用 seaborn",
+          "result": "ok"
+        },
+        {
+          "expected": "给出 SQL 时写清楚用的是哪种方言",
+          "want": "preference",
+          "got": "preference",
+          "content": "给出 SQL 时写清楚用的是哪种方言",
+          "result": "ok"
+        },
+        {
+          "expected": "季度用户留存分析报表，每月 5 号前交付",
+          "want": "project",
+          "got": "project",
+          "content": "季度用户留存分析报表，每月 5 号前交付",
+          "result": "ok"
+        },
+        {
+          "expected": "正在把老的 Excel 报表迁到 Metabase",
+          "want": "project",
+          "got": "project",
+          "content": "正在把老的 Excel 报表迁到 Metabase",
+          "result": "ok"
+        },
+        {
+          "expected": "周末不要安排任务提醒",
+          "want": "preference",
+          "got": "preference",
+          "content": "周末不要安排任务提醒",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "opencode_minimal.md",
+      "items": 6,
+      "candidates": 6,
+      "correct": 6,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "6/6",
+      "rows": [
+        {
+          "expected": "我叫林舟，是一名产品经理",
+          "want": "identity",
+          "got": "identity",
+          "content": "我叫林舟，是一名产品经理",
+          "result": "ok"
+        },
+        {
+          "expected": "文档用飞书写，不用 Notion",
+          "want": "preference",
+          "got": "preference",
+          "content": "文档用飞书写，不用 Notion",
+          "result": "ok"
+        },
+        {
+          "expected": "汇报材料要有一页结论摘要",
+          "want": "preference",
+          "got": "preference",
+          "content": "汇报材料要有一页结论摘要",
+          "result": "ok"
+        },
+        {
+          "expected": "正在负责会员体系改版，10 月底上线",
+          "want": "project",
+          "got": "project",
+          "content": "正在负责会员体系改版，10 月底上线",
+          "result": "ok"
+        },
+        {
+          "expected": "喜欢用表格对比方案",
+          "want": "preference",
+          "got": "preference",
+          "content": "喜欢用表格对比方案",
+          "result": "ok"
+        },
+        {
+          "expected": "今年想学会用 SQL 自己查数据",
+          "want": "goal",
+          "got": "goal",
+          "content": "今年想学会用 SQL 自己查数据",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "zcode_rules.md",
+      "items": 8,
+      "candidates": 8,
+      "correct": 8,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "8/8",
+      "rows": [
+        {
+          "expected": "Python 统一用 3.12，类型标注要写全",
+          "want": "preference",
+          "got": "preference",
+          "content": "Python 统一用 3.12，类型标注要写全",
+          "result": "ok"
+        },
+        {
+          "expected": "函数不超过 50 行，超过先拆",
+          "want": "preference",
+          "got": "preference",
+          "content": "函数不超过 50 行，超过先拆",
+          "result": "ok"
+        },
+        {
+          "expected": "新增依赖前先说明用途",
+          "want": "preference",
+          "got": "preference",
+          "content": "新增依赖前先说明用途",
+          "result": "ok"
+        },
+        {
+          "expected": "改动超过 100 行先给方案再动手",
+          "want": "preference",
+          "got": "preference",
+          "content": "改动超过 100 行先给方案再动手",
+          "result": "ok"
+        },
+        {
+          "expected": "有疑问先问我，不要猜",
+          "want": "preference",
+          "got": "preference",
+          "content": "有疑问先问我，不要猜",
+          "result": "ok"
+        },
+        {
+          "expected": "每次改完列出改了哪些文件",
+          "want": "preference",
+          "got": "preference",
+          "content": "每次改完列出改了哪些文件",
+          "result": "ok"
+        },
+        {
+          "expected": "维护公司的订单服务 order-service，基于 FastAPI",
+          "want": "project",
+          "got": "project",
+          "content": "维护公司的订单服务 order-service，基于 FastAPI",
+          "result": "ok"
+        },
+        {
+          "expected": "下个季度要把订单服务拆成读写两个服务",
+          "want": "project",
+          "got": "project",
+          "content": "下个季度要把订单服务拆成读写两个服务",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "claude_paragraphs.md",
+      "items": 6,
+      "candidates": 6,
+      "correct": 6,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "6/6",
+      "rows": [
+        {
+          "expected": "我是一名高中物理老师，在成都教书。",
+          "want": "identity",
+          "got": "identity",
+          "content": "我是一名高中物理老师，在成都教书。",
+          "result": "ok"
+        },
+        {
+          "expected": "平时用 AI 主要是备课和出题。",
+          "want": "other",
+          "got": "other",
+          "content": "平时用 AI 主要是备课和出题。",
+          "result": "ok"
+        },
+        {
+          "expected": "出题时请标明难度和对应的知识点。",
+          "want": "preference",
+          "got": "preference",
+          "content": "出题时请标明难度和对应的知识点。",
+          "result": "ok"
+        },
+        {
+          "expected": "讲解要用学生能听懂的语言，少用术语。",
+          "want": "preference",
+          "got": "preference",
+          "content": "讲解要用学生能听懂的语言，少用术语。",
+          "result": "ok"
+        },
+        {
+          "expected": "这学期在带高二两个班，还负责学校的科技社团。",
+          "want": "project",
+          "got": "project",
+          "content": "这学期在带高二两个班，还负责学校的科技社团。",
+          "result": "ok"
+        },
+        {
+          "expected": "我希望明年能评上高级职称。",
+          "want": "goal",
+          "got": "goal",
+          "content": "我希望明年能评上高级职称。",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "agents_nested.md",
+      "items": 9,
+      "candidates": 9,
+      "correct": 9,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 0,
+      "merged": 0,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "9/9",
+      "rows": [
+        {
+          "expected": "职业：UI 设计师，自由职业",
+          "want": "identity",
+          "got": "identity",
+          "content": "职业：UI 设计师，自由职业",
+          "result": "ok"
+        },
+        {
+          "expected": "所在城市：厦门",
+          "want": "identity",
+          "got": "identity",
+          "content": "所在城市：厦门",
+          "result": "ok"
+        },
+        {
+          "expected": "语言：中文",
+          "want": "preference",
+          "got": "preference",
+          "content": "语言：中文",
+          "result": "ok"
+        },
+        {
+          "expected": "主力用 Figma",
+          "want": "preference",
+          "got": "preference",
+          "content": "设计工具：主力用 Figma",
+          "result": "ok"
+        },
+        {
+          "expected": "动效用 Principle",
+          "want": "preference",
+          "got": "preference",
+          "content": "设计工具：动效用 Principle",
+          "result": "ok"
+        },
+        {
+          "expected": "配色：偏好低饱和度",
+          "want": "preference",
+          "got": "preference",
+          "content": "配色：偏好低饱和度",
+          "result": "ok"
+        },
+        {
+          "expected": "给一家咖啡品牌做全套视觉，11 月交稿",
+          "want": "project",
+          "got": "project",
+          "content": "给一家咖啡品牌做全套视觉，11 月交稿",
+          "result": "ok"
+        },
+        {
+          "expected": "在准备个人作品集网站",
+          "want": "project",
+          "got": "project",
+          "content": "在准备个人作品集网站",
+          "result": "ok"
+        },
+        {
+          "expected": "三年内开一家自己的设计工作室",
+          "want": "goal",
+          "got": "goal",
+          "content": "三年内开一家自己的设计工作室",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    },
+    {
+      "file": "dup_heavy.md",
+      "items": 4,
+      "candidates": 4,
+      "correct": 4,
+      "wrong_category": 0,
+      "missing": 0,
+      "extra": 0,
+      "expected_duplicates": 4,
+      "merged": 4,
+      "unmerged_duplicates": 0,
+      "evidence_verbatim": "8/8",
+      "rows": [
+        {
+          "expected": "回答简洁，先说结论",
+          "want": "preference",
+          "got": "preference",
+          "content": "回答简洁，先说结论",
+          "result": "ok"
+        },
+        {
+          "expected": "用 Markdown 输出表格",
+          "want": "preference",
+          "got": "preference",
+          "content": "用 Markdown 输出表格",
+          "result": "ok"
+        },
+        {
+          "expected": "示例代码用 TypeScript",
+          "want": "preference",
+          "got": "preference",
+          "content": "示例代码用 TypeScript",
+          "result": "ok"
+        },
+        {
+          "expected": "在做一个开源的番茄钟应用 tomato-timer",
+          "want": "project",
+          "got": "project",
+          "content": "在做一个开源的番茄钟应用 tomato-timer",
+          "result": "ok"
+        }
+      ],
+      "extra_candidates": []
+    }
+  ]
+}

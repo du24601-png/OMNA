@@ -22,6 +22,7 @@ from zhiwo.api.errors import ApiError, api_error
 from zhiwo.config import ConfigError, load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
+from zhiwo.services.agent_files import list_agent_files
 from zhiwo.services.access import attach_reads, get_access_event, list_access_events, read_counts
 from zhiwo.services.agent_tools import explain_memory, get_context, propose_memory, search_memory
 from zhiwo.services.agents import (
@@ -39,6 +40,7 @@ from zhiwo.services.library import backup_archive, export_archive, reset_library
 from zhiwo.services.memories import (
     attach_origins,
     build_profile,
+    current_texts,
     get_memory,
     get_source,
     list_memories,
@@ -408,16 +410,28 @@ def create_app() -> FastAPI:
         body: ImportBody,
         idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
     ) -> dict:
+        db_path = request.app.state.settings.control_db
         return import_source(
-            request.app.state.settings.control_db,
+            db_path,
             request.app.state.settings,
             _request_id(idempotency_key),
-            body.model_dump(),
+            body.model_dump(exclude_none=True),
+            existing=lambda: current_texts(db_path, request.app.state.kernel),
         )
+
+    @app.get("/api/v1/agent-files", dependencies=[Depends(require_owner)])
+    def agent_files(request: Request) -> dict:
+        return list_agent_files(request.app.state.settings.control_db)
 
     @app.post("/api/v1/imports/{job_id}/retry", dependencies=[Depends(require_owner)])
     def retry_job(request: Request, job_id: str) -> dict:
-        return retry_import(request.app.state.settings.control_db, request.app.state.settings, _request_id(job_id))
+        db_path = request.app.state.settings.control_db
+        return retry_import(
+            db_path,
+            request.app.state.settings,
+            _request_id(job_id),
+            existing=lambda: current_texts(db_path, request.app.state.kernel),
+        )
 
     @app.get("/api/v1/settings", dependencies=[Depends(require_owner)])
     def read_settings(request: Request) -> dict:
@@ -715,6 +729,7 @@ class ImportBody(BaseModel):
     name: str | None = None
     text: str | None = None
     content_base64: str | None = None
+    file_id: str | None = None
 
 
 _WEB_HEADERS = {

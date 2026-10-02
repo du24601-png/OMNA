@@ -163,6 +163,18 @@ def get_memory(db_path, handle: KernelHandle, memory_id: str) -> dict:
     return item
 
 
+def current_texts(db_path, handle: KernelHandle) -> list[dict]:
+    """Current memories as {"id", "content"}, for import dedupe. Owner side only."""
+    texts = []
+    for row in _rows(db_path):
+        if row["lifecycle"] != "active" or not row["kernel_id"]:
+            continue
+        content = read_version(handle.db_path, row["kernel_session"], row["kernel_id"])
+        if content:
+            texts.append({"id": row["memory_id"], "content": content})
+    return texts
+
+
 def _approved_evidence(db_path, memory_id: str, revision: int) -> str | None:
     """The evidence fragment the owner approved for this version, for the detail view."""
     connection = sqlite3.connect(db_path)
