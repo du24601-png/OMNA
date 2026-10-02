@@ -1,14 +1,14 @@
 # 知我 · ARCHITECTURE
 
-> V1.0 启动基线｜2026-09-26  
+> V2.0 基线｜2026-10-02（V1.0 启动基线 2026-09-26）  
 > 范围以 [PRODUCT.md](PRODUCT.md) 为准。以下是知我的设计契约；底层实际接口、版本及平台兼容性的早期验证证据见 `experiments/kernel_spike/results/`；当前使用限制见 [README.md](README.md)。
 
 ## 1. 架构决策
 
 | 层 | 首版选择 | 边界 |
 | --- | --- | --- |
-| 界面 | React + TypeScript + Vite；Tailwind CSS；`@base-ui/react` 提供无样式的可访问控件，`motion` 只做反馈动效，`recharts` 2.15.4 只画关于我的读取次数折线 | P1 先跑本地 Web，P3 复用同一界面装入 Electron |
-| 桌面壳 | Electron，Windows 原生环境优先 | 管理窗口、受限文件操作和本地服务生命周期 |
+| 界面 | React + TypeScript + Vite；Tailwind CSS；`@base-ui/react` 提供无样式的可访问控件，`motion` 只做反馈动效。v2 去掉关于我和读取次数折线后不再需要 `recharts` | P1 先跑本地 Web，P3 复用同一界面装入 Electron；v2 的主窗口和托盘小窗加载同一份前端的不同路由 |
+| 桌面壳 | Electron，Windows 原生环境优先 | 管理主窗口、托盘小窗、托盘图标状态、系统通知、全局快捷键、受限文件操作和本地服务生命周期；状态靠轮询本机服务，不建推送通道 |
 | 本地服务 | Python + FastAPI，单进程服务 | 审核、发布、权限、画像、导出；模块化单体 |
 | MCP | Python MCP SDK，stdio bridge | 客户端只连接知我 Gateway，不连接原生 Kernel MCP |
 | 正式记忆 | `mnemosyne-oss/mnemosyne`，经 Adapter 调用 | 复用内核；不复制第二套长期记忆引擎 |
@@ -64,7 +64,7 @@ flowchart TD
 | --- | --- |
 | `sources` | `id, kind, name, content, content_hash, imported_at`；`kind=manual/paste/file/agent_claim` |
 | `import_jobs` | `id, source_id, status, extractor_config, error_code`；提取状态与重试，不存密钥 |
-| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用。Agent 没给请求号时，服务按变更内容和证据派生一个固定的 UUID，同一条建议重复提交只留第一条 |
+| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用。Agent 没给请求号时，服务按变更内容和证据派生一个固定的 UUID，同一条建议重复提交只留第一条。v2 的导入拆分在 `payload_json` 里另记 `similar_to`（很像的已有记忆或同批候选）和合并掉的重复条数，不加列 |
 | `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文。所有者列表另附 `origin`，由该版本的来源和提案上的 `agent_id` 推出，不另存一列。`GET /api/v1/memories` 的 `origin` 按这个来源筛选，取值是已知客户端 id，或 `agent:` 加自定义连接名称 |
 | `agents` | `id, name, credential_hash, enabled, policy_version, client_status, created_at, updated_at`；`credential_hash` 是 sha256，明文不入库。凭证可重置。`client_status` 新建为 `pending`，只有 stdio 通道成功交付一次工具响应后才变为 `verified`。已停用的连接不会被标成已连接。迁移版本是 6 |
 | `agent_permissions` | `agent_id, allowed_tools, allowed_categories, propose_categories`；`allowed_categories` 只管读取，`propose_categories` 只管能在哪些类别提案，两者互不授予；空集即无权限。迁移版本 8 加入 `propose_categories`，已有连接取原来的 `allowed_categories`，行为不变 |
@@ -72,7 +72,7 @@ flowchart TD
 | `access_events` | `id, request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state`；`id` 由服务生成，每次调用或重试各有一行。`outcome` 是 `success`、`empty` 或 `rejected`。`response_snapshot` 就是那一次返回的业务载荷。`delivery_state` 从 `prepared` 只能变为 `sent`、`failed` 或 `unknown`，之后不再改。交付按 `id` 更新，不按请求号批量更新 |
 | `profile_summary` | 单行派生缓存：`text, input_hash, generated_at, model, memory_count`。不保存原始记忆集合，不参与普通检索；可随时删除并从 Mnemosyne 当前记忆重建 |
 | `operations` | `id, action, target_id, base_revision, revision, payload_hash, payload_json, kernel_id, status, error_code`；跨库写入恢复及幂等。`payload_json` 只用于核对和恢复，不作为正式检索正文 |
-| `settings` | 非敏感设置、schema 版本、选定模型；密钥使用系统凭据存储或开发环境变量 |
+| `settings` | 非敏感设置、schema 版本、选定模型；密钥使用系统凭据存储或开发环境变量。v2 另存 `sharing_paused_until` |
 
 统一外部 `memory_id` 为知我生成的稳定 UUID；`revision` 从 1 递增；Kernel ID 只在 Adapter 内解释。类别冻结为 `identity/goal/preference/project/event/other`，每条一个类别；`scope` 表示适用场景，不是权限类别。
 
@@ -163,7 +163,7 @@ P2.1 的权限变更在 `services/agents.py`。新连接的工具、读取类别
 
 `get_context` 只组装获准记忆，不调用模型再总结；不接受完整画像请求绕过类别过滤。`explain_memory` 不返回整份原文、旧版本或其他记忆；无权访问与不存在统一返回 `NOT_FOUND`，避免通过 ID 探测信息。Agent 只可在其提案类别（`propose_categories`）提交提案，与读取类别无关；更新目标还需当前可读。
 
-错误码至少覆盖：`UNAUTHENTICATED`、`FORBIDDEN`、`NOT_FOUND`、`VALIDATION_ERROR`、`CONFLICT`、`MODEL_UNAVAILABLE`、`KERNEL_UNAVAILABLE`、`AUDIT_UNAVAILABLE`。未返回记忆是正常空结果，不触发全库兜底。
+错误码至少覆盖：`UNAUTHENTICATED`、`FORBIDDEN`、`NOT_FOUND`、`VALIDATION_ERROR`、`CONFLICT`、`MODEL_UNAVAILABLE`、`KERNEL_UNAVAILABLE`、`AUDIT_UNAVAILABLE`、`SHARING_PAUSED`。`SHARING_PAUSED` 的说明写明「用户暂停了共享」，Agent 应如实告诉用户。未返回记忆是正常空结果，不触发全库兜底。
 
 ### 6.3 身份与最小披露
 
@@ -182,6 +182,33 @@ P2.2 的四个工具在 `services/agent_tools.py`，可见性在 `services/polic
 空结果和拒绝也记录 `outcome`，不写未授权正文。`sent` 仅表示交给发送通道；不等于模型已收到。默认不保存完整任务/查询文本，避免访问日志额外积累无关个人信息。
 
 禁止暴露原生删除/覆盖工具，以及绕过过滤的 MCP resources/prompts。这里控制的是接入配置的权限，不承诺抵御拥有同一系统用户文件权限的恶意进程，也不提供不可伪造的客户端品牌认证。
+
+### 6.4 v2 新增接口与约束
+
+v2 不改数据库结构（仍是 schema 8），不改发布和删除的核心逻辑。新增状态放在现有 `settings` 表和 `proposals.payload_json` 里；新接口尽量组合已有服务，不另建第二套流程。
+
+| 路由 | 用途与规则 |
+| --- | --- |
+| `GET /status?utc_offset_minutes=` | 给托盘和小窗轮询。返回服务是否正常（含 `embeddings_loaded`）、待确认数和最新一条待确认的时间、暂停到期时间、今天按本地日期各 Agent 的读取次数，以及最近 2 次成功读取（Agent、工具、各类别条数、时间、事件 id）。不返回正文、查询词或快照。今天的次数复用 `access.read_counts`，不计被拒绝的调用 |
+| `GET /memories` 的 `reads_7d` | 每条记忆近 7×24 小时被读取的次数：只数 `get_context`、`search_memory`、`explain_memory` 中 `outcome=success`、`delivery_state=sent` 的事件，从 `response_snapshot` 里取出返回的记忆 id 计数。不另存一列 |
+| `POST /sharing/pause`；`DELETE /sharing/pause` | 暂停共享 1 小时或立即恢复。到期时间写在 `settings.sharing_paused_until`（UTC ISO 时间），读的时候判断是否过期，不开定时器，所以重启后仍保持。四个工具在鉴权之后、提交之前各检查一次，暂停中返回 `SHARING_PAUSED`，并照常写一条 `rejected` 访问记录 |
+| `GET /agent-files` | 只看白名单里的固定路径（各客户端的用户级 `CLAUDE.md` / `AGENTS.md`），返回客户端、路径、大小、是否导入过；不读内容。白名单在服务代码里，可配置，路径逐一按客户端官方文档核实 |
+| `POST /imports` 的 `agent_file` | 服务自己读白名单文件（≤ 1 MiB）一次，来源类型用现有的 `file`，名字记路径；不改原文件 |
+| 按结构拆分 | `imports._run_extraction` 在没配模型时改走拆分器：列表项或每行一条为候选，标题关键词定类别，证据是原行，任务状态记 `extracted`。配了模型仍走原来的提取。规整空格和全半角标点后文字相同的合并；与已有记忆或同批候选很像的，在 `payload_json` 记 `similar_to`。相似判断把前端审核里现有的字符二元组重叠算法（阈值 0.62）搬到服务端，前后端用同一个规则 |
+| `POST /imports/{job_id}/accept-additions` | 只处理该批次里未标相似、未被排除的待确认新增；逐条调用现有 `decide_proposal`（本身幂等），返回每条结果，失败的留在待确认 |
+| `POST /imports/{job_id}/undo` | 把这批经批量接受发布的记忆逐条走现有永久删除流程。只要其中有一条已不是当初发布的版本，就整批拒绝并说明 |
+| `GET /proposals` 的 `since` | 只列这个时间之后创建的待确认，给桌面壳决定要不要弹通知 |
+
+MCP 服务说明（`instructions`）另加两条：用到记忆时在回复末尾带一行「已参考你在 OMNA 的…」；提议后告诉用户「已提议，等你在 OMNA 里确认」。仍是四个工具。
+
+桌面壳（`apps/desktop/src/main.cjs`、`preload.cjs`）：
+
+- **托盘小窗**：第二个无边框 `BrowserWindow`（368 × 520，`skipTaskbar`，失焦隐藏），按 `tray.getBounds()` 和所在显示器的工作区定位，加载同源页面的 `#/flyout`；Windows 11 上尝试系统材质，不支持时用普通背景。
+- **托盘图标**：五种状态各一套图标（浅色、深色任务栏各一版）。main 进程用本机 Owner 凭证每 3–5 秒轮询 `/api/v1/status`；小窗和主窗口都不可见时降到 10 秒。状态轮询不写进服务的通用访问日志。
+- **通知**：Electron `Notification`；轮询发现新的待确认时弹出，30 秒内合并；点击打开小窗并定位到这条；受设置开关控制。
+- **全局快捷键**：`globalShortcut` 注册 Ctrl Shift M，打开主窗口并聚焦搜索；注册失败时在设置里提示。
+- **主窗口**：默认 1040 × 680，最小 960 × 600；关闭仍收进托盘。
+- preload 只加必要的事件（打开小窗、定位到某条建议、快捷键状态），渲染层仍关闭 Node 集成。
 
 ## 7. 删除、导出与恢复
 
