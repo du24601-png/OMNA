@@ -19,11 +19,13 @@ from zhiwo.services.access import dump_payload, note_delivery
 from zhiwo.services.agents import fetch_principal_by_id, note_client_observed
 from zhiwo.services.commit_gate import commit_lock
 from zhiwo.services.policy import memory_visible
+from zhiwo.services.sharing import PAUSED_MESSAGE, paused_until
 
 _INTERRUPTED = (ConnectionError, TimeoutError, BrokenPipeError)
 _STATUS = {
     "UNAUTHENTICATED": 401,
     "FORBIDDEN": 403,
+    "SHARING_PAUSED": 403,
     "NOT_FOUND": 404,
     "CONFLICT": 409,
     "VALIDATION_ERROR": 400,
@@ -131,6 +133,8 @@ def _revise(connection, row, payload: dict) -> tuple[int, dict, str]:
         return 401, _error_body(payload, "UNAUTHENTICATED", "agent credential rejected"), "rejected"
     if not principal.enabled:
         return 403, _error_body(payload, "FORBIDDEN", "agent is disabled"), "rejected"
+    if paused_until(connection) is not None:
+        return 403, _error_body(payload, "SHARING_PAUSED", PAUSED_MESSAGE), "rejected"
     if row["policy_version"] is not None and principal.policy_version != int(row["policy_version"]):
         return 403, _error_body(payload, "FORBIDDEN", "connection permissions changed"), "rejected"
     if row["tool"] not in principal.allowed_tools:

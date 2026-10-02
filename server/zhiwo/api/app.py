@@ -22,7 +22,7 @@ from zhiwo.api.errors import ApiError, api_error
 from zhiwo.config import ConfigError, load_settings
 from zhiwo.contracts.memory import Category, Kind
 from zhiwo.repositories.migrate import memory_ref_count, migrate, schema_version, setting
-from zhiwo.services.access import get_access_event, list_access_events, read_counts
+from zhiwo.services.access import attach_reads, get_access_event, list_access_events, read_counts
 from zhiwo.services.agent_tools import explain_memory, get_context, propose_memory, search_memory
 from zhiwo.services.agents import (
     AgentPrincipal,
@@ -53,6 +53,8 @@ from zhiwo.services.shell import pick_folder, reveal_path
 from zhiwo.services.publish import operation_status, publish_memory
 from zhiwo.services.review import decide_proposal, get_proposal, list_proposals
 from zhiwo.services.search import list_versions, search_memories
+from zhiwo.services.sharing import pause_sharing, resume_sharing
+from zhiwo.services.status import tray_status
 
 
 @asynccontextmanager
@@ -161,8 +163,9 @@ def create_app() -> FastAPI:
                 found["items"] = [item for item in items if origin_key(item.get("origin")) == selected]
             found["origins"] = list_origin_choices(db_path)
             found["next_cursor"] = None
+            attach_reads(db_path, found["items"])
             return found
-        return list_memories(
+        listed = list_memories(
             db_path,
             kernel,
             state=state,
@@ -173,6 +176,8 @@ def create_app() -> FastAPI:
             sort=sort,
             cursor=cursor,
         )
+        attach_reads(db_path, listed["items"])
+        return listed
 
     @app.get("/api/v1/memories/{memory_id}/versions", dependencies=[Depends(require_owner)])
     def memory_versions(request: Request, memory_id: str) -> dict:
@@ -180,7 +185,10 @@ def create_app() -> FastAPI:
 
     @app.get("/api/v1/memories/{memory_id}", dependencies=[Depends(require_owner)])
     def memory(request: Request, memory_id: str) -> dict:
-        return get_memory(request.app.state.settings.control_db, request.app.state.kernel, memory_id)
+        db_path = request.app.state.settings.control_db
+        found = get_memory(db_path, request.app.state.kernel, memory_id)
+        attach_reads(db_path, [found])
+        return found
 
     @app.patch("/api/v1/memories/{memory_id}", dependencies=[Depends(require_owner)])
     def patch_memory(
@@ -321,6 +329,22 @@ def create_app() -> FastAPI:
             "propose_categories": list(principal.propose_categories),
             "identity_source": "credential",
         }
+
+    @app.get("/api/v1/status", dependencies=[Depends(require_owner)])
+    def status(request: Request, utc_offset_minutes: int = 0) -> dict:
+        return tray_status(
+            request.app.state.settings.control_db,
+            embeddings_loaded=request.app.state.kernel.embeddings_loaded,
+            utc_offset_minutes=utc_offset_minutes,
+        )
+
+    @app.post("/api/v1/sharing/pause", dependencies=[Depends(require_owner)])
+    def pause(request: Request) -> dict:
+        return pause_sharing(request.app.state.settings.control_db)
+
+    @app.delete("/api/v1/sharing/pause", dependencies=[Depends(require_owner)])
+    def resume(request: Request) -> dict:
+        return resume_sharing(request.app.state.settings.control_db)
 
     @app.get("/api/v1/access-reads", dependencies=[Depends(require_owner)])
     def access_reads(request: Request, days: int = 14, utc_offset_minutes: int = 0) -> dict:

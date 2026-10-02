@@ -5,7 +5,7 @@
   "service": "official FastAPI on 127.0.0.1",
   "new_process": true,
   "model_cache_present_before_start": true,
-  "cache_dir": "D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_3\\fastembed-cache",
+  "cache_dir": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\experiments\\kernel_spike\\runs\\p0_3\\fastembed-cache",
   "restriction": {
     "method": "HTTP_PROXY, HTTPS_PROXY and ALL_PROXY point at http://127.0.0.1:9. NO_PROXY keeps 127.0.0.1 and localhost. HF_HUB_OFFLINE=1.",
     "loopback": "kept",

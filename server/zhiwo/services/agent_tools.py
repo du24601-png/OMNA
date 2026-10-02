@@ -21,6 +21,7 @@ from zhiwo.services.access import bind_delivery, record_prepared
 from zhiwo.services.agents import fetch_principal
 from zhiwo.services.commit_gate import commit_lock
 from zhiwo.services.policy import RECALL_WINDOW, memory_visible, select_visible
+from zhiwo.services.sharing import paused_error, paused_until
 
 _UNVERIFIED = "Agent 提供，未核实"
 
@@ -319,12 +320,15 @@ def _begin(db_path, credential: str, tool: str):
     connection = _connect(db_path)
     try:
         principal = fetch_principal(connection, credential)
+        paused = principal is not None and paused_until(connection) is not None
     finally:
         connection.close()
     if principal is None:
         raise _mark(ApiError(401, "UNAUTHENTICATED", "agent credential rejected"), None)
     if not principal.enabled:
         raise _mark(ApiError(403, "FORBIDDEN", "agent is disabled"), principal)
+    if paused:
+        raise _mark(paused_error(), principal)
     if tool not in principal.allowed_tools:
         raise _mark(ApiError(403, "FORBIDDEN", "tool is not allowed"), principal)
     return principal
@@ -336,6 +340,8 @@ def _recheck(connection, credential: str, tool: str, policy_version: int):
         raise _mark(ApiError(401, "UNAUTHENTICATED", "agent credential rejected"), None)
     if not principal.enabled:
         raise _mark(ApiError(403, "FORBIDDEN", "agent is disabled"), principal)
+    if paused_until(connection) is not None:
+        raise _mark(paused_error(), principal)
     if principal.policy_version != policy_version:
         raise _mark(ApiError(403, "FORBIDDEN", "connection permissions changed"), principal)
     if tool not in principal.allowed_tools:

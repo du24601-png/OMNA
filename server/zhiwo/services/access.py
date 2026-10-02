@@ -176,13 +176,21 @@ def _count_series(buckets: dict[str, dict[str, int]], names: dict[str, str], key
     return series
 
 
-def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | None = None) -> dict:
+def read_counts(
+    db_path,
+    days: int,
+    utc_offset_minutes: int,
+    *,
+    now: datetime | None = None,
+    include_rejected: bool = True,
+) -> dict:
     """Daily read counts for the owner chart, plus the last 24 local hours.
 
     A read is get_context, search_memory, or explain_memory. Proposals are
     not reads. The result is dates, hours, and counts only: no snapshot,
     sentence, or query. `utc_offset_minutes` matches `Date.getTimezoneOffset()`.
     `last_24h` is 24 clock hours ending at the current local hour.
+    The tray passes `include_rejected=False`: a refused call is not a read.
     """
     if type(days) is not int or days not in (7, 14):
         raise ApiError(400, "VALIDATION_ERROR", "days must be 7 or 14")
@@ -209,8 +217,9 @@ def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | 
             FROM access_events
             WHERE tool IN ('get_context', 'search_memory', 'explain_memory')
               AND created_at >= ?
+              AND (? OR outcome != 'rejected')
             """,
-            (start_utc.isoformat(),),
+            (start_utc.isoformat(), 1 if include_rejected else 0),
         ).fetchall()
         names = {
             row["id"]: row["name"]
@@ -242,6 +251,99 @@ def read_counts(db_path, days: int, utc_offset_minutes: int, *, now: datetime | 
         "series": _count_series(day_buckets, names, day_list),
         "last_24h": {"hours": hour_list, "series": _count_series(hour_buckets, names, hour_list)},
     }
+
+
+def memory_reads(db_path, memory_ids: list[str], *, days: int = 7, now: datetime | None = None) -> dict[str, int]:
+    """How often each memory was handed to an agent in the last `days` x 24 hours.
+
+    Only read tools, only successful calls, only snapshots that reached the
+    send channel. The ids come from the stored snapshot; nothing is stored
+    per memory.
+    """
+    wanted = {memory_id for memory_id in memory_ids if isinstance(memory_id, str) and memory_id}
+    counts = {memory_id: 0 for memory_id in wanted}
+    if not wanted:
+        return counts
+    since = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    connection = _connect(db_path)
+    try:
+        rows = connection.execute(
+            """
+            SELECT response_snapshot FROM access_events
+            WHERE tool IN ('get_context', 'search_memory', 'explain_memory')
+              AND outcome = 'success' AND delivery_state = 'sent' AND created_at >= ?
+            """,
+            (since.isoformat(),),
+        ).fetchall()
+    finally:
+        connection.close()
+    for row in rows:
+        try:
+            payload = json.loads(row["response_snapshot"])
+        except json.JSONDecodeError:
+            continue
+        for memory_id in {version["id"] for version in _versions(payload)}:
+            if memory_id in counts:
+                counts[memory_id] += 1
+    return counts
+
+
+def attach_reads(db_path, items: list[dict], *, now: datetime | None = None) -> None:
+    """Add `reads_7d` to each listed memory."""
+    counts = memory_reads(db_path, [item.get("id") for item in items], now=now)
+    for item in items:
+        item["reads_7d"] = counts.get(item.get("id"), 0)
+
+
+def recent_reads(db_path, limit: int = 2) -> list[dict]:
+    """The latest delivered reads: who, which tool, how many per category, when.
+
+    No sentence, query, or snapshot leaves this function.
+    """
+    connection = _connect(db_path)
+    try:
+        rows = connection.execute(
+            """
+            SELECT access_events.id, agent_id, tool, response_snapshot, access_events.created_at,
+                   agents.name AS agent_name
+            FROM access_events
+            LEFT JOIN agents ON agents.id = access_events.agent_id
+            WHERE tool IN ('get_context', 'search_memory', 'explain_memory')
+              AND outcome = 'success' AND delivery_state = 'sent'
+            ORDER BY access_events.created_at DESC, access_events.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        reads = []
+        for row in rows:
+            try:
+                payload = json.loads(row["response_snapshot"])
+            except json.JSONDecodeError:
+                payload = {}
+            categories: dict[str, int] = {}
+            versions = _versions(payload)
+            for version in versions:
+                found = connection.execute(
+                    "SELECT category FROM memory_refs WHERE memory_id = ? AND revision = ?",
+                    (version["id"], version["revision"]),
+                ).fetchone()
+                if found is not None:
+                    categories[found["category"]] = categories.get(found["category"], 0) + 1
+            reads.append(
+                {
+                    "event_id": row["id"],
+                    "agent_id": row["agent_id"],
+                    "agent_name": row["agent_name"] or "已移除的连接",
+                    "tool": row["tool"],
+                    "count": len(versions),
+                    "categories": categories,
+                    "at": row["created_at"],
+                }
+            )
+        return reads
+    finally:
+        connection.close()
 
 
 def get_access_event(db_path, event_id: str) -> dict:
