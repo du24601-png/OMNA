@@ -1,0 +1,154 @@
+{
+  "instructions": "知我是用户本机的个人记忆库。读取只会返回用户已确认并允许你看的记忆。用户让你把内容记进知我时：每条记忆只写一件事，逐条调用 propose_memory；category 只能从 identity、goal、preference、project、event、other 里选；evidence 逐字摘自用户给你的原文，不要改写标点；不要推算日期，也不要补充原文没有的信息。提交的都是待确认建议，用户在知我里确认后才生效。全部提交后，如实告诉用户成功几条、失败几条；工具报错时按错误里写的字段和取值改正后再试。",
+  "propose_description": "提出一条待确认记忆，一次一条。不会直接写入正式库，用户在知我里确认后才生效。新增时不填 target_id；修改已有记忆时填 search_memory 返回的 id 和 revision。同一条重复提交会返回第一次的结果，不会多出一条。",
+  "propose_schema": {
+    "properties": {
+      "content": {
+        "description": "记忆内容，一句话只写一件事",
+        "maxLength": 2000,
+        "minLength": 1,
+        "title": "Content",
+        "type": "string"
+      },
+      "category": {
+        "description": "identity 身份；goal 目标；preference 偏好与习惯；project 项目；event 发生过的事；other 其他",
+        "enum": [
+          "identity",
+          "goal",
+          "preference",
+          "project",
+          "event",
+          "other"
+        ],
+        "title": "Category",
+        "type": "string"
+      },
+      "evidence": {
+        "description": "用户原话里支撑这条记忆的一段，逐字照抄",
+        "maxLength": 2000,
+        "minLength": 1,
+        "title": "Evidence",
+        "type": "string"
+      },
+      "kind": {
+        "default": "fact",
+        "description": "fact 长期成立的事实；event 某次发生的事",
+        "enum": [
+          "fact",
+          "event"
+        ],
+        "title": "Kind",
+        "type": "string"
+      },
+      "scope": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "适用场景，可不填",
+        "title": "Scope"
+      },
+      "target_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "修改已有记忆时填它的 id",
+        "title": "Target Id"
+      },
+      "base_revision": {
+        "anyOf": [
+          {
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "修改已有记忆时填它的 revision",
+        "title": "Base Revision"
+      },
+      "source_ref": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "证据所在来源的 id；没有就不填",
+        "title": "Source Ref"
+      }
+    },
+    "required": [
+      "content",
+      "category",
+      "evidence"
+    ],
+    "type": "object",
+    "title": "propose_memoryArguments"
+  },
+  "variants": {
+    "baseline": {
+      "is_error": false,
+      "stored": true,
+      "text": "{\"proposal_id\":\"b097dea1-1a52-45ff-8601-31373ec28c1f\",\"request_id\":\"10bbd7f3-50e8-5afe-a23d-e1d871078804\",\"status\":\"pending\"}"
+    },
+    "category_in_chinese": {
+      "is_error": true,
+      "stored": false,
+      "text": "Error executing tool propose_memory: 1 validation error for propose_memoryArguments\ncategory\n  Input should be 'identity', 'goal', 'preference', 'project', 'event' or 'other' [type=literal_error, input_value='偏好', input_type=str]\n    For fu"
+    },
+    "kind_in_chinese": {
+      "is_error": true,
+      "stored": false,
+      "text": "Error executing tool propose_memory: 1 validation error for propose_memoryArguments\nkind\n  Input should be 'fact' or 'event' [type=literal_error, input_value='事实', input_type=str]\n    For further information visit https://errors.pydantic.de"
+    },
+    "extra_confidence_field": {
+      "is_error": false,
+      "stored": true,
+      "text": "{\"proposal_id\":\"b097dea1-1a52-45ff-8601-31373ec28c1f\",\"request_id\":\"10bbd7f3-50e8-5afe-a23d-e1d871078804\",\"status\":\"pending\"}"
+    },
+    "evidence_as_object": {
+      "is_error": true,
+      "stored": false,
+      "text": "Error executing tool propose_memory: 1 validation error for propose_memoryArguments\nevidence\n  Input should be a valid string [type=string_type, input_value={'text': '我写东西喜...不要太多客套话'}, input_type=dict]\n    For further information visit htt"
+    },
+    "missing_evidence": {
+      "is_error": true,
+      "stored": false,
+      "text": "Error executing tool propose_memory: 1 validation error for propose_memoryArguments\nevidence\n  Field required [type=missing, input_value={'content': '写作偏好...category': 'preference'}, input_type=dict]\n    For further information visit https:"
+    },
+    "too_long": {
+      "is_error": true,
+      "stored": false,
+      "text": "Error executing tool propose_memory: 1 validation error for propose_memoryArguments\ncontent\n  String should have at most 2000 characters [type=string_too_long, input_value='长长长长长长长长...长长长长长长长', input_type=str]\n    For further information vi"
+    },
+    "identity_under_preset": {
+      "is_error": false,
+      "stored": true,
+      "text": "{\"proposal_id\":\"190eb269-c1bf-4fcd-8a6f-7d8359902528\",\"request_id\":\"53e4d7b3-0425-5fd8-9c43-326c95f834c0\",\"status\":\"pending\"}"
+    },
+    "same_as_baseline": {
+      "is_error": false,
+      "stored": true,
+      "text": "{\"proposal_id\":\"b097dea1-1a52-45ff-8601-31373ec28c1f\",\"request_id\":\"10bbd7f3-50e8-5afe-a23d-e1d871078804\",\"status\":\"pending\"}"
+    }
+  },
+  "failures_not_flagged_as_error": [],
+  "pending": 2
+}

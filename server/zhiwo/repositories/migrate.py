@@ -236,6 +236,19 @@ def _apply_profile_summary(connection: sqlite3.Connection) -> None:
     connection.execute("UPDATE settings SET value = '7' WHERE key = 'schema_version'")
 
 
+def _apply_propose_scope(connection: sqlite3.Connection) -> None:
+    """Proposal categories are separate from read categories.
+
+    Existing connections keep their current behaviour: they may propose in
+    the categories they can already read.
+    """
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(agent_permissions)")}
+    if "propose_categories" not in columns:
+        connection.execute("ALTER TABLE agent_permissions ADD COLUMN propose_categories TEXT NOT NULL DEFAULT '[]'")
+        connection.execute("UPDATE agent_permissions SET propose_categories = allowed_categories")
+    connection.execute("UPDATE settings SET value = '8' WHERE key = 'schema_version'")
+
+
 MIGRATIONS: tuple[tuple[int, str, object], ...] = (
     (1, "control_identity", _MIGRATION_1),
     (2, "sources_and_publish", _MIGRATION_2),
@@ -244,6 +257,7 @@ MIGRATIONS: tuple[tuple[int, str, object], ...] = (
     (5, "agent_identity", _apply_agent_identity),
     (6, "access_ledger", _apply_access_ledger),
     (7, "profile_summary", _apply_profile_summary),
+    (8, "propose_scope", _apply_propose_scope),
 )
 
 

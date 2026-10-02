@@ -1,0 +1,16 @@
+{
+  "read_categories": [
+    "preference",
+    "goal"
+  ],
+  "propose_categories": [
+    "identity",
+    "goal",
+    "preference",
+    "project",
+    "event",
+    "other"
+  ],
+  "identity_proposal_status": 200,
+  "identity_visible_to_agent": false
+}

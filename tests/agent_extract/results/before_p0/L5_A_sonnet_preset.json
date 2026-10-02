@@ -1,0 +1,258 @@
+{
+  "scenario": "A_sonnet_preset",
+  "model": "sonnet",
+  "grant": {
+    "tools": [
+      "get_context",
+      "search_memory",
+      "propose_memory"
+    ],
+    "categories": [
+      "preference",
+      "goal"
+    ]
+  },
+  "import_first": false,
+  "elapsed_s": 27.2,
+  "exit_code": 0,
+  "num_turns": 13,
+  "cost_usd": 0.23001480000000002,
+  "final_reply": "知我没有收下任何一条记忆，目前一条都没存进去。我调用 `propose_memory` 共 9 次，每次都返回同一个 `VALIDATION_ERROR`（\"the submitted fields are invalid\"，不可重试）。\n\n- **已试过的写法：** 先用中文的 `kind` 和 `category`，后来换成英文的 `fact` 加 `profile` 或 `identity`。`request_id` 试过自拟的字符串和 UUID，`evidence` 里还补过 `source` 字段，都被拒。\n- **没查到原因：** 报错没说是哪个字段有问题，工具说明里也没写 `kind` 和 `category` 的合法取值。库里目前没有已确认的记忆，我找不到现成的例子参照。我不想再靠乱猜重试。\n\n我原本打算提交这 7 条，每条都带了你的原话作证据：\n\n1. 你叫林舟，在杭州做独立开发，一个人运营一家小公司。\n2. 2026 年的目标是把记账小程序做到 1000 个付费用户。\n3. 写作偏好：先给结论，不要太多客套话。\n4. 目前主要在做「青柠账本」，用 Flutter 开发。\n5. 服务器已从阿里云迁到腾讯云（你说\"上周三\"，按今天推算约 9 月 23 日）。\n6. 习惯早上六点起床写代码。\n7. 养了一只叫豆包的猫。\n\n**需要你确认：**\n- 你能告诉我知我里 `kind` 和 `category` 允许哪些取值吗？或者给我一条已有记忆的格式？有了我就立刻重新提交。\n- 第 5 条服务器迁移是一次性事件，我只记了\"现在用腾讯云\"这个状态。你要是觉得不必长期记，提交时我可以去掉。",
+  "tool_calls": 12,
+  "propose_calls": 9,
+  "propose_succeeded": 0,
+  "propose_failed": 9,
+  "distinct_request_ids": 9,
+  "request_ids_sample": [
+    "intro-001",
+    "intro-002",
+    "intro-003",
+    "intro-004",
+    "intro-005"
+  ],
+  "stored_pending": 0,
+  "stored_categories": [],
+  "stored": [],
+  "audit_events": 1,
+  "audit_rejected": 0,
+  "calls": [
+    {
+      "id": "toolu_01J1udibUkguVmKHG8Fj2AX9",
+      "name": "ToolSearch",
+      "input": {
+        "query": "select:mcp__zhiwo__propose_memory,mcp__zhiwo__search_memory",
+        "max_results": 5
+      },
+      "result": {
+        "is_error": false,
+        "text": ""
+      }
+    },
+    {
+      "id": "toolu_017RikwsexMEirpH3PgWF6bj",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-001",
+        "change": {
+          "type": "add",
+          "content": "用户叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+          "kind": "fact",
+          "category": "身份"
+        },
+        "evidence": {
+          "text": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01KiazAUwSKsRcMUdF3RTUrn",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-002",
+        "change": {
+          "type": "add",
+          "content": "2026年的目标是把记账小程序做到 1000 个付费用户。",
+          "kind": "goal",
+          "category": "工作"
+        },
+        "evidence": {
+          "text": "今年的目标是把记账小程序做到 1000 个付费用户。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01G1eKuSRjWLfH4sQF3W2dZb",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-003",
+        "change": {
+          "type": "add",
+          "content": "写作偏好：先给结论，不要太多客套话。",
+          "kind": "preference",
+          "category": "沟通偏好"
+        },
+        "evidence": {
+          "text": "我写东西喜欢先给结论，不要太多客套话。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_016sHG5Whs3WngRkxbEa1a2F",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-004",
+        "change": {
+          "type": "add",
+          "content": "目前主要在做「青柠账本」项目，使用 Flutter 开发。",
+          "kind": "fact",
+          "category": "工作"
+        },
+        "evidence": {
+          "text": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01MV2dEFnh4J16HQo9BMDKLo",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-005",
+        "change": {
+          "type": "add",
+          "content": "服务器已从阿里云迁到腾讯云（2026年9月下旬，约9月23日）。",
+          "kind": "fact",
+          "category": "工作"
+        },
+        "evidence": {
+          "text": "上周三我把服务器从阿里云迁到了腾讯云。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01Kwa2SrvKZ2G4YhERqRJjVV",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-006",
+        "change": {
+          "type": "add",
+          "content": "习惯早上六点起床写代码。",
+          "kind": "habit",
+          "category": "生活习惯"
+        },
+        "evidence": {
+          "text": "我习惯早上六点起床写代码。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01Dob57ndNJPyCCvX6EnpDJk",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "intro-007",
+        "change": {
+          "type": "add",
+          "content": "养了一只叫豆包的猫。",
+          "kind": "fact",
+          "category": "生活"
+        },
+        "evidence": {
+          "text": "我养了一只叫豆包的猫。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_017w1E1zTBr8S6CazUhi31hp",
+      "name": "ToolSearch",
+      "input": {
+        "query": "select:mcp__zhiwo__explain_memory,mcp__zhiwo__get_context",
+        "max_results": 5
+      },
+      "result": {
+        "is_error": false,
+        "text": ""
+      }
+    },
+    {
+      "id": "toolu_01Ah3jHNDHSigYDgnUyenpKs",
+      "name": "mcp__zhiwo__search_memory",
+      "input": {
+        "query": "用户的个人信息、偏好和项目",
+        "limit": 20
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"items\":[],\"request_id\":\"cc7bf04a-2b7c-44e8-8cb2-4f223eb10f61\",\"truncated\":false}"
+      }
+    },
+    {
+      "id": "toolu_01T3rzm7mpyuHPgkW9XY1DCd",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "7c1f0a52-3e8b-4d1a-9b6e-2f4a8d5c1e01",
+        "change": {
+          "type": "add",
+          "content": "用户叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+          "kind": "fact",
+          "category": "profile"
+        },
+        "evidence": {
+          "text": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    },
+    {
+      "id": "toolu_01DYsBr88qMyMKKwacqQfMi8",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "request_id": "7c1f0a52-3e8b-4d1a-9b6e-2f4a8d5c1e02",
+        "change": {
+          "type": "add",
+          "content": "用户叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+          "kind": "fact",
+          "category": "identity"
+        },
+        "evidence": {
+          "text": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+          "source": "user_message"
+        }
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"the submitted fields are invalid\",\"retryable\":false}}"
+      }
+    }
+  ],
+  "stderr_tail": ""
+}

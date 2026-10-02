@@ -113,10 +113,11 @@ export function AgentPage({ tick, online, runtime }: { tick: number; online: boo
       run: async () => {
         const preset = presetOf(agent.allowed_tools)
         const done = await run(
-          `reconnect:${client.id}:${agent.policy_version}:${agent.allowed_tools.join(",")}:${agent.allowed_categories.join(",")}`,
+          `reconnect:${client.id}:${agent.policy_version}:${agent.allowed_tools.join(",")}:${agent.allowed_categories.join(",")}:${agent.propose_categories.join(",")}`,
           key => api.connectClient(client.id, preset, key, {
             allowed_tools: agent.allowed_tools,
             allowed_categories: agent.allowed_categories,
+            propose_categories: agent.propose_categories,
           }),
         )
         if (done) setNotice(`已重新写入。重启 ${client.name} 后生效。`)
@@ -383,31 +384,41 @@ function VerifyGuide({ row, agent, waiting, onRestart, onOpenPermissions }: { ro
   </section>
 }
 
-function sortedKey(tools: string[], categories: string[]) {
-  return JSON.stringify([[...tools].sort(), [...categories].sort()])
+function sortedKey(tools: string[], categories: string[], propose: string[]) {
+  return JSON.stringify([[...tools].sort(), [...categories].sort(), [...propose].sort()])
 }
+
+const ALL_CATEGORY_IDS = CATEGORIES.map(([id]) => id)
 
 function PermissionEditor({ agent, online, busy, onSave }: { agent: AgentConnection; online: boolean; busy: boolean; onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null> }) {
   const [tools, setTools] = useState(agent.allowed_tools)
   const [categories, setCategories] = useState(agent.allowed_categories)
-  const [baseline, setBaseline] = useState(sortedKey(agent.allowed_tools, agent.allowed_categories))
-  const dirty = sortedKey(tools, categories) !== baseline
+  const [propose, setPropose] = useState(agent.propose_categories)
+  const [baseline, setBaseline] = useState(sortedKey(agent.allowed_tools, agent.allowed_categories, agent.propose_categories))
+  const dirty = sortedKey(tools, categories, propose) !== baseline
   const locked = busy || !online
   useUnsaved(dirty, busy)
   useEffect(() => {
     if (dirty) return
-    setTools(agent.allowed_tools); setCategories(agent.allowed_categories); setBaseline(sortedKey(agent.allowed_tools, agent.allowed_categories))
+    setTools(agent.allowed_tools); setCategories(agent.allowed_categories); setPropose(agent.propose_categories)
+    setBaseline(sortedKey(agent.allowed_tools, agent.allowed_categories, agent.propose_categories))
   }, [agent])
   const level: Preset | null = tools.includes("propose_memory") ? "propose" : tools.some(tool => READ_TOOLS.includes(tool)) ? "read" : null
   function flip(list: string[], value: string, set: (next: string[]) => void) { set(list.includes(value) ? list.filter(item => item !== value) : [...list, value]) }
   function setLevel(next: Preset) {
     const wanted = new Set([...tools.filter(tool => tool !== "propose_memory"), ...READ_TOOLS, ...(next === "propose" ? ["propose_memory"] : [])])
     setTools(TOOLS.map(([id]) => id).filter(id => wanted.has(id)))
+    if (next === "propose" && propose.length === 0) setPropose(ALL_CATEGORY_IDS)
+    if (next === "read") setPropose([])
   }
-  function reset() { setTools(agent.allowed_tools); setCategories(agent.allowed_categories) }
+  function reset() { setTools(agent.allowed_tools); setCategories(agent.allowed_categories); setPropose(agent.propose_categories) }
   async function submit() {
-    const value = await onSave({ allowed_tools: tools, allowed_categories: categories })
-    if (value) { setTools(value.allowed_tools); setCategories(value.allowed_categories); setBaseline(sortedKey(value.allowed_tools, value.allowed_categories)) }
+    const proposing = tools.includes("propose_memory")
+    const value = await onSave({ allowed_tools: tools, allowed_categories: categories, propose_categories: proposing ? propose : [] })
+    if (value) {
+      setTools(value.allowed_tools); setCategories(value.allowed_categories); setPropose(value.propose_categories)
+      setBaseline(sortedKey(value.allowed_tools, value.allowed_categories, value.propose_categories))
+    }
   }
   return <div className="permission-editor">
     <h3 className="field-title">它可以做什么</h3>
@@ -418,6 +429,14 @@ function PermissionEditor({ agent, online, busy, onSave }: { agent: AgentConnect
       return <button key={id} type="button" className={`chip ${on ? "on" : ""}`} aria-pressed={on} disabled={locked} onClick={() => flip(categories, id, setCategories)}>{on && <Icon name="check" />}{label}</button>
     })}</div>
     <p className="helper">只会提供已确认、当前有效、你没有设为「仅自己可见」的记忆。</p>
+    {tools.includes("propose_memory") && <>
+      <h3 className="field-title">它可以提哪些</h3>
+      <div className="chip-group">{CATEGORIES.map(([id, label]) => {
+        const on = propose.includes(id)
+        return <button key={id} type="button" className={`chip ${on ? "on" : ""}`} aria-pressed={on} disabled={locked} onClick={() => flip(propose, id, setPropose)}>{on && <Icon name="check" />}{label}</button>
+      })}</div>
+      <p className="helper">它提的都是待确认建议，你确认后才生效。能提哪些和能读哪些分开设置。</p>
+    </>}
     <details className="disclosure advanced">
       <summary>逐项设置工具</summary>
       <fieldset className="tool-permissions" disabled={locked}>

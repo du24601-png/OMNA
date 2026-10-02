@@ -1,0 +1,99 @@
+{
+  "instructions": "只使用已注册的四个记忆工具。不要请求资源或提示词。",
+  "propose_description": "提出一条待确认记忆，不会直接写入正式库。change.type 是 add 或 update；change 含 content、kind、category，更新时含 target_id 和 base_revision。evidence.text 是证据片段。",
+  "change_schema": {
+    "additionalProperties": true,
+    "title": "Change",
+    "type": "object"
+  },
+  "prompts": "MCPError: Method not found",
+  "variants": {
+    "baseline": {
+      "is_error": false,
+      "stored": true,
+      "error": null
+    },
+    "category_in_chinese": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "the submitted fields are invalid",
+        "retryable": false
+      }
+    },
+    "kind_in_chinese": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "the submitted fields are invalid",
+        "retryable": false
+      }
+    },
+    "extra_confidence_field": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "the submitted fields are invalid",
+        "retryable": false
+      }
+    },
+    "type_new_instead_of_add": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "change type is not supported",
+        "retryable": false
+      }
+    },
+    "missing_kind": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "the submitted fields are invalid",
+        "retryable": false
+      }
+    },
+    "evidence_key_quote": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "the submitted fields are invalid",
+        "retryable": false
+      }
+    },
+    "request_id_not_uuid": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "request id must be a UUID",
+        "retryable": false
+      }
+    },
+    "forbidden_category": {
+      "is_error": false,
+      "stored": false,
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "category is not allowed",
+        "retryable": false
+      }
+    }
+  },
+  "failures_not_flagged_as_error": [
+    "category_in_chinese",
+    "kind_in_chinese",
+    "extra_confidence_field",
+    "type_new_instead_of_add",
+    "missing_kind",
+    "evidence_key_quote",
+    "request_id_not_uuid",
+    "forbidden_category"
+  ]
+}

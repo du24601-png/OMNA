@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>OMNA · 主窗口</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.mw{--mica:#F3F3F3;--pane:rgba(255,255,255,.62);--card:#FFFFFF;--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.04);--sel:rgba(0,0,0,.065);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--kbd:rgba(0,0,0,.06);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);background:var(--mica);-webkit-font-smoothing:antialiased}
+.mw.dark{--mica:#202020;--pane:rgba(255,255,255,.035);--card:#2B2B2B;--stroke:rgba(255,255,255,.08);--text:#F3F3F3;--muted:#ADADAD;--hover:rgba(255,255,255,.05);--sel:rgba(255,255,255,.08);--accent:#6CC49B;--accent-ink:#0D1F16;--accent-soft:rgba(108,196,155,.14);--warn:#E3B868;--kbd:rgba(255,255,255,.09)}
+.mw button,.mw input{font-family:inherit}
+.m-row:hover{background:var(--hover)}
+.m-tab:hover{color:var(--text);background:var(--hover)}
+.m-win:hover{background:var(--hover);color:var(--text)}
+.m-close:hover{background:#C42B1C;color:#FFFFFF}
+.m-chip:hover{background:var(--sel)}
+.m-btn:hover{background:var(--sel)}
+.m-pri:hover{opacity:.88}
+.m-input:focus{outline:none}
+.m-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.m-scroll{scrollbar-width:thin}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 1040px; height: 680px; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box">
+
+<div style="height: 44px; flex-shrink: 0; display: flex; align-items: center; padding-left: 16px">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<span style="margin-left: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
+<nav aria-label="主导航" style="display: flex; gap: 2px; margin-left: 24px">
+<button type="button" aria-current="page" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--sel); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer">记忆</button>
+<button type="button" class="m-tab" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">Agent</button>
+<button type="button" class="m-tab" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">设置</button>
+</nav>
+<div style="flex-grow: 1"></div>
+<button type="button" class="m-win" aria-label="最小化" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12h16"></path></svg></button>
+<button type="button" class="m-win" aria-label="最大化" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"></rect></svg></button>
+<button type="button" class="m-close" aria-label="关闭到托盘" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg></button>
+</div>
+
+<div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 360px">
+
+<div style="min-height: 0; display: flex; flex-direction: column; padding: 4px 16px 0 20px">
+<label class="m-search" style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: 6px; background: var(--card); border: 1px solid var(--stroke); flex-shrink: 0">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--muted)"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+<input class="m-input" type="text" aria-label="搜索记忆" placeholder="搜一下 AI 记得你什么" value="{{q}}" onChange="{{onSearch}}" style="flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--text); font-size: 14px">
+<span style="font-size: 11px; color: var(--muted)"><kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">Ctrl</kbd> <kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">K</kbd></span>
+</label>
+<div role="group" aria-label="筛选" style="display: flex; gap: 6px; margin-top: 12px; flex-shrink: 0">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+<button type="button" class="m-chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="height: 28px; padding: 0 11px; border-radius: 999px; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; {{c.st}}">{{c.label}}<span style="font-size: 11px; {{c.nst}}">{{c.n}}</span></button>
+</sc-for>
+</div>
+
+<div class="m-scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; margin-top: 10px; padding-bottom: 12px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<div style="padding: 14px 8px 6px; font-size: 12px; font-weight: 600; color: var(--muted)">{{g.title}}<span style="font-weight: 400; margin-left: 6px">{{g.n}}</span></div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<button type="button" class="m-row" onClick="{{r.pick}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 38px; padding: 7px 8px; border: 0; border-radius: 5px; color: var(--text); text-align: left; cursor: pointer; {{r.st}}">
+<span style="flex: 1; min-width: 0; font-size: 14px; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.text}}</span>
+<sc-if value="{{r.isPending}}" hint-placeholder-val="{{ false }}"><span style="flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 1px 7px; border-radius: 999px">{{r.kind}}</span></sc-if>
+<sc-if value="{{r.priv}}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-label="仅自己可见" style="flex-shrink: 0; color: var(--muted)"><rect x="5" y="11" width="14" height="9" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></sc-if>
+<span title="{{r.srcName}}" style="flex-shrink: 0; width: 18px; height: 18px; border-radius: 4px; font-size: 8.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; {{r.monoSt}}">{{r.mono}}</span>
+<span style="flex-shrink: 0; width: 52px; text-align: right; font-size: 12px; color: var(--muted)">{{r.time}}</span>
+</button>
+</sc-for>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 40px 8px; font-size: 13px; color: var(--muted)">没找到相关的记忆。换个说法试试，或者直接告诉你的 Agent。</div>
+</sc-if>
+</div>
+</div>
+
+<aside style="min-height: 0; overflow-y: auto; margin: 4px 12px 12px 0; padding: 20px 20px 16px; border-radius: 8px; background: var(--pane); border: 1px solid var(--stroke); display: flex; flex-direction: column">
+<div style="font-size: 12px; color: var(--muted)">{{d.meta}}</div>
+<div style="font-size: 18px; line-height: 1.6; font-weight: 500; margin-top: 8px">{{d.text}}</div>
+
+<sc-if value="{{d.isEdit}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; padding: 10px 12px; border-radius: 6px; background: var(--card); border: 1px solid var(--stroke); font-size: 13px; line-height: 1.7">
+<div style="color: var(--muted)">现在：<span style="text-decoration: line-through">{{d.old}}</span></div>
+<div>改为：<span style="background: var(--accent-soft); color: var(--text); padding: 1px 3px; border-radius: 3px">{{d.neu}}</span></div>
+</div>
+</sc-if>
+
+<div style="margin-top: 22px; font-size: 12px; font-weight: 600; color: var(--muted)">{{d.whoTitle}}</div>
+<div style="display: flex; flex-direction: column; gap: 2px; margin-top: 8px">
+<sc-for list="{{d.who}}" as="w" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 13px">
+<span style="width: 20px; height: 20px; border-radius: 5px; background: {{w.color}}; color: #FFFFFF; font-size: 8.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">{{w.mono}}</span>
+<span style="flex: 1">{{w.name}}</span>
+<span style="font-size: 12px; {{w.st}}">{{w.state}}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top: 20px; font-size: 12px; font-weight: 600; color: var(--muted)">来源</div>
+<div style="margin-top: 8px; font-size: 13px; line-height: 1.6">{{d.source}}</div>
+<sc-if value="{{d.hasEvidence}}" hint-placeholder-val="{{ true }}">
+<div style="margin-top: 8px; padding: 9px 12px; border-radius: 6px; background: var(--card); border: 1px solid var(--stroke); font-size: 13px; line-height: 1.6; color: var(--muted)">「{{d.evidence}}」</div>
+</sc-if>
+
+<sc-if value="{{d.hasUse}}" hint-placeholder-val="{{ true }}">
+<div style="margin-top: 20px; font-size: 12px; font-weight: 600; color: var(--muted)">使用</div>
+<div style="margin-top: 8px; font-size: 13px">{{d.use}}</div>
+</sc-if>
+
+<div style="flex-grow: 1; min-height: 16px"></div>
+<sc-if value="{{d.isPending}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; gap: 8px">
+<button type="button" class="m-pri" onClick="{{d.accept}}" style="flex: 1; height: 34px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">{{d.acceptLabel}}</button>
+<button type="button" class="m-btn" onClick="{{d.reject}}" style="flex: 1; height: 34px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 13px; cursor: pointer">忽略</button>
+</div>
+</sc-if>
+<sc-if value="{{d.isMemory}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 8px">
+<button type="button" class="m-btn" style="flex: 1; height: 34px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 13px; cursor: pointer">编辑</button>
+<button type="button" class="m-btn" style="flex: 1; height: 34px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 13px; cursor: pointer">停止共享</button>
+<button type="button" class="m-btn" aria-label="更多操作" style="width: 34px; height: 34px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="18" cy="12" r="1.6"></circle></svg></button>
+</div>
+</sc-if>
+</aside>
+</div>
+
+<div style="height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-top: 1px solid var(--stroke); font-size: 12px; color: var(--muted)">
+<span>{{footLeft}}</span>
+<div style="display: flex; gap: 16px">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="3">
+<span>{{k.label}} <kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd); margin-left: 4px">{{k.key}}</kbd></span>
+</sc-for>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1040,"height":680}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { f: 'all', q: '', sel: 'm8', done: [] };
+  }
+  renderVals() {
+    const st = this.state;
+    const AG = {
+      oc: { name: 'OpenCode', mono: 'OC', color: '#2B2B2A', cats: ['preference', 'project', 'goal'] },
+      wb: { name: 'WorkBuddy', mono: 'WB', color: '#3B6CA3', cats: ['preference', 'goal'] },
+      cc: { name: 'Claude Code', mono: 'CC', color: '#A3532A', cats: ['preference', 'project'] }
+    };
+    const CATN = { identity: '身份', goal: '目标', preference: '偏好', project: '项目', other: '生活' };
+    const SEC = { now: '现在在忙', how: '合作方式', who: '长期', life: '生活' };
+    const mem = [
+      { id: 'm1', sec: 'now', cat: 'project', text: '在做本地优先的笔记应用「纸鸢」，计划下个月开放内测', src: 'oc', time: '9月30日', reads: 14, ev: '我在做一个本地优先的笔记 app，叫纸鸢，下个月想开内测' },
+      { id: 'm2', sec: 'now', cat: 'project', text: '把记账小程序从 Taro 迁回原生微信小程序', src: 'you', time: '7月30日', reads: 2 },
+      { id: 'm3', sec: 'now', cat: 'goal', text: '在学 Rust，打算用它重写「纸鸢」的同步模块', src: 'cc', time: '9月28日', reads: 9, ev: '我最近在学 Rust，想拿它重写同步那块' },
+      { id: 'm4', sec: 'now', cat: 'goal', text: '11 月要做一场独立开发者主题的分享', src: 'wb', time: '9月26日', reads: 3, ev: '11 月有个独立开发者的分享，我是讲者之一' },
+      { id: 'm5', sec: 'now', cat: 'goal', text: '年底前让「纸鸢」有 100 个付费用户', src: 'you', time: '9月12日', reads: 0, priv: true },
+      { id: 'm6', sec: 'how', cat: 'preference', text: '先给结论，再讲原因，不需要客套', src: 'you', time: '9月20日', reads: 23 },
+      { id: 'm7', sec: 'how', cat: 'preference', text: '中文回答，技术名词保留英文', src: 'you', time: '9月20日', reads: 18 },
+      { id: 'm8', sec: 'how', cat: 'preference', text: '包管理用 pnpm，不用 npm', src: 'cc', time: '9月24日', reads: 15, ev: '别用 npm，我这边全是 pnpm' },
+      { id: 'm9', sec: 'how', cat: 'preference', text: '代码里不要加自动生成的注释', src: 'oc', time: '9月22日', reads: 11, ev: '这些自动生成的注释都删掉，以后也别加' },
+      { id: 'm10', sec: 'how', cat: 'preference', text: '改动超过 50 行，先给方案再动手', src: 'you', time: '9月21日', reads: 7 },
+      { id: 'm11', sec: 'how', cat: 'preference', text: 'git 提交信息用中文，动词开头', src: 'oc', time: '9月22日', reads: 12, ev: '提交信息写中文，用动词开头，比如「修复…」' },
+      { id: 'm12', sec: 'how', cat: 'preference', text: '日期统一写成 2026-10-02 这种格式', src: 'wb', time: '9月25日', reads: 4, ev: '日期都写成 2026-10-02 这样' },
+      { id: 'm14', sec: 'who', cat: 'identity', text: '独立开发者，一个人运营一家小公司', src: 'you', time: '9月12日', reads: 0 },
+      { id: 'm15', sec: 'who', cat: 'identity', text: '做过 6 年后端，主力语言是 TypeScript 和 Python', src: 'you', time: '9月12日', reads: 0 },
+      { id: 'm16', sec: 'who', cat: 'identity', text: '在杭州，时区 UTC+8', src: 'you', time: '9月12日', reads: 0 },
+      { id: 'l1', sec: 'life', cat: 'other', text: '只喝美式', src: 'you', time: '9月14日', reads: 0 },
+      { id: 'l3', sec: 'life', cat: 'other', text: '在读《人月神话》', src: 'oc', time: '8月21日', reads: 0, ev: '最近在看《人月神话》' }
+    ];
+    const pend = [
+      { id: 'p1', pending: true, kind: '新增', cat: 'preference', text: '测试框架用 Vitest，不用 Jest', src: 'cc', time: '刚刚', ev: '以后测试都用 Vitest 吧，别再用 Jest 了' },
+      { id: 'p2', pending: true, kind: '修改', cat: 'project', text: '「纸鸢」内测推迟到 11 月中旬', src: 'oc', time: '3 分钟前', ev: '内测得往后挪到 11 月中旬了', old: '计划下个月开放内测', neu: '内测推迟到 11 月中旬' },
+      { id: 'p3', pending: true, kind: '新增', cat: 'preference', text: '周报习惯在周五下午写', src: 'wb', time: '昨天', ev: '我一般周五下午写周报' }
+    ].filter((p) => st.done.indexOf(p.id) < 0);
+
+    const q = (st.q || '').trim();
+    const match = (x) => !q || x.text.indexOf(q) >= 0;
+    const monoOf = (src) => src === 'you'
+      ? { mono: '你', st: 'background: var(--sel); color: var(--text);', name: '你亲手写的' }
+      : { mono: AG[src].mono, st: 'background: ' + AG[src].color + '; color: #FFFFFF;', name: AG[src].name + ' 提议' };
+    const toRow = (x) => {
+      const m = monoOf(x.src);
+      const on = x.id === st.sel;
+      return {
+        text: x.text, time: x.time, priv: !!x.priv, isPending: !!x.pending, kind: x.kind || '',
+        mono: m.mono, monoSt: m.st, srcName: m.name,
+        st: on ? 'background: var(--sel);' : 'background: transparent;',
+        pick: () => this.setState({ sel: x.id })
+      };
+    };
+
+    let groups = [];
+    if (st.f === 'pending') {
+      const rows = pend.filter(match).map(toRow);
+      if (rows.length) groups = [{ title: '待确认', n: String(rows.length), rows }];
+    } else {
+      const secs = st.f === 'all' ? ['now', 'how', 'who', 'life'] : [st.f];
+      if (st.f === 'all' && pend.filter(match).length) {
+        groups.push({ title: '待确认', n: String(pend.filter(match).length), rows: pend.filter(match).map(toRow) });
+      }
+      secs.forEach((s) => {
+        const rows = mem.filter((x) => x.sec === s && match(x)).map(toRow);
+        if (rows.length) groups.push({ title: SEC[s], n: String(rows.length), rows });
+      });
+    }
+
+    const chipDefs = [
+      { id: 'all', label: '全部', n: String(mem.length) },
+      { id: 'pending', label: '待确认', n: String(pend.length), accent: true },
+      { id: 'now', label: '现在在忙', n: '' },
+      { id: 'how', label: '合作方式', n: '' },
+      { id: 'who', label: '长期', n: '' },
+      { id: 'life', label: '生活', n: '' }
+    ];
+    const chips = chipDefs.map((c) => {
+      const on = c.id === st.f;
+      return {
+        label: c.label, n: c.n, pressed: on ? 'true' : 'false',
+        st: on ? 'background: var(--text); color: var(--mica); border: 1px solid var(--text);' : 'background: transparent; color: var(--text); border: 1px solid var(--stroke);',
+        nst: on ? 'opacity: .7;' : (c.accent && pend.length ? 'color: var(--accent); font-weight: 600;' : 'color: var(--muted);'),
+        pick: () => this.setState({ f: c.id })
+      };
+    });
+
+    const all = mem.concat(pend);
+    const cur = all.find((x) => x.id === st.sel) || pend[0] || mem[0];
+    const who = Object.keys(AG).map((k) => {
+      const a = AG[k];
+      let ok = a.cats.indexOf(cur.cat) >= 0 && !cur.priv;
+      let state = ok ? '能读到' : (cur.priv ? '读不到 · 仅自己可见' : '读不到 · 没开放' + CATN[cur.cat]);
+      if (cur.pending) state = ok ? '确认后能读到' : '确认后也读不到';
+      return { name: a.name, mono: a.mono, color: a.color, state, st: ok ? 'color: var(--accent);' : 'color: var(--muted);' };
+    });
+    const srcName = cur.src === 'you' ? '' : AG[cur.src].name;
+    const d = {
+      meta: (cur.pending ? (srcName + ' 提议' + cur.kind + ' · ') : '') + CATN[cur.cat] + ' · ' + (cur.pending ? '待你确认' : SEC[cur.sec]),
+      text: cur.text,
+      isEdit: !!cur.old, old: cur.old || '', neu: cur.neu || '',
+      whoTitle: cur.pending ? '确认后谁能读到' : '谁能读到',
+      who,
+      source: cur.src === 'you' ? ('你在 ' + cur.time + ' 亲手写下') : (cur.pending ? (srcName + ' 根据对话提议 · ' + cur.time) : (srcName + ' 提议 · 你在 ' + cur.time + ' 确认')),
+      hasEvidence: !!cur.ev, evidence: cur.ev || '',
+      hasUse: !cur.pending,
+      use: cur.reads ? ('近 7 天被读取 ' + cur.reads + ' 次') : '近 7 天没有被读取',
+      isPending: !!cur.pending, isMemory: !cur.pending,
+      acceptLabel: cur.old ? '采用修改' : '记住',
+      accept: () => this.setState({ done: st.done.concat(cur.id), sel: 'm8' }),
+      reject: () => this.setState({ done: st.done.concat(cur.id), sel: 'm8' })
+    };
+
+    const count = groups.reduce((n, g) => n + g.rows.length, 0);
+    return {
+      themeClass: (this.props.dark ?? false) ? 'mw dark' : 'mw',
+      q: st.q,
+      onSearch: (e) => this.setState({ q: e.target.value }),
+      chips, groups, empty: count === 0, d,
+      footLeft: mem.length + ' 条记忆 · 3 个 Agent · 都保存在这台电脑上',
+      keys: cur.pending
+        ? [{ label: '记住', key: 'Y' }, { label: '忽略', key: 'N' }, { label: '下一条', key: '↓' }]
+        : [{ label: '编辑', key: 'Enter' }, { label: '停止共享', key: 'Ctrl D' }, { label: '搜索', key: 'Ctrl K' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+{
+  "scenario": "A1_sonnet",
+  "model": "sonnet",
+  "grant": {
+    "tools": [
+      "get_context",
+      "search_memory",
+      "propose_memory"
+    ],
+    "categories": [
+      "preference",
+      "goal"
+    ]
+  },
+  "import_first": false,
+  "elapsed_s": 21.4,
+  "exit_code": 0,
+  "num_turns": 11,
+  "cost_usd": 0.0852108,
+  "final_reply": "已提交 9 条，0 条失败。它们都处于待确认状态，你在知我里确认后才会生效。\n\n- **身份**：名叫林舟；在杭州做独立开发；一个人运营一家小公司\n- **目标**：今年把记账小程序做到 1000 个付费用户\n- **偏好**：写东西喜欢先给结论，不要太多客套话；习惯早上六点起床写代码\n- **项目**：主要在做「青柠账本」，用 Flutter 开发\n- **事件**：上周三把服务器从阿里云迁到了腾讯云\n- **其他**：养了一只叫豆包的猫\n\n「今年」和「上周三」都按原话存的，我没有换算成具体日期。你确认时可以看一下是否需要补上日期。",
+  "tool_calls": 10,
+  "propose_calls": 9,
+  "propose_succeeded": 9,
+  "propose_failed": 0,
+  "distinct_request_ids": 1,
+  "request_ids_sample": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "stored_pending": 9,
+  "stored_categories": [
+    "event",
+    "goal",
+    "identity",
+    "identity",
+    "identity",
+    "other",
+    "preference",
+    "preference",
+    "project"
+  ],
+  "stored": [
+    {
+      "content": "用户名叫林舟",
+      "category": "identity",
+      "kind": "fact",
+      "evidence": "我叫林舟",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户在杭州做独立开发",
+      "category": "identity",
+      "kind": "fact",
+      "evidence": "在杭州做独立开发",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户一个人运营一家小公司",
+      "category": "identity",
+      "kind": "fact",
+      "evidence": "一个人运营一家小公司",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户今年的目标是把记账小程序做到 1000 个付费用户",
+      "category": "goal",
+      "kind": "fact",
+      "evidence": "今年的目标是把记账小程序做到 1000 个付费用户",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户写东西喜欢先给结论，不要太多客套话",
+      "category": "preference",
+      "kind": "fact",
+      "evidence": "我写东西喜欢先给结论，不要太多客套话",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户现在主要在做「青柠账本」项目，用 Flutter 开发",
+      "category": "project",
+      "kind": "fact",
+      "evidence": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户上周三把服务器从阿里云迁到了腾讯云",
+      "category": "event",
+      "kind": "event",
+      "evidence": "上周三我把服务器从阿里云迁到了腾讯云",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户习惯早上六点起床写代码",
+      "category": "preference",
+      "kind": "fact",
+      "evidence": "我习惯早上六点起床写代码",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "用户养了一只叫豆包的猫",
+      "category": "other",
+      "kind": "fact",
+      "evidence": "我养了一只叫豆包的猫",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    }
+  ],
+  "audit_events": 9,
+  "audit_rejected": 0,
+  "calls": [
+    {
+      "id": "toolu_014qZkefKVJf4Rx4w4246GBw",
+      "name": "ToolSearch",
+      "input": {
+        "query": "select:mcp__zhiwo__propose_memory",
+        "max_results": 5
+      },
+      "result": {
+        "is_error": false,
+        "text": ""
+      }
+    },
+    {
+      "id": "toolu_011emFvK7Cn9R2WCNw2M3suH",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户名叫林舟",
+        "category": "identity",
+        "evidence": "我叫林舟"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"11e794bb-0729-43fa-8505-345a37a0bd4a\",\"request_id\":\"8265d155-ef1f-554a-9797-b634206fc60b\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_01FDvw25mm4GRjwTAvPXyA8P",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户在杭州做独立开发",
+        "category": "identity",
+        "evidence": "在杭州做独立开发"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"ad0fb011-1e3a-4c3f-ba95-dafeba753cb0\",\"request_id\":\"1766542b-7ce1-56f8-81f8-f77f606d143e\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_013Hd7215VVDgq7pgvSxrJcF",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户一个人运营一家小公司",
+        "category": "identity",
+        "evidence": "一个人运营一家小公司"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"12d822bb-d6e8-430b-afd2-09385095d9e6\",\"request_id\":\"52a7bf23-e0e2-5ac2-b7e3-44f1e4d3bb0e\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_01Ji1cvrAdSUFuDvzveHPYrF",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户今年的目标是把记账小程序做到 1000 个付费用户",
+        "category": "goal",
+        "evidence": "今年的目标是把记账小程序做到 1000 个付费用户"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"1f40fb9c-1942-4bb3-a17a-a72ecb1acf36\",\"request_id\":\"b920787b-d73c-593b-bad3-1812b2fe3f75\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_01YZYHPnUfUcpVjpyr8gKtWw",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户写东西喜欢先给结论，不要太多客套话",
+        "category": "preference",
+        "evidence": "我写东西喜欢先给结论，不要太多客套话"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"08026ec2-fe4d-4ede-b1a8-d02be4df60e0\",\"request_id\":\"55d2f4ec-432b-5ab4-bab6-b1238d0549ce\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_018rS2v4uH3tXw96My4QrjJn",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户现在主要在做「青柠账本」项目，用 Flutter 开发",
+        "category": "project",
+        "evidence": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"43791de1-160b-411d-ad50-5cf37be0ca24\",\"request_id\":\"444af3fd-8599-5042-9c12-4d5a61a6d373\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_0178V1FQ5fDitENVAED6Ar2z",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户上周三把服务器从阿里云迁到了腾讯云",
+        "category": "event",
+        "evidence": "上周三我把服务器从阿里云迁到了腾讯云",
+        "kind": "event"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"fd23633e-0d3b-4c57-b6a0-9b4f50faa13f\",\"request_id\":\"0291b1ed-44ea-5f28-b20e-1ef788fdbce6\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_01Ntuy73AvDsBmvgmxQs4kV5",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户习惯早上六点起床写代码",
+        "category": "preference",
+        "evidence": "我习惯早上六点起床写代码"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"1a008dbc-025c-46db-80e2-226526d03155\",\"request_id\":\"a789f87b-c1d0-5a42-8218-c43aca639c9a\",\"status\":\"pending\"}"
+      }
+    },
+    {
+      "id": "toolu_015idvLK1S3tq2JEVQrf9gj9",
+      "name": "mcp__zhiwo__propose_memory",
+      "input": {
+        "content": "用户养了一只叫豆包的猫",
+        "category": "other",
+        "evidence": "我养了一只叫豆包的猫"
+      },
+      "result": {
+        "is_error": false,
+        "text": "{\"proposal_id\":\"f270f855-2b21-41b8-8650-0799989f3f43\",\"request_id\":\"d0418545-0a3f-5709-a73c-c6d14220e880\",\"status\":\"pending\"}"
+      }
+    }
+  ],
+  "stderr_tail": ""
+}

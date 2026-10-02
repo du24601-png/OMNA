@@ -20,8 +20,8 @@
     "raw_tcp": {
       "host": "1.1.1.1",
       "port": 443,
-      "connected": true,
-      "error": null
+      "connected": false,
+      "error": "TimeoutError"
     },
     "nic_disconnected": false
   },

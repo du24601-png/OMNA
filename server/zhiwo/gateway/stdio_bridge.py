@@ -3,6 +3,11 @@
 This process speaks MCP on stdin/stdout and calls the local service over
 HTTP. It does not open the control database or the Kernel. The credential
 is sent only as the agent bearer token.
+
+Tool arguments are flat and typed so a model can read the allowed values
+from the schema. Request ids are not part of the tool surface; the service
+creates them. A service error is returned as an MCP tool error whose text is
+the service's JSON error payload.
 """
 
 from __future__ import annotations
@@ -13,10 +18,23 @@ import os
 import sys
 import urllib.error
 import urllib.request
+from typing import Annotated, Literal
 from urllib.parse import urlparse
+
+from pydantic import Field
 
 
 _TOOLS = ("get_context", "search_memory", "propose_memory", "explain_memory")
+Category = Literal["identity", "goal", "preference", "project", "event", "other"]
+_CATEGORY_HELP = "identity 身份；goal 目标；preference 偏好与习惯；project 项目；event 发生过的事；other 其他"
+_INSTRUCTIONS = (
+    "知我是用户本机的个人记忆库。读取只会返回用户已确认并允许你看的记忆。"
+    "用户让你把内容记进知我时：每条记忆只写一件事，逐条调用 propose_memory；"
+    "category 只能从 identity、goal、preference、project、event、other 里选；"
+    "evidence 逐字摘自用户给你的原文，不要改写标点；不要推算日期，也不要补充原文没有的信息。"
+    "提交的都是待确认建议，用户在知我里确认后才生效。"
+    "全部提交后，如实告诉用户成功几条、失败几条；工具报错时按错误里写的字段和取值改正后再试。"
+)
 _HIDDEN = (
     "prompts/list",
     "prompts/get",
@@ -84,6 +102,19 @@ def _post(origin: str, secret: str, tool: str, payload: dict) -> str:
         return _error("KERNEL_UNAVAILABLE", "the local service did not answer", retryable=True)
 
 
+def _checked(raw: str) -> str:
+    """Return a success payload; turn a service error into an MCP tool error."""
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    if isinstance(payload, dict) and isinstance(payload.get("error"), dict):
+        raise ToolError(raw)
+    return raw
+
+
 def _error(code: str, message: str, retryable: bool = False) -> str:
     return json.dumps(
         {"error": {"code": code, "message": message, "retryable": retryable}},
@@ -106,65 +137,76 @@ def main() -> None:
 
     server = MCPServer(
         name="zhiwo",
-        version="0.1.0",
-        instructions="只使用已注册的四个记忆工具。不要请求资源或提示词。",
+        version="0.2.0",
+        instructions=_INSTRUCTIONS,
         log_level="WARNING",
     )
+    read_only = mcp_types.ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
 
     @server.tool(
         name="get_context",
-        description="获取与任务相关且已获准的记忆。task 为中文任务，max_items 为 1 到 10，默认 5。",
-        annotations=mcp_types.ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False),
+        description="获取与当前任务相关、用户已确认并允许你读取的记忆。",
+        annotations=read_only,
         structured_output=False,
     )
-    def get_context(task: str, max_items: int = 5, request_id: str | None = None) -> str:
-        return _post(origin, secret, "get_context", {"task": task, "max_items": max_items, "request_id": request_id})
+    def get_context(
+        task: Annotated[str, Field(description="用一句话描述当前任务")],
+        max_items: Annotated[int, Field(ge=1, le=10, description="最多返回几条，1 到 10")] = 5,
+    ) -> str:
+        return _checked(_post(origin, secret, "get_context", {"task": task, "max_items": max_items}))
 
     @server.tool(
         name="search_memory",
-        description="搜索已确认且已获准的个人记忆。query 为中文问题，limit 为 1 到 20，默认 10。",
-        annotations=mcp_types.ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False),
+        description="搜索用户已确认并允许你读取的记忆。结果里的 id 和 revision 可用于提议修改。",
+        annotations=read_only,
         structured_output=False,
     )
     def search_memory(
-        query: str,
-        limit: int = 10,
-        categories: list[str] | None = None,
-        request_id: str | None = None,
+        query: Annotated[str, Field(description="要找的内容，一句话")],
+        limit: Annotated[int, Field(ge=1, le=20, description="最多返回几条，1 到 20")] = 10,
+        categories: Annotated[list[Category] | None, Field(description="只在这些类别里找；不填则不限。" + _CATEGORY_HELP)] = None,
     ) -> str:
-        return _post(
-            origin,
-            secret,
-            "search_memory",
-            {"query": query, "limit": limit, "categories": categories, "request_id": request_id},
-        )
+        return _checked(_post(origin, secret, "search_memory", {"query": query, "limit": limit, "categories": categories}))
 
     @server.tool(
         name="propose_memory",
         description=(
-            "提出一条待确认记忆，不会直接写入正式库。"
-            "change.type 是 add 或 update；change 含 content、kind、category，"
-            "更新时含 target_id 和 base_revision。evidence.text 是证据片段。"
+            "提出一条待确认记忆，一次一条。不会直接写入正式库，用户在知我里确认后才生效。"
+            "新增时不填 target_id；修改已有记忆时填 search_memory 返回的 id 和 revision。"
+            "同一条重复提交会返回第一次的结果，不会多出一条。"
         ),
         annotations=mcp_types.ToolAnnotations(read_only_hint=False, destructive_hint=False, open_world_hint=False),
         structured_output=False,
     )
-    def propose_memory(request_id: str, change: dict, evidence: dict) -> str:
-        return _post(
-            origin,
-            secret,
-            "propose_memory",
-            {"request_id": request_id, "change": change, "evidence": evidence},
-        )
+    def propose_memory(
+        content: Annotated[str, Field(min_length=1, max_length=2000, description="记忆内容，一句话只写一件事")],
+        category: Annotated[Category, Field(description=_CATEGORY_HELP)],
+        evidence: Annotated[str, Field(min_length=1, max_length=2000, description="用户原话里支撑这条记忆的一段，逐字照抄")],
+        kind: Annotated[Literal["fact", "event"], Field(description="fact 长期成立的事实；event 某次发生的事")] = "fact",
+        scope: Annotated[str | None, Field(description="适用场景，可不填")] = None,
+        target_id: Annotated[str | None, Field(description="修改已有记忆时填它的 id")] = None,
+        base_revision: Annotated[int | None, Field(ge=1, description="修改已有记忆时填它的 revision")] = None,
+        source_ref: Annotated[str | None, Field(description="证据所在来源的 id；没有就不填")] = None,
+    ) -> str:
+        change: dict = {"type": "update" if target_id else "add", "content": content, "kind": kind, "category": category}
+        if scope:
+            change["scope"] = scope
+        if target_id:
+            change["target_id"] = target_id
+            change["base_revision"] = base_revision
+        evidence_body: dict = {"text": evidence}
+        if source_ref:
+            evidence_body["source_ref"] = source_ref
+        return _checked(_post(origin, secret, "propose_memory", {"change": change, "evidence": evidence_body}))
 
     @server.tool(
         name="explain_memory",
-        description="解释一条当前获准记忆的已审核证据片段。id 是记忆 id。无权和不存在的返回相同。",
-        annotations=mcp_types.ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False),
+        description="查看一条你可读记忆的已审核证据片段。无权和不存在的返回相同。",
+        annotations=read_only,
         structured_output=False,
     )
-    def explain_memory(id: str, request_id: str | None = None) -> str:
-        return _post(origin, secret, "explain_memory", {"id": id, "request_id": request_id})
+    def explain_memory(id: Annotated[str, Field(description="search_memory 或 get_context 返回的记忆 id")]) -> str:
+        return _checked(_post(origin, secret, "explain_memory", {"id": id}))
 
     low = server._lowlevel_server
     for method in _HIDDEN:

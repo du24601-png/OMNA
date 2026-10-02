@@ -1,0 +1,24 @@
+{
+  "cases": {
+    "chinese_category": {
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "message": "the submitted fields are invalid",
+      "retryable": false
+    },
+    "forbidden_category": {
+      "status": 403,
+      "code": "FORBIDDEN",
+      "message": "category is not allowed",
+      "retryable": false
+    },
+    "too_long": {
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "message": "content must contain 1 to 2000 characters",
+      "retryable": false
+    }
+  },
+  "audited_rejections": 1,
+  "rejections": 3
+}

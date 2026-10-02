@@ -1,0 +1,32 @@
+{
+  "cases": {
+    "chinese_category": {
+      "status": 400,
+      "field": "category",
+      "code": "VALIDATION_ERROR",
+      "message": "change.category: must be one of 'identity', 'goal', 'preference', 'project', 'event' or 'other'",
+      "retryable": false
+    },
+    "missing_kind": {
+      "status": 400,
+      "field": "kind",
+      "code": "VALIDATION_ERROR",
+      "message": "change.kind: field is required",
+      "retryable": false
+    },
+    "extra_field": {
+      "status": 400,
+      "field": "confidence",
+      "code": "VALIDATION_ERROR",
+      "message": "change.confidence: field is not supported",
+      "retryable": false
+    },
+    "too_long": {
+      "status": 400,
+      "field": "content",
+      "code": "VALIDATION_ERROR",
+      "message": "content must contain 1 to 2000 characters",
+      "retryable": false
+    }
+  }
+}

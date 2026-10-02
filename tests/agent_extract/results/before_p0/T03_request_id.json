@@ -1,0 +1,29 @@
+{
+  "same_example_uuid_for_4_candidates": [
+    {
+      "status": 200,
+      "error": null,
+      "message": null
+    },
+    {
+      "status": 409,
+      "error": "CONFLICT",
+      "message": "this request id was already used with a different payload"
+    },
+    {
+      "status": 409,
+      "error": "CONFLICT",
+      "message": "this request id was already used with a different payload"
+    },
+    {
+      "status": 409,
+      "error": "CONFLICT",
+      "message": "this request id was already used with a different payload"
+    }
+  ],
+  "stored": 1,
+  "non_uuid": {
+    "status": 400,
+    "message": "request id must be a UUID"
+  }
+}

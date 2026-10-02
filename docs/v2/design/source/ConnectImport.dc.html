@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>OMNA · 连接新 Agent 时提示导入</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ci{--mica:#F3F3F3;--pane:rgba(255,255,255,.62);--card:#FFFFFF;--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.04);--sel:rgba(0,0,0,.065);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--warn-soft:rgba(196,140,40,.13);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);background:var(--mica);-webkit-font-smoothing:antialiased}
+.ci button{font-family:inherit}
+.c-row:hover{background:var(--hover)}
+.c-tab:hover{color:var(--text);background:var(--hover)}
+.c-win:hover{background:var(--hover);color:var(--text)}
+.c-close:hover{background:#C42B1C;color:#FFFFFF}
+.c-pri:hover{opacity:.88}
+.c-sec:hover{background:var(--sel)}
+.c-link:hover{color:var(--text)}
+</style>
+</helmet>
+<div class="ci" style="width: 1040px; height: 680px; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="height: 44px; flex-shrink: 0; display: flex; align-items: center; padding-left: 16px">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<span style="margin-left: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
+<nav aria-label="主导航" style="display: flex; gap: 2px; margin-left: 24px">
+<button type="button" class="c-tab" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">记忆</button>
+<button type="button" aria-current="page" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--sel); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer">Agent</button>
+<button type="button" class="c-tab" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">设置</button>
+</nav>
+<div style="flex-grow: 1"></div>
+<button type="button" class="c-win" aria-label="最小化" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12h16"></path></svg></button>
+<button type="button" class="c-win" aria-label="最大化" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"></rect></svg></button>
+<button type="button" class="c-close" aria-label="关闭到托盘" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg></button>
+</div>
+
+<div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr)">
+
+<div style="min-height: 0; display: flex; flex-direction: column; padding: 8px 12px 16px 16px">
+<div style="padding: 6px 8px 10px; font-size: 12px; color: var(--muted)">2 个已验证 · 1 个等待第一次读取</div>
+<button type="button" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border: 0; border-radius: 6px; background: var(--sel); color: var(--text); text-align: left; cursor: pointer">
+<span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #4B4F8C; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CX<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; background: #C2861A; border: 2px solid var(--mica)"></span></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13.5px; font-weight: 600">Codex</span><span style="display: block; font-size: 12px; color: var(--muted)">刚连接 · 等待第一次读取</span></span>
+</button>
+<button type="button" class="c-row" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); text-align: left; cursor: pointer">
+<span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #2B2B2A; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">OC<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; background: var(--accent); border: 2px solid var(--mica)"></span></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13.5px">OpenCode</span><span style="display: block; font-size: 12px; color: var(--muted)">已验证 · 今天 09:41 读过</span></span>
+</button>
+<button type="button" class="c-row" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); text-align: left; cursor: pointer">
+<span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #A3532A; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CC<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; background: var(--accent); border: 2px solid var(--mica)"></span></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13.5px">Claude Code</span><span style="display: block; font-size: 12px; color: var(--muted)">已验证 · 刚刚读过</span></span>
+</button>
+<div style="height: 1px; background: var(--stroke); margin: 10px 8px"></div>
+<button type="button" class="c-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 12.5px; text-align: left; cursor: pointer">未检测到 3 个客户端<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+<button type="button" class="c-row" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 12.5px; text-align: left; cursor: pointer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>连接其他 MCP 客户端</button>
+</div>
+
+<div style="min-height: 0; overflow-y: auto; margin: 8px 12px 12px 0; padding: 24px 28px; border-radius: 8px; background: var(--pane); border: 1px solid var(--stroke)">
+<div style="display: flex; align-items: center; gap: 14px">
+<span style="width: 44px; height: 44px; border-radius: 10px; background: #4B4F8C; color: #FFFFFF; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CX</span>
+<div style="flex: 1">
+<div style="font-size: 18px; font-weight: 600">Codex</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 2px">只读 · 可以读「偏好」「目标」 · <button type="button" class="c-link" style="border: 0; background: transparent; padding: 0; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">改权限</button></div>
+</div>
+<label style="display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); cursor: pointer">允许访问
+<span aria-hidden="true" style="width: 40px; height: 22px; border-radius: 999px; background: var(--accent); position: relative; display: inline-block"><span style="position: absolute; right: 3px; top: 3px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF"></span></span>
+</label>
+</div>
+
+<div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
+<span style="width: 26px; height: 26px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<span style="flex: 1; font-size: 13px; line-height: 1.6">已写入 Codex 的配置。重启它，再发一句<b style="font-weight: 600">「请查一下我的偏好」</b>，第一次读取成功后就算连好了。</span>
+<button type="button" class="c-sec" style="flex-shrink: 0; height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制这句</button>
+</div>
+
+<sc-if value="{{offer}}" hint-placeholder-val="{{ true }}">
+<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg></span>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 15px; font-weight: 600">Codex 里有你写过的 11 条偏好</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px">其中 6 条已经在你的记忆里。下面 5 条是新的：4 条直接导入，很像的 1 条交给你确认。</div>
+</div>
+</div>
+<div style="margin-top: 14px; padding: 4px 0 4px 44px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 13.5px">
+<span style="width: 4px; height: 4px; border-radius: 999px; background: var(--muted); flex-shrink: 0"></span>
+<span style="flex: 1">{{it.text}}</span>
+<sc-if value="{{it.conflict}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11.5px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 999px">和已有的「中文回答…」很像，放进待确认</span></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-left: 44px">
+<span style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted)">C:\Users\linyu\.codex\AGENTS.md · 只读，不改动</span>
+<div style="display: flex; gap: 8px">
+<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">不用了</button>
+<button type="button" class="c-pri" onClick="{{doImport}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">导入 5 条</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{imported}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--accent-soft)">
+<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">已导入 4 条</b>，和已有记忆很像的 1 条放进了待确认。Claude Code 和 OpenCode 下次也会用上。</span>
+<button type="button" class="c-sec" onClick="{{undo}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">撤销这次导入</button>
+</div>
+</sc-if>
+
+<sc-if value="{{dismissed}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted)">
+<span style="flex: 1">好的，不导入。以后想导入，在「记忆」页右上角的「＋」里。</span>
+<button type="button" class="c-sec" onClick="{{undo}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer">改主意了</button>
+</div>
+</sc-if>
+
+<div style="margin-top: 28px; font-size: 12px; font-weight: 600; color: var(--muted)">访问记录</div>
+<div style="margin-top: 10px; font-size: 13px; color: var(--muted)">还没有读取。它第一次来读时，托盘图标会亮一下。</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1040,"height":680}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { s: 'offer' };
+  }
+  renderVals() {
+    const s = this.state.s;
+    return {
+      offer: s === 'offer', imported: s === 'done', dismissed: s === 'no',
+      items: [
+        { text: 'Python 项目用 uv 管理依赖', conflict: false },
+        { text: '依赖升级前先列出变更日志', conflict: false },
+        { text: '排查报错时先给一个最小复现', conflict: false },
+        { text: 'SQL 关键字用大写', conflict: false },
+        { text: '回复用英文', conflict: true }
+      ],
+      doImport: () => this.setState({ s: 'done' }),
+      dismiss: () => this.setState({ s: 'no' }),
+      undo: () => this.setState({ s: 'offer' })
+    };
+  }
+}
+</script>
+</body>
+</html>

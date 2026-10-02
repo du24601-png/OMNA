@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>OMNA · 新手引导</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ob{--mica:#F3F3F3;--card:#FFFFFF;--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.04);--sel:rgba(0,0,0,.065);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--warn-soft:rgba(196,140,40,.13);--kbd:rgba(0,0,0,.06);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);background:var(--mica);-webkit-font-smoothing:antialiased}
+.ob button{font-family:inherit}
+.o-pri:hover{opacity:.88}
+.o-sec:hover{background:var(--sel)}
+.o-row:hover{background:var(--hover)}
+.o-link:hover{color:var(--text)}
+.o-win:hover{background:#C42B1C;color:#FFFFFF}
+.ob input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
+.ob input[type=radio]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
+.o-scroll{scrollbar-width:thin}
+</style>
+</helmet>
+<div class="ob" style="width: 880px; height: 600px; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box">
+
+<div style="height: 44px; flex-shrink: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; padding-left: 18px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
+</div>
+<div aria-label="{{progressLabel}}" style="display: flex; gap: 6px">
+<sc-for list="{{dots}}" as="dt" hint-placeholder-count="4">
+<span style="height: 6px; border-radius: 999px; transition: width .25s ease, background-color .25s ease; {{dt.st}}"></span>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: flex-end">
+<button type="button" class="o-win" aria-label="关闭" style="width: 46px; height: 44px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg></button>
+</div>
+</div>
+
+<sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
+<div style="font-size: 12px; color: var(--muted)">第 1 步 · 共 4 步</div>
+<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">先连上你常用的 AI 工具</h1>
+<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">OMNA 会把配置写进它们自己的设置里，原有配置都保留。连上之后，它们只能读你的「偏好」和「目标」，随时可以改。</p>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 24px">
+<sc-for list="{{clients}}" as="c" hint-placeholder-count="3">
+<label class="o-row" style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); cursor: pointer">
+<input type="checkbox" checked="{{c.on}}" onChange="{{c.toggle}}" aria-label="连接 {{c.name}}">
+<span style="width: 30px; height: 30px; border-radius: 7px; background: {{c.color}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">{{c.mono}}</span>
+<span style="flex: 1; min-width: 0">
+<span style="display: block; font-size: 14px; font-weight: 500">{{c.name}}</span>
+<span style="display: block; font-size: 12px; color: var(--muted); margin-top: 1px">{{c.note}}</span>
+</span>
+<sc-if value="{{c.hasFiles}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px">有你写过的说明</span></sc-if>
+</label>
+</sc-for>
+</div>
+<div style="margin-top: 10px; font-size: 12px; color: var(--muted)">没检测到 ZCode、ChatGPT、Claude 桌面版 · <button type="button" class="o-link" style="border: 0; background: transparent; padding: 0; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">手动连接其他客户端</button></div>
+</div>
+</sc-if>
+
+<sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+<div class="o-scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 28px 64px 16px">
+<div style="font-size: 12px; color: var(--muted)">第 2 步 · 共 4 步</div>
+<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">带上你已经写过的东西</h1>
+<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">不用从头介绍自己。下面这些只读一次，不会改动原文件。</p>
+
+<div style="margin-top: 22px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); overflow: hidden">
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; font-size: 13px; font-weight: 600">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg>在你电脑上找到 2 个说明文件
+</div>
+<sc-for list="{{files}}" as="f" hint-placeholder-count="2">
+<label class="o-row" style="display: flex; align-items: center; gap: 12px; padding: 9px 14px 9px 40px; cursor: pointer">
+<input type="checkbox" checked="{{f.on}}" onChange="{{f.toggle}}" aria-label="导入 {{f.path}}">
+<span style="flex: 1; min-width: 0; font-family: 'Cascadia Mono', Consolas, monospace; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.path}}</span>
+<span style="font-size: 12px; color: var(--muted); white-space: nowrap">{{f.from}} · {{f.n}} 条</span>
+</label>
+</sc-for>
+<div style="height: 6px"></div>
+</div>
+
+<div style="margin-top: 10px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
+<button type="button" class="o-row" onClick="{{toggleMove}}" aria-expanded="{{moveExpanded}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h12M12 6l6 6-6 6"></path></svg>
+<span style="flex: 1">从 ChatGPT、Kimi、豆包搬过来</span>
+<span style="font-size: 12px; font-weight: 400; color: var(--muted)">复制一句话 → 粘回答回来</span>
+</button>
+<sc-if value="{{showMove}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 0 14px 14px 40px">
+<div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
+<span style="flex: 1">请把你记得的关于我的信息全部列出来：身份、目标、偏好、正在做的项目。每条一行，不要补充你推测的内容。</span>
+<button type="button" class="o-sec" style="flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制</button>
+</div>
+<label style="display: block; margin-top: 8px; font-size: 12px; color: var(--muted)">把它的回答粘贴到这里
+<textarea rows="2" placeholder="粘贴回答…" style="display: block; width: 100%; box-sizing: border-box; margin-top: 6px; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--stroke); background: var(--card); color: var(--text); font-family: inherit; font-size: 13px; resize: none"></textarea>
+</label>
+</div>
+</sc-if>
+</div>
+
+<div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 8px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"></path></svg>
+也可以把 TXT、Markdown 文件直接拖进这个窗口
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
+<div style="font-size: 12px; color: var(--muted)">第 3 步 · 共 4 步</div>
+<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">找到 {{total}} 条，已经帮你整理好了</h1>
+<div style="display: flex; gap: 8px; margin-top: 12px; font-size: 12.5px">
+<span style="padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--stroke)">新增 {{newCount}}</span>
+<span style="padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--stroke)">重复的已合并 3</span>
+<span style="padding: 3px 10px; border-radius: 999px; {{conflictPillSt}}">{{conflictPill}}</span>
+</div>
+
+<div class="o-scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; margin-top: 16px; padding-bottom: 12px">
+<div style="padding: 12px 14px; border-radius: 8px; background: var(--warn-soft); margin-bottom: 14px">
+<div style="font-size: 13px; font-weight: 600">这两条很像，留哪条？</div>
+<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px">
+<sc-for list="{{conflict}}" as="o" hint-placeholder-count="2">
+<label style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; font-size: 13.5px; cursor: pointer; {{o.st}}">
+<input type="radio" name="lang" checked="{{o.on}}" onChange="{{o.pick}}">
+<span style="flex: 1">{{o.text}}</span>
+<span style="font-size: 12px; color: var(--muted)">{{o.from}}</span>
+</label>
+</sc-for>
+</div>
+</div>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<div style="padding: 8px 4px 4px; font-size: 12px; font-weight: 600; color: var(--muted)">{{g.title}}</div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<label class="o-row" style="display: flex; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 6px; cursor: pointer">
+<input type="checkbox" checked="{{r.on}}" onChange="{{r.toggle}}" aria-label="{{r.text}}">
+<span style="flex: 1; min-width: 0; font-size: 14px; line-height: 1.5; {{r.st}}">{{r.text}}</span>
+<span style="font-size: 11.5px; color: var(--muted)">{{r.from}}</span>
+</label>
+</sc-for>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
+<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
+<div style="font-size: 12px; color: var(--muted)">第 4 步 · 共 4 步</div>
+<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">这是 AI 现在眼中的你</h1>
+<div style="margin-top: 20px; padding: 22px 24px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<div style="display: flex; align-items: baseline; gap: 14px">
+<span style="font-size: 24px; font-weight: 600">林屿</span>
+<span style="font-size: 13px; color: var(--muted)">独立开发者 · TypeScript / Python</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 18px">
+<div>
+<div style="font-size: 12px; font-weight: 600; color: var(--muted)">和你合作的方式</div>
+<div style="font-size: 13.5px; line-height: 1.9; margin-top: 6px">先给结论，不要客套<br>用 pnpm，测试用 Vitest<br>提交信息写中文，不要自动 push</div>
+</div>
+<div>
+<div style="font-size: 12px; font-weight: 600; color: var(--muted)">现在在忙</div>
+<div style="font-size: 13.5px; line-height: 1.9; margin-top: 6px">本地优先的笔记应用「纸鸢」<br>学 Rust，准备重写同步模块<br>记账小程序迁回原生</div>
+</div>
+</div>
+<div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--stroke); font-size: 12.5px; color: var(--muted)">Claude Code 和 OpenCode 现在能读到其中的「偏好」和「目标」，身份信息默认不给。</div>
+</div>
+<div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--accent-soft)">
+<span style="flex: 1; font-size: 13px; line-height: 1.6">去 Claude Code 里试一句：<b style="font-weight: 600">「给纸鸢加一个导出功能」</b>，它会用 pnpm、按你的习惯写提交信息。</span>
+<button type="button" class="o-sec" style="flex-shrink: 0; height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制这句</button>
+</div>
+</div>
+</sc-if>
+
+<div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 64px; border-top: 1px solid var(--stroke)">
+<div style="font-size: 12px; color: var(--muted)">{{footNote}}</div>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{hasBack}}" hint-placeholder-val="{{ false }}"><button type="button" class="o-sec" onClick="{{back}}" style="height: 34px; padding: 0 16px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 13px; cursor: pointer">上一步</button></sc-if>
+<sc-if value="{{hasSkip}}" hint-placeholder-val="{{ true }}"><button type="button" class="o-sec" onClick="{{next}}" style="height: 34px; padding: 0 16px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">跳过</button></sc-if>
+<button type="button" class="o-pri" onClick="{{primary}}" style="height: 34px; padding: 0 18px; border: 0; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; {{primarySt}}">{{primaryLabel}}</button>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["1","2","3","4"],"default":"1"},"$preview":{"width":880,"height":600}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: null, cl: { cc: true, oc: true, wb: false }, fl: { f1: true, f2: true }, move: false, off: [], lang: null };
+  }
+  renderVals() {
+    const st = this.state;
+    const step = st.step ?? Number(this.props.step ?? 1);
+    const go = (n) => () => this.setState({ step: n });
+    const flip = (key, id) => () => { const o = Object.assign({}, st[key]); o[id] = !o[id]; this.setState({ [key]: o }); };
+
+    const clientDefs = [
+      { id: 'cc', name: 'Claude Code', mono: 'CC', color: '#A3532A', note: '已安装 · 2.4.1', files: true },
+      { id: 'oc', name: 'OpenCode', mono: 'OC', color: '#2B2B2A', note: '已安装 · 1.18.33', files: true },
+      { id: 'wb', name: 'WorkBuddy', mono: 'WB', color: '#3B6CA3', note: '已安装', files: false }
+    ];
+    const clients = clientDefs.map((c) => ({ name: c.name, mono: c.mono, color: c.color, note: c.note, hasFiles: c.files, on: !!st.cl[c.id], toggle: flip('cl', c.id) }));
+    const nClients = clientDefs.filter((c) => st.cl[c.id]).length;
+
+    const fileDefs = [
+      { id: 'f1', path: 'C:\\Users\\linyu\\.claude\\CLAUDE.md', from: 'Claude Code', n: 11 },
+      { id: 'f2', path: 'C:\\Users\\linyu\\.config\\opencode\\AGENTS.md', from: 'OpenCode', n: 5 }
+    ];
+    const files = fileDefs.map((f) => ({ path: f.path, from: f.from, n: f.n, on: !!st.fl[f.id], toggle: flip('fl', f.id) }));
+    const nFromFiles = fileDefs.filter((f) => st.fl[f.id]).reduce((s, f) => s + f.n, 0);
+
+    const rowDefs = [
+      { id: 'r1', g: '合作方式', text: '先给结论，再讲原因，不需要客套', from: 'CLAUDE.md' },
+      { id: 'r2', g: '合作方式', text: '包管理用 pnpm，不用 npm', from: '两个文件' },
+      { id: 'r3', g: '合作方式', text: '代码里不要加自动生成的注释', from: 'AGENTS.md' },
+      { id: 'r4', g: '合作方式', text: '改动超过 50 行，先给方案再动手', from: 'CLAUDE.md' },
+      { id: 'r6', g: '合作方式', text: '测试框架用 Vitest，不用 Jest', from: 'CLAUDE.md' },
+      { id: 'r7', g: '合作方式', text: '没有我同意，不要 git push', from: 'CLAUDE.md' },
+      { id: 'r8', g: '现在在忙', text: '在做本地优先的笔记应用「纸鸢」', from: 'CLAUDE.md' },
+      { id: 'r9', g: '现在在忙', text: '在学 Rust，打算用它重写同步模块', from: 'CLAUDE.md' },
+      { id: 'r10', g: '现在在忙', text: '记账小程序准备从 Taro 迁回原生', from: 'AGENTS.md' },
+      { id: 'r11', g: '长期', text: '独立开发者，一个人运营一家小公司', from: 'CLAUDE.md' },
+      { id: 'r12', g: '长期', text: '主力语言是 TypeScript 和 Python', from: '两个文件' }
+    ];
+    const isOn = (id) => st.off.indexOf(id) < 0;
+    const groups = ['合作方式', '现在在忙', '长期'].map((g) => ({
+      title: g,
+      rows: rowDefs.filter((r) => r.g === g).map((r) => ({
+        text: r.text, from: r.from, on: isOn(r.id),
+        st: isOn(r.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
+        toggle: () => this.setState({ off: isOn(r.id) ? st.off.concat(r.id) : st.off.filter((x) => x !== r.id) })
+      }))
+    }));
+    const checked = rowDefs.filter((r) => isOn(r.id)).length;
+    const conflictDefs = [
+      { id: 'a', text: 'git 提交信息用中文，动词开头', from: 'CLAUDE.md' },
+      { id: 'b', text: '提交信息写中文', from: 'AGENTS.md' },
+      { id: 'both', text: '两条都留', from: '' }
+    ];
+    const conflict = conflictDefs.map((o) => ({
+      text: o.text, from: o.from, on: st.lang === o.id,
+      st: st.lang === o.id ? 'background: var(--card);' : '',
+      pick: () => this.setState({ lang: o.id })
+    }));
+    const resolved = !!st.lang;
+    const keep = checked + (resolved ? (st.lang === 'both' ? 2 : 1) : 0);
+
+    const dots = [1, 2, 3, 4].map((n) => ({ st: n === step ? 'width: 22px; background: var(--text);' : (n < step ? 'width: 6px; background: var(--text); opacity: .5;' : 'width: 6px; background: var(--stroke);') }));
+
+    let primaryLabel = '';
+    let primary = go(step + 1);
+    let primaryOk = true;
+    let footNote = '';
+    if (step === 1) { primaryLabel = nClients ? ('连接 ' + nClients + ' 个') : '至少选一个'; primaryOk = nClients > 0; footNote = '大约 1 分钟'; }
+    if (step === 2) { primaryLabel = nFromFiles ? ('读取 ' + nFromFiles + ' 条') : '下一步'; footNote = '只读这几个文件，不会上传到任何地方'; }
+    if (step === 3) { primaryLabel = resolved ? ('记住 ' + keep + ' 条') : '还有 1 处要你选'; primaryOk = resolved; footNote = '记住之后，可以整批撤销这次导入'; }
+    if (step === 4) { primaryLabel = '完成，收进托盘'; primary = go(1); footNote = 'OMNA 会在托盘里安静运行，有建议时再叫你'; }
+    if (!primaryOk) primary = () => {};
+
+    return {
+      s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4,
+      progressLabel: '第 ' + step + ' 步，共 4 步',
+      dots, clients, files,
+      showMove: st.move, moveExpanded: st.move ? 'true' : 'false',
+      toggleMove: () => this.setState({ move: !st.move }),
+      groups, conflict,
+      total: rowDefs.length + 2 + 3,
+      newCount: rowDefs.length + 1,
+      conflictPill: resolved ? '已选好' : '很像的要你选 1',
+      conflictPillSt: resolved ? 'background: var(--accent-soft); color: var(--accent);' : 'background: var(--warn-soft); color: var(--warn); font-weight: 600;',
+      hasBack: step > 1 && step < 4,
+      back: go(step - 1),
+      hasSkip: step === 2,
+      next: go(step + 1),
+      primary, primaryLabel, footNote,
+      primarySt: primaryOk ? 'background: var(--accent); color: var(--accent-ink);' : 'background: var(--sel); color: var(--muted); cursor: default;'
+    };
+  }
+}
+</script>
+</body>
+</html>

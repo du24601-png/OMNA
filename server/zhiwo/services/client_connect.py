@@ -38,9 +38,15 @@ from zhiwo.services.commit_gate import commit_lock
 READ_CATEGORIES = ("preference", "goal")
 READ_TOOLS = ("get_context", "search_memory")
 PROPOSE_TOOLS = (*READ_TOOLS, "propose_memory")
+# Reads stay narrow. A connection that may propose can suggest any category,
+# because every proposal waits for the owner's review before it counts.
 _PRESETS = {
-    "read": {"allowed_categories": list(READ_CATEGORIES), "allowed_tools": list(READ_TOOLS)},
-    "propose": {"allowed_categories": list(READ_CATEGORIES), "allowed_tools": list(PROPOSE_TOOLS)},
+    "read": {"allowed_categories": list(READ_CATEGORIES), "allowed_tools": list(READ_TOOLS), "propose_categories": []},
+    "propose": {
+        "allowed_categories": list(READ_CATEGORIES),
+        "allowed_tools": list(PROPOSE_TOOLS),
+        "propose_categories": list(CATEGORIES),
+    },
 }
 
 
@@ -160,15 +166,18 @@ def connect_client(
     port: int,
     allowed_tools: list[str] | None = None,
     allowed_categories: list[str] | None = None,
+    propose_categories: list[str] | None = None,
 ) -> dict:
     profile = _BY_ID.get(client_id)
     if profile is None:
         raise ApiError(404, "NOT_FOUND", "没有这个客户端。")
-    permissions = _resolved_permissions(preset, allowed_tools, allowed_categories)
+    permissions = _resolved_permissions(preset, allowed_tools, allowed_categories, propose_categories)
     payload = {"client_id": client_id, "preset": preset}
     if allowed_tools is not None:
         payload["allowed_tools"] = permissions["allowed_tools"]
         payload["allowed_categories"] = permissions["allowed_categories"]
+    if propose_categories is not None:
+        payload["propose_categories"] = permissions["propose_categories"]
     digest = _digest(payload)
     with commit_lock:
         prior = _prior(db_path, request_id)
@@ -208,21 +217,28 @@ def connect_client(
         return result
 
 
-def _resolved_permissions(preset: str, allowed_tools, allowed_categories) -> dict:
+def _resolved_permissions(preset: str, allowed_tools, allowed_categories, propose_categories=None) -> dict:
     base = _PRESETS.get(preset)
     if base is None:
         raise ApiError(400, "VALIDATION_ERROR", "请选择只读，或允许提议修改。")
     if allowed_tools is None and allowed_categories is None:
-        return {
+        resolved = {
             "allowed_categories": list(base["allowed_categories"]),
             "allowed_tools": list(base["allowed_tools"]),
+            "propose_categories": list(base["propose_categories"]),
         }
-    if allowed_tools is None or allowed_categories is None:
+    elif allowed_tools is None or allowed_categories is None:
         raise ApiError(400, "VALIDATION_ERROR", "重写配置时需要同时给出工具和类别。")
-    return {
-        "allowed_tools": _choice_list(allowed_tools, TOOLS, "tool"),
-        "allowed_categories": _choice_list(allowed_categories, CATEGORIES, "category"),
-    }
+    else:
+        tools = _choice_list(allowed_tools, TOOLS, "tool")
+        resolved = {
+            "allowed_tools": tools,
+            "allowed_categories": _choice_list(allowed_categories, CATEGORIES, "category"),
+            "propose_categories": list(CATEGORIES) if "propose_memory" in tools else [],
+        }
+    if propose_categories is not None:
+        resolved["propose_categories"] = _choice_list(propose_categories, CATEGORIES, "category")
+    return resolved
 
 
 def _choice_list(value, allowed: tuple[str, ...], label: str) -> list[str]:

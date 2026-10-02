@@ -303,6 +303,9 @@ def _collect_tools(text: str) -> list[dict]:
             state = node.get("state") if isinstance(node.get("state"), dict) else {}
             if isinstance(tool, str) and any(name in tool for name in ("search_memory", "propose_memory", "explain_memory", "get_context")):
                 output = state.get("output")
+                if not output and isinstance(state.get("error"), str):
+                    # A service error now arrives as an MCP tool error; OpenCode keeps its text here.
+                    output = state.get("error")
                 if isinstance(output, (dict, list)):
                     output = json.dumps(output, ensure_ascii=False)
                 item = {"name": tool, "output": output if isinstance(output, str) else ""}
@@ -523,14 +526,12 @@ def test_real_client() -> None:
             after_search = _agent_row(db, opencode_agent["id"])
 
             print("opencode propose", flush=True)
-            propose_key = str(uuid.uuid4())
             proposed = _opencode(
                 run,
                 _bridge_env(origin, opencode_agent["credential"]),
                 "请只调用 zhiwo 的 propose_memory，不要调用其他工具。\n"
-                f"request_id 使用 {propose_key}。\n"
-                'change 使用 {"type":"add","content":"所有回答都越短越好。","kind":"fact","category":"preference"}。\n'
-                'evidence 使用 {"text":"用户希望更短。"}。\n'
+                "content 使用「所有回答都越短越好。」，category 使用 preference，kind 使用 fact。\n"
+                "evidence 使用「用户希望更短。」。\n"
                 "不要把其他个人记忆写进回答。",
                 "propose",
             )
@@ -671,14 +672,11 @@ def test_real_client() -> None:
                         (
                             "propose_memory",
                             {
-                                "request_id": str(uuid.uuid4()),
-                                "change": {
-                                    "type": "add",
-                                    "content": FRAGMENT,
-                                    "kind": "fact",
-                                    "category": "other",
-                                },
-                                "evidence": {"text": FRAGMENT, "source_ref": source_id},
+                                "content": FRAGMENT,
+                                "category": "other",
+                                "kind": "fact",
+                                "evidence": FRAGMENT,
+                                "source_ref": source_id,
                             },
                         )
                     ],

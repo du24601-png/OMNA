@@ -88,26 +88,32 @@ def propose_memory(
     db_path,
     _kernel,
     credential: str,
-    request_id: str,
+    request_id: str | None,
     change: dict,
     evidence: dict,
     *,
     before_commit=None,
     record=None,
 ) -> dict:
-    """Store one pending proposal. The target of an update must be visible."""
+    """Store one pending proposal. The target of an update must be visible.
+
+    The category must be one the connection may propose (propose_categories),
+    which is separate from what it may read. Without a request id the key is
+    derived from the proposal itself, so a retried or repeated suggestion
+    returns the first proposal instead of adding another one.
+    """
     del _kernel
-    request_key = _required_request_id(request_id)
     proposal = _change(change)
     fragment, source_ref = _evidence_input(evidence)
+    request_key = _derived_request_id(proposal, fragment, source_ref) if request_id is None else _required_request_id(request_id)
     turn = _authorize(db_path, credential, "propose_memory", request_key, record)
-    if proposal["category"] not in turn.allowed_categories:
+    if proposal["category"] not in turn.propose_categories:
         _audit_and_raise(
             db_path,
             turn,
             "propose_memory",
             request_key,
-            ApiError(403, "FORBIDDEN", "category is not allowed"),
+            ApiError(403, "FORBIDDEN", _category_denied(turn.propose_categories)),
             record,
         )
     if before_commit is not None:
@@ -117,13 +123,13 @@ def propose_memory(
         try:
             connection.execute("BEGIN IMMEDIATE")
             principal = _recheck(connection, credential, "propose_memory", turn.policy_version)
-            if proposal["category"] not in principal.allowed_categories:
+            if proposal["category"] not in principal.propose_categories:
                 _deny(
                     connection,
                     principal,
                     "propose_memory",
                     request_key,
-                    ApiError(403, "FORBIDDEN", "category is not allowed"),
+                    ApiError(403, "FORBIDDEN", _category_denied(principal.propose_categories)),
                     record,
                 )
             existing = connection.execute(
@@ -435,6 +441,7 @@ def _narrow(principal, categories: set[str]):
         policy_version=principal.policy_version,
         allowed_tools=principal.allowed_tools,
         allowed_categories=allowed,
+        propose_categories=principal.propose_categories,
     )
 
 
@@ -507,6 +514,30 @@ def _store_claim(connection, fragment: str, now: str) -> tuple[str, str]:
     return source_id, job_id
 
 
+_PROPOSAL_KEYS = uuid.UUID("6f1d6f0e-2b8a-4a57-9a0e-6d3c1b7e5a10")
+
+
+def _derived_request_id(proposal: dict, fragment: str, source_ref: str | None) -> str:
+    """Stable key for one suggestion. Same change and evidence, same key."""
+    key = _dump(
+        {
+            "change_type": proposal["change_type"],
+            "target_id": proposal["target_id"],
+            "base_revision": proposal["base_revision"],
+            "payload": proposal["payload"],
+            "evidence": fragment,
+            "source_ref": source_ref,
+        }
+    )
+    return str(uuid.uuid5(_PROPOSAL_KEYS, key))
+
+
+def _category_denied(allowed) -> str:
+    if not allowed:
+        return "this connection may not propose memories in any category"
+    return "category is not allowed; this connection may propose: " + ", ".join(allowed)
+
+
 def _same_proposal(existing, proposal: dict, fragment: str, source_ref: str | None) -> bool:
     if existing["origin"] != "agent" or existing["change_type"] != proposal["change_type"]:
         return False
@@ -530,12 +561,14 @@ def _change(change: dict) -> dict:
         raise ApiError(400, "VALIDATION_ERROR", "change contains an unsupported field")
     change_type = change.get("type")
     if change_type not in {"add", "update"}:
-        raise ApiError(400, "VALIDATION_ERROR", "change type is not supported")
+        raise ApiError(400, "VALIDATION_ERROR", "change.type must be add or update")
     content = _text(change.get("content"), "content")
     kind = change.get("kind")
     category = change.get("category")
-    if kind not in {"fact", "event"} or category not in CATEGORIES:
-        raise ApiError(400, "VALIDATION_ERROR", "kind or category is not supported")
+    if kind not in {"fact", "event"}:
+        raise ApiError(400, "VALIDATION_ERROR", "kind must be fact or event")
+    if category not in CATEGORIES:
+        raise ApiError(400, "VALIDATION_ERROR", "category must be one of: " + ", ".join(CATEGORIES))
     scope = change.get("scope")
     if scope is not None:
         scope = _text(scope, "scope")

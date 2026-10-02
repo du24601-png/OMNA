@@ -1,0 +1,10 @@
+{
+  "agent_patch_fields": [
+    "allowed_categories",
+    "allowed_tools",
+    "enabled",
+    "name"
+  ],
+  "separate_write_scope_field": false,
+  "identity_visible_to_agent_after_granting_proposals": true
+}

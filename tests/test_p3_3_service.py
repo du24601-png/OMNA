@@ -255,7 +255,7 @@ def main() -> None:
             _hidden(before_bytes, ui_key, "settings before save")
             if before["extractor"]["key_saved"] or not before["extractor"]["configured"]:
                 raise AssertionError("environment extractor was not reported without a saved key")
-            if before["schema_version"] != 7:
+            if before["schema_version"] != 8:
                 raise AssertionError("schema version changed")
             saved = _json(
                 *_call(

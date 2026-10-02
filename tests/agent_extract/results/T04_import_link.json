@@ -1,0 +1,14 @@
+{
+  "import_status_before": "extractor_unavailable",
+  "import_status_after_agent": "extractor_unavailable",
+  "agent_tools": [
+    "explain_memory",
+    "get_context",
+    "propose_memory",
+    "search_memory"
+  ],
+  "agent_can_read_pending_source": false,
+  "proposal_source_id_equals_import": false,
+  "proposal_source_kind": "agent_claim",
+  "verification": "unverified"
+}

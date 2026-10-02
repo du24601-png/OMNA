@@ -2,7 +2,7 @@
   "task": "P2.3-delivery",
   "platform": "Windows-11-10.0.26200-SP0",
   "a12": "NOT_RUN",
-  "schema_version": 6,
+  "schema_version": 8,
   "distinct_events": true,
   "same_request_id": true,
   "different_agents": true,

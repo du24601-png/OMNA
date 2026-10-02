@@ -64,10 +64,10 @@ flowchart TD
 | --- | --- |
 | `sources` | `id, kind, name, content, content_hash, imported_at`；`kind=manual/paste/file/agent_claim` |
 | `import_jobs` | `id, source_id, status, extractor_config, error_code`；提取状态与重试，不存密钥 |
-| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用 |
+| `proposals` | `id, origin, change_type, target_id, base_revision, payload_json, evidence_json, status, decision, operation_id, intent_json, agent_id, client_request_id`；`intent_json` 保存已提交的审核意图，包含共享状态、有效期，以及这两个字段是否出现在请求里。Agent 提案的幂等键是 `agent_id + client_request_id`，不跨连接共用。Agent 没给请求号时，服务按变更内容和证据派生一个固定的 UUID，同一条建议重复提交只留第一条 |
 | `memory_refs` | `memory_id, revision, kernel_id, kind, category, scope, lifecycle, share_enabled, valid_until, source_refs, approved_evidence, operation_id`；每版本一行，无正式正文。所有者列表另附 `origin`，由该版本的来源和提案上的 `agent_id` 推出，不另存一列。`GET /api/v1/memories` 的 `origin` 按这个来源筛选，取值是已知客户端 id，或 `agent:` 加自定义连接名称 |
 | `agents` | `id, name, credential_hash, enabled, policy_version, client_status, created_at, updated_at`；`credential_hash` 是 sha256，明文不入库。凭证可重置。`client_status` 新建为 `pending`，只有 stdio 通道成功交付一次工具响应后才变为 `verified`。已停用的连接不会被标成已连接。迁移版本是 6 |
-| `agent_permissions` | `agent_id, allowed_tools, allowed_categories`；空集即无权限 |
+| `agent_permissions` | `agent_id, allowed_tools, allowed_categories, propose_categories`；`allowed_categories` 只管读取，`propose_categories` 只管能在哪些类别提案，两者互不授予；空集即无权限。迁移版本 8 加入 `propose_categories`，已有连接取原来的 `allowed_categories`，行为不变 |
 | `agent_commands` | `id, agent_id, action, payload_hash, created_at`；管理请求的幂等记录。不存凭证明文，不存记忆正文 |
 | `access_events` | `id, request_id, agent_id, tool, outcome, policy_version, response_snapshot, created_at, delivery_state`；`id` 由服务生成，每次调用或重试各有一行。`outcome` 是 `success`、`empty` 或 `rejected`。`response_snapshot` 就是那一次返回的业务载荷。`delivery_state` 从 `prepared` 只能变为 `sent`、`failed` 或 `unknown`，之后不再改。交付按 `id` 更新，不按请求号批量更新 |
 | `profile_summary` | 单行派生缓存：`text, input_hash, generated_at, model, memory_count`。不保存原始记忆集合，不参与普通检索；可随时删除并从 Mnemosyne 当前记忆重建 |
@@ -136,7 +136,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 | `GET /memories/{id}/versions` | 历史版本 |
 | `GET /sources/{id}` | 已保存的来源原文；页面只按文本显示 |
 | `GET/POST /agents`；`PATCH /agents/{id}`；`POST /agents/{id}/rotate-credential` | 连接、权限、启停、凭证重置。只允许 Owner。明文只在创建或重置的当次响应返回。每条连接附 `last_access_at`，取自 `access_events` 中该连接最新一条的时间，没有就是 `null`；Agent 侧接口不返回它 |
-| `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表报告是否安装、配置文件里是否已有 `zhiwo`，以及 `agent_id`：设置 `client_agent:{id}` 指向、且仍存在的连接，没有就是 `null`。确认后合并写入该客户端自己的配置，响应不回显凭证 |
+| `GET /agent-clients`；`POST /agent-clients/{id}/connect` | 固定名单：WorkBuddy、ZCode、OpenCode、ChatGPT、Claude、Claude Code。列表报告是否安装、配置文件里是否已有 `zhiwo`，以及 `agent_id`：设置 `client_agent:{id}` 指向、且仍存在的连接，没有就是 `null`。确认后合并写入该客户端自己的配置，响应不回显凭证。预设「只读」：读取偏好、目标，不能提案；「可提议修改」：读取偏好、目标，可在全部 6 类提案。自定义权限时可另给 `propose_categories`，不给则有 `propose_memory` 就是全部类别 |
 | `GET /access-events`；`GET /access-events/{id}` | 请求列表与返回快照。列表每条多一个 `returned`：从该次快照取出已返回的记忆正文或解释片段，压成单行，超过 160 字截断，最多 8 句。不另存一列。错误信息不算返回的句子。只出现在 Owner 的访问记录里 |
 | `GET /access-reads?days=7\|14&utc_offset_minutes=` | 首页趋势图。按本地日汇总读取次数，并附带 `last_24h`：截至当前本地小时的 24 个小时。只计 `get_context`、`search_memory`、`explain_memory`。返回日期、小时和每个 Agent 的计数，不返回快照、正文或查询。`utc_offset_minutes` 与浏览器 `getTimezoneOffset()` 相同 |
 | `GET/PATCH /settings`；`POST /settings/test-model`；`POST /settings/data-dir/open`；`POST /settings/data-dir/pick` | 非敏感设置及模型连通测试，响应不回显密钥。打开或选择文件夹只作用于本机资源管理器，不改 `ZHIWO_DATA_DIR` |
@@ -148,7 +148,7 @@ P1.3 的审核也只调用这个入口。`POST /api/v1/proposals/{id}/decision` 
 
 第一版客户端接入在 `services/client_connect.py`。名单是 WorkBuddy（`~/.workbuddy/mcp.json` 的 `mcpServers`）、ZCode（`~/.zcode/cli/config.json` 的 `mcp.servers`）、OpenCode（`~/.config/opencode/opencode.json` 的 `mcp`，`type: local`）、ChatGPT（桌面端、命令行和编辑器扩展共用 `~/.codex/config.toml` 的 `[mcp_servers.zhiwo]`）、Claude 桌面版（Windows 的 `%APPDATA%\Claude\claude_desktop_config.json` 的 `mcpServers`）和 Claude Code（`~/.claude.json` 用户级 `mcpServers`，`type: stdio`）。检测看这些目录、配置文件、同名命令、Windows 用户和系统 PATH 里的同名命令，以及用户目录下这些客户端的常见安装文件。Claude 桌面版另认当前用户已注册的应用包 `Claude_*pzs8sxrjxfjjc`。不扫描进程，不搜索整盘。写入是合并一条 `zhiwo`，不替换文件里的其他服务。启动命令默认是正在运行这份服务的 Python，参数是 `-m zhiwo.gateway.stdio_bridge`；从源码运行时带上 `server` 目录的 `PYTHONPATH`。安装进程用 `ZHIWO_BRIDGE_PYTHON` 指向随包解释器，解释器还不能导入 `zhiwo` 时再用 `ZHIWO_BRIDGE_PYTHONPATH` 指向随包代码目录。不需要 `PYTHONPATH` 时参数前加 `-I -X utf8`，客户端环境里的 `PYTHON*` 变量和用户级 site-packages 不会遮住随包依赖。凭证只放进该文件的环境变量。已有连接在配置文件替换成功之后才保存新凭证；写入失败时旧凭证和旧权限保持不变。重新写入可以带上当前的工具和类别，避免先被预设覆盖。配置路径若经符号链接或目录联接跑到用户目录以外，拒绝写入。安装文件若经联接跑到用户目录以外，不把它算作已安装。`ZHIWO_CLIENT_HOME` 只在 `ZHIWO_TEST_MODE=1` 时改写目标目录。
 
-P2.1 的权限变更在 `services/agents.py`。新连接的工具和类别为空，`policy_version` 从 1 开始。允许的工具是 `get_context`、`search_memory`、`propose_memory`、`explain_memory`；类别是 `identity`、`goal`、`preference`、`project`、`event`、`other`。未知值拒绝。`enabled`、工具、类别或凭证实际变化时 `policy_version` 加 1；只改名称不加。停用后的后续请求立即拒绝。重置使旧凭证立即失效，递增权限版本，并且不恢复已停用的连接。身份和权限用 `fetch_principal()` 一次连接查询读出。这个模块不读取、不写入记忆。
+P2.1 的权限变更在 `services/agents.py`。新连接的工具、读取类别和提案类别都为空，`policy_version` 从 1 开始。首次授予 `propose_memory` 而没有指定提案类别时，提案类别设为全部 6 类。允许的工具是 `get_context`、`search_memory`、`propose_memory`、`explain_memory`；类别是 `identity`、`goal`、`preference`、`project`、`event`、`other`。未知值拒绝。`enabled`、工具、读取类别、提案类别或凭证实际变化时 `policy_version` 加 1；只改名称不加。停用后的后续请求立即拒绝。重置使旧凭证立即失效，递增权限版本，并且不恢复已停用的连接。身份和权限用 `fetch_principal()` 一次连接查询读出。这个模块不读取、不写入记忆。
 
 ### 6.2 MCP：只暴露四个工具
 
@@ -156,12 +156,12 @@ P2.1 的权限变更在 `services/agents.py`。新连接的工具和类别为空
 | --- | --- | --- |
 | `get_context` | `task: string, max_items?: 1..10`，默认 5 | 与任务相关且获准的 `MemoryItem[]` |
 | `search_memory` | `query: string, categories?: Category[], limit?: 1..20`，默认 10 | 同一权限规则下的 `MemoryItem[]` |
-| `propose_memory` | `request_id: UUID, change: {type: add/update, content, kind, category, scope?, target_id?, base_revision?}, evidence: {text, source_ref?}` | `proposal_id, status: pending`；同 ID 重试返回原提案 |
+| `propose_memory` | `content: string, category: Category, evidence: string, kind?: fact/event`（默认 fact）`, scope?, target_id?, base_revision?, source_ref?`；给了 `target_id` 就是修改 | `proposal_id, request_id, status`；同一条建议重复提交返回第一次的提案和它当前的状态 |
 | `explain_memory` | `id: string` | 当前获准版本的出处类型、确认时间及用户审核过的证据片段 |
 
-`MemoryItem = {id, revision, content, kind, category, scope?, valid_until?}`。成功响应包含 `request_id, items/result, truncated`；失败包含 `request_id, error: {code, message, retryable}`，不附带未授权内容。
+`MemoryItem = {id, revision, content, kind, category, scope?, valid_until?}`。成功响应包含 `request_id, items/result, truncated`；失败包含 `request_id, error: {code, message, retryable}`，不附带未授权内容。MCP 工具参数是扁平、带类型的，`category`、`kind` 是枚举并附中文说明，模型从 schema 就能看到允许值；工具参数里没有请求号，由服务生成。stdio bridge 把服务的错误载荷原样作为 MCP 工具错误（`isError`）返回；字段校验错误写明字段和允许值，不回显提交的值。服务说明（`instructions`）写明提取规则：一条一件事、类别只用 6 个值、证据逐字照抄、不推算日期、提交后如实报告成功和失败的条数。HTTP 的 `/api/v1/agent/tools/propose_memory` 仍收 `change` 和 `evidence` 两个对象，`request_id` 可选。
 
-`get_context` 只组装获准记忆，不调用模型再总结；不接受完整画像请求绕过类别过滤。`explain_memory` 不返回整份原文、旧版本或其他记忆；无权访问与不存在统一返回 `NOT_FOUND`，避免通过 ID 探测信息。Agent 只可在其获准类别提交提案；更新目标还需当前可访问。
+`get_context` 只组装获准记忆，不调用模型再总结；不接受完整画像请求绕过类别过滤。`explain_memory` 不返回整份原文、旧版本或其他记忆；无权访问与不存在统一返回 `NOT_FOUND`，避免通过 ID 探测信息。Agent 只可在其提案类别（`propose_categories`）提交提案，与读取类别无关；更新目标还需当前可读。
 
 错误码至少覆盖：`UNAUTHENTICATED`、`FORBIDDEN`、`NOT_FOUND`、`VALIDATION_ERROR`、`CONFLICT`、`MODEL_UNAVAILABLE`、`KERNEL_UNAVAILABLE`、`AUDIT_UNAVAILABLE`。未返回记忆是正常空结果，不触发全库兜底。
 
@@ -194,7 +194,7 @@ P2.2 的四个工具在 `services/agent_tools.py`，可见性在 `services/polic
 
 所有成功状态须以实际存取结果为依据；“删除”指应用与数据库逻辑清除，不承诺存储介质取证级擦除。
 
-P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windows DPAPI 写到数据目录的 `extractor.key`，不进 `zhiwo.db`，接口也不回显。页面还没保存过时，进程继续使用启动时的环境变量。保存后当前进程立刻改用新配置。恢复会删掉这个密钥文件，并记 `extractor_requires_setup`，避免环境变量里的旧密钥自动生效；清空则去掉这个标记，重新读取环境变量。测试连接只发送一句不含记忆的请求。摘要缓存加入后 schema 是 7。永久删除先把版本标成 `deleting` 并写下操作，再清理 Kernel、派生行、摘要缓存和业务库里的正文；`ZHIWO_CRASH_AFTER=delete_marked` 只在测试模式且数据目录位于系统临时目录时，于标记之后退出。重启从 `prepared` 的删除操作继续。短生命周期的 Kernel 连接在用完后关闭，否则 Windows 会因文件占用而无法替换备份。
+P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windows DPAPI 写到数据目录的 `extractor.key`，不进 `zhiwo.db`，接口也不回显。页面还没保存过时，进程继续使用启动时的环境变量。保存后当前进程立刻改用新配置。恢复会删掉这个密钥文件，并记 `extractor_requires_setup`，避免环境变量里的旧密钥自动生效；清空则去掉这个标记，重新读取环境变量。测试连接只发送一句不含记忆的请求。摘要缓存加入后 schema 是 7；提案类别加入后是 8。永久删除先把版本标成 `deleting` 并写下操作，再清理 Kernel、派生行、摘要缓存和业务库里的正文；`ZHIWO_CRASH_AFTER=delete_marked` 只在测试模式且数据目录位于系统临时目录时，于标记之后退出。重启从 `prepared` 的删除操作继续。短生命周期的 Kernel 连接在用完后关闭，否则 Windows 会因文件占用而无法替换备份。服务句柄在打开后清掉 Mnemosyne 的线程连接缓存，自己独占那条连接，所以同一线程上的短生命周期写入关闭的只是它自己的连接；经句柄的检索用一把锁串行，因为一条 sqlite 连接不能被多个请求线程同时使用。
 
 ## 8. 目录与实现约束
 

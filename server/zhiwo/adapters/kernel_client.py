@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,6 +21,10 @@ _log = logging.getLogger(__name__)
 SERVICE_SESSION = "zhiwo-service"
 EMBEDDING_MODEL = "BAAI/bge-small-zh-v1.5"
 SESSION_CAP = 1_000_000
+# The handle's Mnemosyne instance holds one sqlite connection. sqlite3
+# connections are not safe for concurrent use, and request threads search in
+# parallel, so searches through the handle take turns.
+_RECALL_LOCK = threading.Lock()
 _DROPPED_ENV = (
     "OPENAI_API_KEY",
     "OPENAI_BASE_URL",
@@ -80,6 +85,7 @@ def connect(kernel_dir: Path, *, cache_dir: Path, connect_only: bool) -> KernelH
     if embedding_module._DEFAULT_MODEL != EMBEDDING_MODEL:
         raise KernelConnectError("embedding model was fixed after Mnemosyne had already been imported")
     memory = Mnemosyne(session_id=SERVICE_SESSION, db_path=db_path)
+    _detach_thread_cache()
     opened = Path(memory.db_path).resolve()
     if opened != db_path or not opened.is_relative_to(kernel_dir.resolve()):
         raise KernelConnectError("kernel database is outside the requested directory")
@@ -96,7 +102,8 @@ def connect(kernel_dir: Path, *, cache_dir: Path, connect_only: bool) -> KernelH
 
 
 def recall_rows(handle: KernelHandle, query: str, top_k: int = 40) -> list[dict]:
-    rows = handle.memory.recall(query, top_k=top_k)
+    with _RECALL_LOCK:
+        rows = handle.memory.recall(query, top_k=top_k)
     if isinstance(rows, dict):
         rows = rows.get("results") or []
     found = []
@@ -176,6 +183,24 @@ def discard_version(db_path: Path, session_id: str, kernel_id: str) -> None:
         cleanup_derived_rows(db_path, kernel_id)
     finally:
         _close_transient(memory)
+
+
+def _detach_thread_cache() -> None:
+    """Let the long-lived handle own the connections it was built with.
+
+    Mnemosyne caches one connection per thread and database. A transient
+    write on the same thread would otherwise get the handle's connection and
+    _close_transient would close it, so every later search through the handle
+    fails with "Cannot operate on a closed database". Clearing the cache (not
+    closing) makes later transient instances on this thread open their own.
+    """
+    import mnemosyne.core.beam as beam
+    import mnemosyne.core.memory as memory_module
+
+    for module in (memory_module, beam):
+        local = getattr(module, "_thread_local", None)
+        if local is not None:
+            local.conn = None
 
 
 def _close_transient(memory) -> None:

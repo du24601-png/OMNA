@@ -474,6 +474,8 @@ function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear
   return <div className="page library-page">
     <div className="library-feed" ref={feedRef}>
       {query && <p className="helper search-caption">搜索“{query}”，仅包含已确认内容{truncated ? "。只列出最相关的 20 条" : ""}</p>}
+      <ResourceNotice resource={resource} pending={false}/>
+      <div className="list-sticky">
       <div className="list-tools">
         <div className="list-tool-group">
           <Popover.Root>
@@ -512,10 +514,11 @@ function MemoryPage({ tick, selectedId, query, draft, onDraft, onSearch, onClear
         </div>
         <form className="library-search" onSubmit={e => { e.preventDefault(); onSearch() }}><Icon name="search"/><input aria-label="搜索记忆" placeholder="搜索已确认的记忆" value={draft} onChange={e => onDraft(e.target.value)}/>{(draft || query) && <button type="button" className="search-clear" aria-label="清除搜索" onClick={onClear}><Icon name="close"/></button>}</form>
       </div>
-      <ResourceNotice resource={resource} pending={false}/>
+      {!!shown.length && <div className="memo-head" aria-hidden="true"><span>{partial ? <span className="memo-count">已显示 {shown.length} 条，共 {total} 条</span> : <>记忆 <span className="memo-count">{shown.length} 条</span></>}</span><span>主题</span><span>来源</span><span>时间</span></div>}
+      </div>
       {resource.loading && !resource.data && !resource.error && <MemorySkeleton/>}
       {resource.data && !shown.length && !resource.loading && !resource.error && <Empty title={filtered ? "没有符合筛选条件的记忆" : "还没有已确认的记忆"} action={<button className="button secondary" onClick={filtered ? clear : onAdd}>{filtered ? "清除筛选" : "添加记忆"}</button>}>{filtered ? "换个关键词、主题或来源再试试。" : "从一条偏好、目标或近期事件开始。"}</Empty>}
-      {!!shown.length && <div className="memo-list"><div className="memo-head" aria-hidden="true"><span>{partial ? <span className="memo-count">已显示 {shown.length} 条，共 {total} 条</span> : <>记忆 <span className="memo-count">{shown.length} 条</span></>}</span><span>主题</span><span>来源</span><span>时间</span></div>{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} open={selectedId === item.id} onOpen={onOpen}/>)}{canMore && <button type="button" className="memo-more" disabled={moreLoading} aria-busy={moreLoading} onClick={loadMore}>{moreLoading ? "正在查看…" : sort === "oldest" ? "查看更新的" : "查看更早的"}</button>}{moreError && <p className="helper memo-more-error" role="alert">{moreError}</p>}</div>}
+      {!!shown.length && <div className="memo-list">{shown.map(item => <MemoCard key={`${item.id}-${item.revision}`} memory={item} open={selectedId === item.id} onOpen={onOpen}/>)}{canMore && <button type="button" className="memo-more" disabled={moreLoading} aria-busy={moreLoading} onClick={loadMore}>{moreLoading ? "正在查看…" : sort === "oldest" ? "查看更新的" : "查看更早的"}</button>}{moreError && <p className="helper memo-more-error" role="alert">{moreError}</p>}</div>}
     </div>
   </div>
 }

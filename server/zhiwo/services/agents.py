@@ -1,8 +1,12 @@
 """Owner-managed agent connections.
 
 Identity is the credential hash. This module does not read or write
-memories. policy_version increases when tools, categories, enabled, or
-the credential change. A name-only edit does not.
+memories. policy_version increases when tools, read or proposal
+categories, enabled, or the credential change. A name-only edit does not.
+
+Read categories (allowed_categories) decide what the connection may see.
+Proposal categories (propose_categories) decide what it may suggest for
+review. Granting one never grants the other.
 """
 
 from __future__ import annotations
@@ -33,6 +37,7 @@ class AgentPrincipal:
     policy_version: int
     allowed_tools: tuple[str, ...]
     allowed_categories: tuple[str, ...]
+    propose_categories: tuple[str, ...] = ()
 
 
 def require_agent(request: Request) -> AgentPrincipal:
@@ -66,7 +71,8 @@ def fetch_principal_by_id(connection, agent_id: str) -> AgentPrincipal | None:
     row = connection.execute(
         """
         SELECT agents.id, agents.name, agents.enabled, agents.policy_version,
-               agent_permissions.allowed_tools, agent_permissions.allowed_categories
+               agent_permissions.allowed_tools, agent_permissions.allowed_categories,
+               agent_permissions.propose_categories
         FROM agents
         LEFT JOIN agent_permissions ON agent_permissions.agent_id = agents.id
         WHERE agents.id = ?
@@ -112,7 +118,8 @@ def fetch_principal(connection, credential: str) -> AgentPrincipal | None:
     row = connection.execute(
         """
         SELECT agents.id, agents.name, agents.enabled, agents.policy_version,
-               agent_permissions.allowed_tools, agent_permissions.allowed_categories
+               agent_permissions.allowed_tools, agent_permissions.allowed_categories,
+               agent_permissions.propose_categories
         FROM agents
         LEFT JOIN agent_permissions ON agent_permissions.agent_id = agents.id
         WHERE agents.credential_hash = ?
@@ -130,6 +137,7 @@ def _principal_from_row(row) -> AgentPrincipal | None:
     permissions = {
         "allowed_tools": _load_list(row["allowed_tools"]),
         "allowed_categories": _load_list(row["allowed_categories"]),
+        "propose_categories": _load_list(row["propose_categories"] or "[]"),
     }
     return AgentPrincipal(
         agent_id=row["id"],
@@ -138,6 +146,7 @@ def _principal_from_row(row) -> AgentPrincipal | None:
         policy_version=int(row["policy_version"]),
         allowed_tools=tuple(permissions["allowed_tools"]),
         allowed_categories=tuple(permissions["allowed_categories"]),
+        propose_categories=tuple(permissions["propose_categories"]),
     )
 
 
@@ -171,8 +180,8 @@ def create_agent(db_path, request_id: str, name: str, *, secret: str | None = No
             )
             connection.execute(
                 """
-                INSERT INTO agent_permissions (agent_id, allowed_tools, allowed_categories)
-                VALUES (?, '[]', '[]')
+                INSERT INTO agent_permissions (agent_id, allowed_tools, allowed_categories, propose_categories)
+                VALUES (?, '[]', '[]', '[]')
                 """,
                 (agent_id,),
             )
@@ -204,6 +213,7 @@ def update_agent(db_path, agent_id: str, request_id: str, patch: dict) -> dict:
     enabled = patch.get("enabled")
     tools = patch.get("allowed_tools")
     categories = patch.get("allowed_categories")
+    propose = patch.get("propose_categories")
     if name is not None:
         name = _name(name)
     if enabled is not None and not isinstance(enabled, bool):
@@ -212,14 +222,17 @@ def update_agent(db_path, agent_id: str, request_id: str, patch: dict) -> dict:
         tools = _choices(tools, TOOLS, "tool")
     if categories is not None:
         categories = _choices(categories, CATEGORIES, "category")
-    digest = _payload_hash(
-        {
-            "allowed_categories": categories,
-            "allowed_tools": tools,
-            "enabled": enabled,
-            "name": name,
-        }
-    )
+    if propose is not None:
+        propose = _choices(propose, CATEGORIES, "category")
+    hashed = {
+        "allowed_categories": categories,
+        "allowed_tools": tools,
+        "enabled": enabled,
+        "name": name,
+    }
+    if propose is not None:
+        hashed["propose_categories"] = propose
+    digest = _payload_hash(hashed)
     with _lock:
         connection = _connect(db_path)
         try:
@@ -238,10 +251,17 @@ def update_agent(db_path, agent_id: str, request_id: str, patch: dict) -> dict:
             next_enabled = bool(current["enabled"]) if enabled is None else enabled
             next_tools = permissions["allowed_tools"] if tools is None else tools
             next_categories = permissions["allowed_categories"] if categories is None else categories
+            next_propose = permissions["propose_categories"] if propose is None else propose
+            newly_proposing = "propose_memory" in next_tools and "propose_memory" not in permissions["allowed_tools"]
+            if propose is None and newly_proposing and not next_propose:
+                # Turning on proposals without naming categories means every
+                # category, as the one-click preset does. Reads stay as set.
+                next_propose = list(CATEGORIES)
             policy_changed = (
                 next_enabled != bool(current["enabled"])
                 or next_tools != permissions["allowed_tools"]
                 or next_categories != permissions["allowed_categories"]
+                or next_propose != permissions["propose_categories"]
             )
             policy_version = int(current["policy_version"]) + (1 if policy_changed else 0)
             now = _now()
@@ -256,10 +276,10 @@ def update_agent(db_path, agent_id: str, request_id: str, patch: dict) -> dict:
             connection.execute(
                 """
                 UPDATE agent_permissions
-                SET allowed_tools = ?, allowed_categories = ?
+                SET allowed_tools = ?, allowed_categories = ?, propose_categories = ?
                 WHERE agent_id = ?
                 """,
-                (_dump(next_tools), _dump(next_categories), agent_id),
+                (_dump(next_tools), _dump(next_categories), _dump(next_propose), agent_id),
             )
             _remember(connection, request_id, agent_id, "update", digest, now)
             connection.commit()
@@ -407,6 +427,7 @@ def _public(connection, agent_id: str) -> dict:
         "policy_version": int(row["policy_version"]),
         "allowed_tools": permissions["allowed_tools"],
         "allowed_categories": permissions["allowed_categories"],
+        "propose_categories": permissions["propose_categories"],
         "client_status": row["client_status"] if row["client_status"] in {"pending", "verified"} else "pending",
         "last_access_at": last[0] if last else None,
     }
@@ -414,7 +435,7 @@ def _public(connection, agent_id: str) -> dict:
 
 def _permissions(connection, agent_id: str) -> dict:
     row = connection.execute(
-        "SELECT allowed_tools, allowed_categories FROM agent_permissions WHERE agent_id = ?",
+        "SELECT allowed_tools, allowed_categories, propose_categories FROM agent_permissions WHERE agent_id = ?",
         (agent_id,),
     ).fetchone()
     if row is None:
@@ -422,6 +443,7 @@ def _permissions(connection, agent_id: str) -> dict:
     return {
         "allowed_tools": _load_list(row["allowed_tools"]),
         "allowed_categories": _load_list(row["allowed_categories"]),
+        "propose_categories": _load_list(row["propose_categories"] or "[]"),
     }
 
 

@@ -300,6 +300,7 @@ def create_app() -> FastAPI:
             port=int(request.scope["server"][1]),
             allowed_tools=body.allowed_tools,
             allowed_categories=body.allowed_categories,
+            propose_categories=body.propose_categories,
         )
 
     @app.get("/api/v1/agent/session")
@@ -317,6 +318,7 @@ def create_app() -> FastAPI:
             "policy_version": principal.policy_version,
             "allowed_tools": list(principal.allowed_tools),
             "allowed_categories": list(principal.allowed_categories),
+            "propose_categories": list(principal.propose_categories),
             "identity_source": "credential",
         }
 
@@ -592,6 +594,7 @@ class ClientConnectBody(BaseModel):
     confirm: bool = False
     allowed_tools: list[str] | None = None
     allowed_categories: list[str] | None = None
+    propose_categories: list[str] | None = None
 
 
 class AgentPatch(BaseModel):
@@ -601,6 +604,7 @@ class AgentPatch(BaseModel):
     enabled: bool | None = None
     allowed_tools: list[str] | None = None
     allowed_categories: list[str] | None = None
+    propose_categories: list[str] | None = None
 
 
 class GetContextBody(BaseModel):
@@ -642,7 +646,7 @@ class ProposeEvidence(BaseModel):
 class ProposeToolBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    request_id: str
+    request_id: str | None = None
     change: ProposeChange
     evidence: ProposeEvidence
 
@@ -710,17 +714,36 @@ class _WebFiles(StaticFiles):
         return response
 
 
-def _validation_error(_request: Request, _exc: RequestValidationError) -> JSONResponse:
+def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse(
         status_code=400,
         content={
             "error": {
                 "code": "VALIDATION_ERROR",
-                "message": "the submitted fields are invalid",
+                "message": _field_errors(exc),
                 "retryable": False,
             }
         },
     )
+
+
+def _field_errors(exc: RequestValidationError) -> str:
+    """Name the fields and the expected values. Submitted values are not echoed."""
+    parts = []
+    for item in exc.errors()[:3]:
+        location = [str(part) for part in item.get("loc", ()) if part not in ("body", "query", "header", "path")]
+        field = ".".join(location) or "request"
+        kind = item.get("type", "")
+        if kind == "extra_forbidden":
+            parts.append(f"{field}: field is not supported")
+        elif kind == "missing":
+            parts.append(f"{field}: field is required")
+        elif kind in {"literal_error", "enum"}:
+            expected = (item.get("ctx") or {}).get("expected", "")
+            parts.append(f"{field}: must be one of {expected}")
+        else:
+            parts.append(f"{field}: {item.get('msg', 'invalid value')}")
+    return "; ".join(parts) or "the submitted fields are invalid"
 
 
 def _mcp_runtime(request: Request) -> dict:

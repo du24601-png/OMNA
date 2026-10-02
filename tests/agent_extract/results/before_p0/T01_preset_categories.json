@@ -1,0 +1,52 @@
+{
+  "granted_categories": [
+    "preference",
+    "goal"
+  ],
+  "attempted": 8,
+  "accepted": 3,
+  "rate": 0.38,
+  "outcomes": [
+    {
+      "category": "identity",
+      "status": 403,
+      "error": "FORBIDDEN"
+    },
+    {
+      "category": "identity",
+      "status": 403,
+      "error": "FORBIDDEN"
+    },
+    {
+      "category": "goal",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "preference",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "project",
+      "status": 403,
+      "error": "FORBIDDEN"
+    },
+    {
+      "category": "event",
+      "status": 403,
+      "error": "FORBIDDEN"
+    },
+    {
+      "category": "preference",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "other",
+      "status": 403,
+      "error": "FORBIDDEN"
+    }
+  ],
+  "pending_after": 3
+}

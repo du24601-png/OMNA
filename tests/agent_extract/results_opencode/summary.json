@@ -1,0 +1,25 @@
+{
+  "opencode": "D:\\npm-global\\node_modules\\opencode-ai\\bin\\opencode.exe",
+  "version": "1.18.33",
+  "model": "opencode-go/deepseek-v4-flash",
+  "runs": [
+    {
+      "scenario": "A1",
+      "error": null,
+      "propose_calls": 7,
+      "propose_succeeded": 7,
+      "stored_pending": 7,
+      "audit_events": 7,
+      "elapsed_s": 18.4
+    },
+    {
+      "scenario": "C1",
+      "error": null,
+      "propose_calls": 7,
+      "propose_succeeded": 7,
+      "stored_pending": 7,
+      "audit_events": 7,
+      "elapsed_s": 11.8
+    }
+  ]
+}

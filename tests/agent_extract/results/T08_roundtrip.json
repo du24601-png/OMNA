@@ -1,0 +1,15 @@
+{
+  "decision_status": 200,
+  "memory_id": "5e6e4d9d-dfaf-46e4-80b3-721e826ab588",
+  "explain_status": 200,
+  "explain": {
+    "request_id": "197c9ed9-5d21-4f22-ac0c-967f955266de",
+    "result": {
+      "confirmed_at": "2026-10-01T15:47:38.216238+00:00",
+      "evidence": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发",
+      "id": "5e6e4d9d-dfaf-46e4-80b3-721e826ab588",
+      "revision": 1,
+      "source_kind": "agent_claim"
+    }
+  }
+}

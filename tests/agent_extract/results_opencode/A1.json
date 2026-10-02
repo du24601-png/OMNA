@@ -1,0 +1,171 @@
+{
+  "scenario": "A1",
+  "client": "OpenCode",
+  "model": "opencode-go/deepseek-v4-flash",
+  "grant": {
+    "tools": [
+      "get_context",
+      "search_memory",
+      "propose_memory"
+    ],
+    "categories": [
+      "preference",
+      "goal"
+    ]
+  },
+  "import_first": false,
+  "exit_code": 0,
+  "elapsed_s": 18.4,
+  "tool_calls": 7,
+  "propose_calls": 7,
+  "propose_succeeded": 7,
+  "propose_failed": 0,
+  "distinct_request_ids": 1,
+  "stored_pending": 7,
+  "stored": [
+    {
+      "content": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+      "category": "identity",
+      "kind": "fact",
+      "evidence": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "今年的目标是把记账小程序做到 1000 个付费用户。",
+      "category": "goal",
+      "kind": "fact",
+      "evidence": "今年的目标是把记账小程序做到 1000 个付费用户。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "写东西喜欢先给结论，不要太多客套话。",
+      "category": "preference",
+      "kind": "fact",
+      "evidence": "我写东西喜欢先给结论，不要太多客套话。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发。",
+      "category": "project",
+      "kind": "fact",
+      "evidence": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "上周三把服务器从阿里云迁到了腾讯云。",
+      "category": "event",
+      "kind": "event",
+      "evidence": "上周三我把服务器从阿里云迁到了腾讯云。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "习惯早上六点起床写代码。",
+      "category": "preference",
+      "kind": "fact",
+      "evidence": "我习惯早上六点起床写代码。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    },
+    {
+      "content": "养了一只叫豆包的猫。",
+      "category": "other",
+      "kind": "fact",
+      "evidence": "我养了一只叫豆包的猫。",
+      "evidence_in_source": true,
+      "verification": "unverified"
+    }
+  ],
+  "audit_events": 7,
+  "audit_rejected": 0,
+  "final_text": "已提交 7 条待确认记忆，全部成功：\n\n1. identity — 林舟，杭州独立开发，一人运营小公司\n2. goal — 记账小程序做到 1000 个付费用户\n3. preference — 写东西先给结论，少客套\n4. project — 「青柠账本」，Flutter 开发\n5. event — 上周三服务器从阿里云迁到腾讯云\n6. preference — 早上六点起床写代码\n7. other — 养了一只叫豆包的猫\n\n去知我里确认后生效。",
+  "all_text": [
+    "我来逐条存入知我。",
+    "已提交 7 条待确认记忆，全部成功：\n\n1. identity — 林舟，杭州独立开发，一人运营小公司\n2. goal — 记账小程序做到 1000 个付费用户\n3. preference — 写东西先给结论，少客套\n4. project — 「青柠账本」，Flutter 开发\n5. event — 上周三服务器从阿里云迁到腾讯云\n6. preference — 早上六点起床写代码\n7. other — 养了一只叫豆包的猫\n\n去知我里确认后生效。"
+  ],
+  "tools": [
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "content": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。",
+        "category": "identity",
+        "kind": "fact",
+        "evidence": "我叫林舟，在杭州做独立开发，一个人运营一家小公司。"
+      },
+      "output": "{\"proposal_id\":\"ca62cdc1-ad26-446b-bae6-ae7bfb1c6704\",\"request_id\":\"256ab818-1d36-5035-bc67-a998770fb53c\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "goal",
+        "content": "今年的目标是把记账小程序做到 1000 个付费用户。",
+        "evidence": "今年的目标是把记账小程序做到 1000 个付费用户。",
+        "kind": "fact"
+      },
+      "output": "{\"proposal_id\":\"98d5aaa7-e9d9-41b4-a45b-d6ecf76b8cd6\",\"request_id\":\"0834e3bf-c512-50a4-b564-028f3bd1e639\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "preference",
+        "content": "写东西喜欢先给结论，不要太多客套话。",
+        "evidence": "我写东西喜欢先给结论，不要太多客套话。",
+        "kind": "fact"
+      },
+      "output": "{\"proposal_id\":\"157a6c5a-8256-440c-9a58-e1671d4a3b67\",\"request_id\":\"ae44e55d-cc46-54a7-a42e-a129b2523b3b\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "project",
+        "content": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发。",
+        "evidence": "现在主要在做一个叫「青柠账本」的项目，用 Flutter 开发。",
+        "kind": "fact"
+      },
+      "output": "{\"proposal_id\":\"7c654eca-080b-44be-8b02-41424908f895\",\"request_id\":\"cf8f8c9d-b682-5c90-a2c2-1db4c240cc51\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "event",
+        "content": "上周三把服务器从阿里云迁到了腾讯云。",
+        "evidence": "上周三我把服务器从阿里云迁到了腾讯云。",
+        "kind": "event"
+      },
+      "output": "{\"proposal_id\":\"95ade5a9-b816-4bd7-b5d6-ea0889d558ce\",\"request_id\":\"91ce61dd-b4bd-5a48-afd5-c54c0778d868\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "preference",
+        "content": "习惯早上六点起床写代码。",
+        "evidence": "我习惯早上六点起床写代码。",
+        "kind": "fact"
+      },
+      "output": "{\"proposal_id\":\"605f8a75-d2f1-4a3c-8677-72af6ee3f5cd\",\"request_id\":\"25d438bb-c78f-5ec1-8689-0ba4fa57f60c\",\"status\":\"pending\"}"
+    },
+    {
+      "tool": "zhiwo_propose_memory",
+      "status": "completed",
+      "input": {
+        "category": "other",
+        "content": "养了一只叫豆包的猫。",
+        "evidence": "我养了一只叫豆包的猫。",
+        "kind": "fact"
+      },
+      "output": "{\"proposal_id\":\"c125ff1a-6907-4eaa-ab5b-2c9b287c09e0\",\"request_id\":\"0aeb07a1-5cfd-51a2-a754-2f2b6d8e2684\",\"status\":\"pending\"}"
+    }
+  ],
+  "stderr_tail": "",
+  "opencode_version": "1.18.33"
+}

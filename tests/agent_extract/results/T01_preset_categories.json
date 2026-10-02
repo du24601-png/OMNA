@@ -1,0 +1,52 @@
+{
+  "granted_categories": [
+    "preference",
+    "goal"
+  ],
+  "attempted": 8,
+  "accepted": 8,
+  "rate": 1.0,
+  "outcomes": [
+    {
+      "category": "identity",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "identity",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "goal",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "preference",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "project",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "event",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "preference",
+      "status": 200,
+      "error": null
+    },
+    {
+      "category": "other",
+      "status": 200,
+      "error": null
+    }
+  ],
+  "pending_after": 8
+}

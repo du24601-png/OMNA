@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>OMNA · 托盘小窗</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ow{--acrylic:rgba(249,249,249,.84);--card:rgba(255,255,255,.72);--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.045);--press:rgba(0,0,0,.07);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--warn-soft:rgba(196,140,40,.14);--shadow:0 16px 48px rgba(0,0,0,.20),0 2px 6px rgba(0,0,0,.08);--kbd:rgba(0,0,0,.06);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.ow.dark{--acrylic:rgba(36,36,36,.86);--card:rgba(255,255,255,.055);--stroke:rgba(255,255,255,.09);--text:#F3F3F3;--muted:#ADADAD;--hover:rgba(255,255,255,.06);--press:rgba(255,255,255,.09);--accent:#6CC49B;--accent-ink:#0D1F16;--accent-soft:rgba(108,196,155,.14);--warn:#E3B868;--warn-soft:rgba(227,184,104,.13);--shadow:0 16px 48px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3);--kbd:rgba(255,255,255,.09)}
+.ow button{font-family:inherit}
+.h-row:hover{background:var(--hover)}
+.h-ic:hover{background:var(--hover);color:var(--text)}
+.h-ok:hover{background:var(--accent);color:var(--accent-ink)}
+.h-no:hover{background:var(--press);color:var(--text)}
+.h-foot:hover{background:var(--hover)}
+@keyframes ow-breath{0%,100%{opacity:1}50%{opacity:.35}}
+.ow-live{animation:ow-breath 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.ow-live{animation:none}}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 1440px; height: 900px; position: relative; overflow: hidden; background: radial-gradient(1100px 680px at 28% 112%, #9DBFE6 0%, rgba(157,191,230,0) 62%), radial-gradient(900px 600px at 88% -8%, #E2EAF4 0%, rgba(226,234,244,0) 60%), linear-gradient(160deg, #EDF2F8 0%, #D6E2EE 100%)">
+
+<div style="position: absolute; left: 120px; top: 84px; width: 860px; height: 600px; border-radius: 8px; overflow: hidden; background: #1E1E1E; box-shadow: 0 20px 60px rgba(0,0,0,.22); display: flex; flex-direction: column">
+<div style="height: 36px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; background: #2B2B2B; color: #C8C8C8; font-size: 12px">
+<span>Claude Code — zhiyuan</span>
+<span style="letter-spacing: 10px; color: #8A8A8A">— ▢ ✕</span>
+</div>
+<div style="padding: 22px 26px; font-family: 'Cascadia Mono', Consolas, 'Noto Sans SC', monospace; font-size: 13.5px; line-height: 1.9; color: #D4D4D4">
+<div style="color: #7F7F7F">~/projects/zhiyuan</div>
+<div style="margin-top: 10px"><span style="color: #6CC49B">›</span> 帮我把同步模块的测试补齐</div>
+<div style="color: #9A9A9A">· 读取 OMNA 记忆：偏好 2 条 · 项目 1 条</div>
+<div style="color: #9A9A9A">· 按你的习惯用 pnpm 安装依赖，测试用 Vitest</div>
+<div style="color: #9A9A9A">· 新建 src/sync/__tests__/merge.test.ts（14 个用例）</div>
+<div style="margin-top: 10px"><span style="color: #6CC49B">›</span> 以后测试都用 Vitest 吧</div>
+<div style="color: #9A9A9A">· 好的。已向 OMNA 提议记住这条偏好，你确认后其他工具也会知道。</div>
+<div style="margin-top: 10px; color: #6CC49B">›<span style="display: inline-block; width: 8px; height: 16px; margin-left: 6px; vertical-align: -3px; background: #D4D4D4"></span></div>
+</div>
+</div>
+
+<div role="dialog" aria-label="OMNA" style="position: absolute; right: 12px; bottom: 60px; width: 368px; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--stroke); box-shadow: var(--shadow); backdrop-filter: blur(40px) saturate(1.5); display: flex; flex-direction: column; overflow: hidden">
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 10px 16px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<span style="font-size: 13px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: {{statusColor}}"><span style="width: 6px; height: 6px; border-radius: 999px; background: {{statusColor}}"></span>{{statusText}}</span>
+</div>
+<div style="display: flex; gap: 2px">
+<button type="button" class="h-ic" onClick="{{togglePause}}" aria-label="{{pauseLabel}}" title="{{pauseLabel}}" style="width: 32px; height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center">
+<sc-if value="{{paused}}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"></path></svg></sc-if>
+<sc-if value="{{notPaused}}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"></path></svg></sc-if>
+</button>
+<button type="button" class="h-ic" aria-label="打开主窗口" title="打开主窗口" style="width: 32px; height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-8 8M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"></path></svg></button>
+</div>
+</div>
+
+<sc-if value="{{paused}}" hint-placeholder-val="{{ false }}">
+<div style="margin: 0 12px; padding: 12px 14px; border-radius: 6px; background: var(--warn-soft)">
+<div style="font-size: 14px; font-weight: 600">已暂停共享</div>
+<div style="font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5">所有 Agent 暂时读不到你的记忆，59 分钟后自动恢复。适合开会投屏或借电脑给别人时用。</div>
+</div>
+</sc-if>
+<sc-if value="{{notPaused}}" hint-placeholder-val="{{ true }}">
+<div style="margin: 0 12px; padding: 12px 14px; border-radius: 6px; background: var(--card); border: 1px solid var(--stroke); display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div>
+<div style="font-size: 14px; font-weight: 600">今天被读取 12 次</div>
+<div style="font-size: 12px; color: var(--muted); margin-top: 3px">Claude Code 7 · OpenCode 4 · WorkBuddy 1</div>
+</div>
+<div style="display: flex">
+<span style="width: 24px; height: 24px; border-radius: 6px; background: #A3532A; color: #FFFFFF; font-size: 9.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--acrylic)">CC</span>
+<span style="width: 24px; height: 24px; border-radius: 6px; background: #2B2B2A; color: #FFFFFF; font-size: 9.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--acrylic); margin-left: -6px">OC</span>
+<span style="width: 24px; height: 24px; border-radius: 6px; background: #3B6CA3; color: #FFFFFF; font-size: 9.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--acrylic); margin-left: -6px">WB</span>
+</div>
+</div>
+</sc-if>
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 6px">
+<span style="font-size: 12px; font-weight: 600; color: var(--muted)">待确认 {{pendingCount}}</span>
+<button type="button" class="h-ic" style="border: 0; background: transparent; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--muted); cursor: pointer">全部</button>
+</div>
+<div style="display: flex; flex-direction: column; padding: 0 6px">
+<sc-for list="{{pending}}" as="p" hint-placeholder-count="3">
+<div class="h-row" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; cursor: default; {{p.st}}">
+<span style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 6px; background: {{p.color}}; color: #FFFFFF; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">{{p.mono}}</span>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 13.5px; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{p.text}}</div>
+<div style="font-size: 12px; color: var(--muted); margin-top: 1px">{{p.meta}}</div>
+</div>
+<sc-if value="{{p.isAdd}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 4px">
+<button type="button" class="h-no" onClick="{{p.reject}}" aria-label="忽略" title="忽略 (N)" style="width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<button type="button" class="h-ok" onClick="{{p.accept}}" aria-label="记住" title="记住 (Y)" style="width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--accent-soft); color: var(--accent); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></button>
+</div>
+</sc-if>
+<sc-if value="{{p.isEdit}}" hint-placeholder-val="{{ false }}">
+<button type="button" class="h-no" style="height: 30px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 6px; background: transparent; color: var(--text); font-size: 12px; cursor: pointer">看差异</button>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{noPending}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 10px; font-size: 13px; color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>都处理完了，新的建议会在这里出现</div>
+</sc-if>
+</div>
+<sc-if value="{{hasPending}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 12px; padding: 6px 16px 0; font-size: 11px; color: var(--muted)">
+<span><kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">↑↓</kbd> 选择</span>
+<span><kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">Y</kbd> 记住</span>
+<span><kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">N</kbd> 忽略</span>
+</div>
+</sc-if>
+
+<div style="padding: 16px 16px 6px; font-size: 12px; font-weight: 600; color: var(--muted)">最近</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 0 16px 12px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 12.5px">
+<span class="ow-live" style="width: 6px; height: 6px; border-radius: 999px; background: var(--accent); flex-shrink: 0"></span>
+<span style="flex: 1; min-width: 0"><b style="font-weight: 600">Claude Code</b> 读了偏好 2 · 项目 1</span>
+<span style="color: var(--muted); font-size: 12px">刚刚</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 12.5px">
+<span style="width: 6px; height: 6px; border-radius: 999px; background: var(--stroke); flex-shrink: 0"></span>
+<span style="flex: 1; min-width: 0"><b style="font-weight: 600">OpenCode</b> 搜索「代码风格」，拿到 2 条</span>
+<span style="color: var(--muted); font-size: 12px">09:41</span>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 6px; border-top: 1px solid var(--stroke)">
+<button type="button" class="h-foot" style="display: inline-flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer">打开 OMNA<span style="font-size: 11px; color: var(--muted)"><kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">Ctrl</kbd> <kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">Shift</kbd> <kbd style="font-family: inherit; padding: 1px 5px; border-radius: 3px; background: var(--kbd)">M</kbd></span></button>
+<button type="button" class="h-ic" aria-label="设置" style="width: 36px; height: 36px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"></path></svg></button>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 48px; background: rgba(243,243,243,.86); backdrop-filter: blur(30px); border-top: 1px solid rgba(0,0,0,.06); display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Segoe UI Variable Text','Segoe UI','Noto Sans SC',sans-serif; color: #1B1B1B">
+<div style="width: 40px; height: 40px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="1" y="1" width="8.4" height="8.4" rx="1.2" fill="#2D7DD2"></rect><rect x="10.6" y="1" width="8.4" height="8.4" rx="1.2" fill="#2D7DD2"></rect><rect x="1" y="10.6" width="8.4" height="8.4" rx="1.2" fill="#2D7DD2"></rect><rect x="10.6" y="10.6" width="8.4" height="8.4" rx="1.2" fill="#2D7DD2"></rect></svg></div>
+<div style="width: 40px; height: 40px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></div>
+<div style="width: 40px; height: 40px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center"><span style="width: 22px; height: 18px; border-radius: 3px; background: #E8B13C"></span></div>
+<div style="width: 40px; height: 40px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center"><span style="width: 20px; height: 20px; border-radius: 999px; background: #3C8DDE"></span></div>
+<div style="position: relative; width: 40px; height: 40px; border-radius: 4px; background: rgba(0,0,0,.05); display: inline-flex; align-items: center; justify-content: center"><span style="width: 20px; height: 20px; border-radius: 4px; background: #1E1E1E; color: #FFFFFF; font-size: 10px; font-family: Consolas, monospace; display: inline-flex; align-items: center; justify-content: center">&gt;_</span><span style="position: absolute; bottom: 2px; width: 16px; height: 3px; border-radius: 2px; background: #2D7DD2"></span></div>
+<div style="position: absolute; right: 8px; top: 0; bottom: 0; display: flex; align-items: center; gap: 2px">
+<div style="width: 28px; height: 40px; display: inline-flex; align-items: center; justify-content: center; color: #404040"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></div>
+<div style="position: relative; width: 32px; height: 40px; border-radius: 4px; background: rgba(0,0,0,.06); display: inline-flex; align-items: center; justify-content: center; color: #1B1B1B"><svg width="16" height="16" viewBox="0 0 24 24" aria-label="OMNA"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg><sc-if value="{{hasPending}}" hint-placeholder-val="{{ true }}"><span style="position: absolute; top: 9px; right: 6px; width: 6px; height: 6px; border-radius: 999px; background: #2E7656; border: 1.5px solid #F3F3F3"></span></sc-if></div>
+<div style="width: 30px; height: 40px; display: inline-flex; align-items: center; justify-content: center; color: #404040"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.5a4 4 0 0 1 6 0"></path><circle cx="12" cy="19.5" r="0.8" fill="currentColor"></circle></svg></div>
+<div style="width: 30px; height: 40px; display: inline-flex; align-items: center; justify-content: center; color: #404040"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"></path><path d="M16 9a4 4 0 0 1 0 6"></path></svg></div>
+<div style="padding: 0 10px; text-align: right; font-size: 12px; line-height: 1.35">21:42<br>2026/10/2</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { done: [], sel: 'p1', paused: false };
+  }
+  renderVals() {
+    const st = this.state;
+    const defs = [
+      { id: 'p1', mono: 'CC', color: '#A3532A', text: '测试框架用 Vitest，不用 Jest', meta: 'Claude Code · 新增偏好', add: true },
+      { id: 'p2', mono: 'OC', color: '#2B2B2A', text: '「纸鸢」内测推迟到 11 月中旬', meta: 'OpenCode · 修改项目', add: false },
+      { id: 'p3', mono: 'WB', color: '#3B6CA3', text: '周报习惯在周五下午写', meta: 'WorkBuddy · 新增偏好', add: true }
+    ];
+    const left = defs.filter((d) => st.done.indexOf(d.id) < 0);
+    const pending = left.map((d, i) => ({
+      text: d.text, meta: d.meta, mono: d.mono, color: d.color,
+      isAdd: d.add, isEdit: !d.add,
+      st: i === 0 ? 'background: var(--hover); box-shadow: inset 0 0 0 1px var(--stroke);' : '',
+      accept: () => this.setState({ done: st.done.concat(d.id) }),
+      reject: () => this.setState({ done: st.done.concat(d.id) })
+    }));
+    const paused = st.paused;
+    return {
+      themeClass: (this.props.dark ?? false) ? 'ow dark' : 'ow',
+      pending, pendingCount: pending.length, hasPending: pending.length > 0, noPending: pending.length === 0,
+      paused, notPaused: !paused,
+      statusText: paused ? '已暂停共享' : '运行中',
+      statusColor: paused ? 'var(--warn)' : 'var(--accent)',
+      pauseLabel: paused ? '恢复共享' : '暂停共享 1 小时',
+      togglePause: () => this.setState({ paused: !paused })
+    };
+  }
+}
+</script>
+</body>
+</html>

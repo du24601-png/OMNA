@@ -1,0 +1,15 @@
+{
+  "mcp_tools_expose_request_id": false,
+  "mcp_distinct_candidates_stored": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "http_same_id_different_payload": [
+    200,
+    409,
+    "CONFLICT"
+  ],
+  "pending": 5
+}

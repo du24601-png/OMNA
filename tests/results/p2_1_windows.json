@@ -23,11 +23,11 @@
   "list_count": 2,
   "list_has_credential": false,
   "forged_status": 200,
-  "forged_agent_id": "ecd5b075-3f19-45e7-aaa9-efa2785c54ec",
+  "forged_agent_id": "1a244339-5b63-430d-839c-2eff4541752c",
   "forged_name": "合成连接甲",
   "forged_identity_source": "credential",
   "other_agent_status": 200,
-  "other_agent_id": "64c57af1-a294-4949-988a-c09366f34e7e",
+  "other_agent_id": "4002e34a-d51a-4b42-a62b-2284f536963c",
   "owner_token_on_session": 401,
   "agent_on_owner_api": {
     "GET /api/v1/memories": {
@@ -45,7 +45,7 @@
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "GET /api/v1/sources/e292821b-9ad3-4365-a3b5-92acc5031dd1": {
+    "GET /api/v1/sources/ef9b7139-e96f-4a76-af00-3e5b559d234c": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false
@@ -55,12 +55,12 @@
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "PATCH /api/v1/agents/ecd5b075-3f19-45e7-aaa9-efa2785c54ec": {
+    "PATCH /api/v1/agents/1a244339-5b63-430d-839c-2eff4541752c": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false
     },
-    "POST /api/v1/agents/ecd5b075-3f19-45e7-aaa9-efa2785c54ec/rotate-credential": {
+    "POST /api/v1/agents/1a244339-5b63-430d-839c-2eff4541752c/rotate-credential": {
       "status": 401,
       "code": "UNAUTHENTICATED",
       "has_items": false

@@ -82,6 +82,7 @@ export type AgentConnection = {
   policy_version: number
   allowed_tools: string[]
   allowed_categories: string[]
+  propose_categories: string[]
   client_status: string
   last_access_at?: string | null
   credential?: string
@@ -291,7 +292,7 @@ export const api = {
   agentClients() {
     return request("/api/v1/agent-clients") as Promise<{ clients: AgentClient[] }>
   },
-  connectClient(id: string, preset: "read" | "propose", key: string, permissions?: { allowed_tools: string[]; allowed_categories: string[] }) {
+  connectClient(id: string, preset: "read" | "propose", key: string, permissions?: { allowed_tools: string[]; allowed_categories: string[]; propose_categories?: string[] }) {
     return request(`/api/v1/agent-clients/${encodeURIComponent(id)}/connect`, {
       method: "POST",
       headers: { "Idempotency-Key": key },
