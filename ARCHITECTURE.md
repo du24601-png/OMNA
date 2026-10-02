@@ -192,7 +192,7 @@ v2 不改数据库结构（仍是 schema 8），不改发布和删除的核心�
 | `GET /status?utc_offset_minutes=` | 给托盘和小窗轮询。返回服务是否正常（含 `embeddings_loaded`）、待确认数和最新一条待确认的时间、暂停到期时间、今天按本地日期各 Agent 的读取次数，以及最近 2 次成功读取（Agent、工具、各类别条数、时间、事件 id）。不返回正文、查询词或快照。今天的次数复用 `access.read_counts`，不计被拒绝的调用 |
 | `GET /memories` 的 `reads_7d` | 每条记忆近 7×24 小时被读取的次数：只数 `get_context`、`search_memory`、`explain_memory` 中 `outcome=success`、`delivery_state=sent` 的事件，从 `response_snapshot` 里取出返回的记忆 id 计数。不另存一列 |
 | `POST /sharing/pause`；`DELETE /sharing/pause` | 暂停共享 1 小时或立即恢复。到期时间写在 `settings.sharing_paused_until`（UTC ISO 时间），读的时候判断是否过期，不开定时器，所以重启后仍保持。四个工具在鉴权之后、提交之前各检查一次，暂停中返回 `SHARING_PAUSED`，并照常写一条 `rejected` 访问记录 |
-| `GET /agent-files` | 只看白名单里的固定路径（各客户端的用户级 `CLAUDE.md` / `AGENTS.md`），返回客户端、路径、大小、是否导入过；不读内容。白名单在服务代码里，可配置，路径逐一按客户端官方文档核实 |
+| `GET /agent-files` | 只看白名单里的固定路径（各客户端的用户级 `CLAUDE.md` / `AGENTS.md`），返回客户端、路径、大小、是否导入过；不读内容。白名单在服务代码里，可配置。已按官方文档核实（2026-10-02）：Claude Code `~/.claude/CLAUDE.md`；ChatGPT（Codex）`~/.codex/AGENTS.override.md`，没有时 `~/.codex/AGENTS.md`；OpenCode `~/.config/opencode/AGENTS.md`，没有时它也读 `~/.claude/CLAUDE.md`（同一文件只列一次）；ZCode `~/.zcode/AGENTS.md`。Claude 桌面版没有这类文件。WorkBuddy 的 `~/.workbuddy/USER.md`、`MEMORY.md` 只见于第三方文章，是否加入待负责人决定 |
 | `POST /imports` 的 `agent_file` | 服务自己读白名单文件（≤ 1 MiB）一次，来源类型用现有的 `file`，名字记路径；不改原文件 |
 | 按结构拆分 | `imports._run_extraction` 在没配模型时改走拆分器：列表项或每行一条为候选，标题关键词定类别，证据是原行，任务状态记 `extracted`。配了模型仍走原来的提取。规整空格和全半角标点后文字相同的合并；与已有记忆或同批候选很像的，在 `payload_json` 记 `similar_to`。相似判断把前端审核里现有的字符二元组重叠算法（阈值 0.62）搬到服务端，前后端用同一个规则 |
 | `POST /imports/{job_id}/accept-additions` | 只处理该批次里未标相似、未被排除的待确认新增；逐条调用现有 `decide_proposal`（本身幂等），返回每条结果，失败的留在待确认 |

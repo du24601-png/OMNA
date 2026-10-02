@@ -1,0 +1,118 @@
+{
+  "_about": "Synthetic instruction files for the v2 split quality gate. Fictional people only. Each item is one memory a careful person would keep from the file, with the category they would pick. A candidate matches an item when, after normalizing whitespace, full/half-width punctuation, Markdown emphasis and trailing punctuation, one text contains the other. duplicates = lines that should be merged into an earlier identical line. Gate: category accuracy >= 80% over all items; manual work (missing items + wrong category + extra candidates + unmerged duplicates) <= 20% of items.",
+  "files": {
+    "claude_cn_structured.md": {
+      "client": "claude-code",
+      "duplicates": 0,
+      "items": [
+        ["identity", "独立开发者，一个人运营一家小公司"],
+        ["identity", "做过 6 年后端，主力语言是 TypeScript 和 Python"],
+        ["identity", "在杭州，时区 UTC+8"],
+        ["preference", "先给结论，再讲原因，不需要客套"],
+        ["preference", "中文回答，技术名词保留英文"],
+        ["preference", "不确定的地方直接说不确定，不要编"],
+        ["preference", "包管理用 pnpm，不用 npm"],
+        ["preference", "测试框架用 Vitest"],
+        ["preference", "代码里不要加自动生成的注释"],
+        ["preference", "git 提交信息用中文，动词开头"],
+        ["project", "本地优先的笔记应用「纸鸢」，计划下个月开放内测"],
+        ["project", "记账小程序从 Taro 迁回原生微信小程序"],
+        ["goal", "年底前让「纸鸢」有 100 个付费用户"],
+        ["goal", "11 月做一场独立开发者主题的分享"]
+      ]
+    },
+    "claude_en_dev.md": {
+      "client": "claude-code",
+      "duplicates": 0,
+      "items": [
+        ["identity", "Frontend engineer at a small fintech startup in Shenzhen"],
+        ["identity", "I mostly write React and Go"],
+        ["preference", "Keep answers short; skip the preamble"],
+        ["preference", "Explain trade-offs before recommending a library"],
+        ["preference", "Use metric units and 24-hour time"],
+        ["preference", "Prefer functional components and hooks"],
+        ["preference", "Two-space indentation, no semicolons"],
+        ["preference", "Never commit directly to main"],
+        ["project", "Migrating the payments dashboard from Redux to Zustand"],
+        ["project", "Writing an internal design system called \"Kite\""],
+        ["goal", "Pass the AWS Solutions Architect exam this year"]
+      ]
+    },
+    "codex_mixed.md": {
+      "client": "codex",
+      "duplicates": 1,
+      "items": [
+        ["identity", "我是数据分析师，日常用 Python 和 SQL。"],
+        ["preference", "回答用中文，代码注释用英文"],
+        ["preference", "画图默认用 matplotlib，不要用 seaborn"],
+        ["preference", "给出 SQL 时写清楚用的是哪种方言"],
+        ["project", "季度用户留存分析报表，每月 5 号前交付"],
+        ["project", "正在把老的 Excel 报表迁到 Metabase"],
+        ["preference", "周末不要安排任务提醒"]
+      ]
+    },
+    "opencode_minimal.md": {
+      "client": "opencode",
+      "duplicates": 0,
+      "items": [
+        ["identity", "我叫林舟，是一名产品经理"],
+        ["preference", "文档用飞书写，不用 Notion"],
+        ["preference", "汇报材料要有一页结论摘要"],
+        ["project", "正在负责会员体系改版，10 月底上线"],
+        ["preference", "喜欢用表格对比方案"],
+        ["goal", "今年想学会用 SQL 自己查数据"]
+      ]
+    },
+    "zcode_rules.md": {
+      "client": "zcode",
+      "duplicates": 0,
+      "items": [
+        ["preference", "Python 统一用 3.12，类型标注要写全"],
+        ["preference", "函数不超过 50 行，超过先拆"],
+        ["preference", "新增依赖前先说明用途"],
+        ["preference", "改动超过 100 行先给方案再动手"],
+        ["preference", "有疑问先问我，不要猜"],
+        ["preference", "每次改完列出改了哪些文件"],
+        ["project", "维护公司的订单服务 order-service，基于 FastAPI"],
+        ["project", "下个季度要把订单服务拆成读写两个服务"]
+      ]
+    },
+    "claude_paragraphs.md": {
+      "client": "claude-code",
+      "duplicates": 0,
+      "items": [
+        ["identity", "我是一名高中物理老师，在成都教书。"],
+        ["other", "平时用 AI 主要是备课和出题。"],
+        ["preference", "出题时请标明难度和对应的知识点。"],
+        ["preference", "讲解要用学生能听懂的语言，少用术语。"],
+        ["project", "这学期在带高二两个班，还负责学校的科技社团。"],
+        ["goal", "我希望明年能评上高级职称。"]
+      ]
+    },
+    "agents_nested.md": {
+      "client": "codex",
+      "duplicates": 0,
+      "items": [
+        ["identity", "职业：UI 设计师，自由职业"],
+        ["identity", "所在城市：厦门"],
+        ["preference", "语言：中文"],
+        ["preference", "主力用 Figma"],
+        ["preference", "动效用 Principle"],
+        ["preference", "配色：偏好低饱和度"],
+        ["project", "给一家咖啡品牌做全套视觉，11 月交稿"],
+        ["project", "在准备个人作品集网站"],
+        ["goal", "三年内开一家自己的设计工作室"]
+      ]
+    },
+    "dup_heavy.md": {
+      "client": "opencode",
+      "duplicates": 4,
+      "items": [
+        ["preference", "回答简洁，先说结论"],
+        ["preference", "用 Markdown 输出表格"],
+        ["preference", "示例代码用 TypeScript"],
+        ["project", "在做一个开源的番茄钟应用 tomato-timer"]
+      ]
+    }
+  }
+}
