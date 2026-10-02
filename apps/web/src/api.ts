@@ -100,6 +100,8 @@ export type AccessDetail = AccessEvent & {
   }
 }
 
+export type DesktopPrefs = { notifications: boolean; shortcut: string; shortcutRegistered: boolean; notificationsSupported: boolean }
+
 export type TrayStatus = {
   service: { ok: boolean; embeddings_loaded: boolean }
   pending: { count: number; latest_at: string | null }
@@ -125,6 +127,12 @@ declare global {
       windowAction?: (action: "minimize" | "maximize" | "close") => void
       maximized?: () => boolean
       onMaximized?: (listener: (value: boolean) => void) => () => void
+      onFocusSearch?: (listener: () => void) => () => void
+      onNavigate?: (listener: (route: string) => void) => () => void
+      onFlyoutShown?: (listener: (proposalId: string) => void) => () => void
+      flyout?: { hide: () => void; openMain: (route?: string) => void }
+      prefs?: () => DesktopPrefs | null
+      setPrefs?: (patch: Partial<Pick<DesktopPrefs, "notifications" | "shortcut">>) => Promise<DesktopPrefs | null>
     }
   }
 }

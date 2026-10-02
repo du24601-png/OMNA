@@ -88,6 +88,11 @@ export function MemoriesPage({ tick, online, paused, filter, onFilter, onCompose
     if (id === selected || canLeave()) setSelected(id)
   }
   useEffect(() => {
+    const focusSearch = () => { searchRef.current?.focus(); searchRef.current?.select() }
+    window.addEventListener("omna:focus-search", focusSearch)
+    return () => window.removeEventListener("omna:focus-search", focusSearch)
+  }, [])
+  useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && (event.key === "k" || event.key === "K")) {
         event.preventDefault()

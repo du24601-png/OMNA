@@ -1,12 +1,13 @@
-import { Database, FolderArchive, Monitor, Moon, Palette, Sparkles, Sun, Trash2 } from "lucide-react"
+import { Bell, Database, FolderArchive, Monitor, Moon, Palette, Sparkles, Sun, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { ApiError, api, explain, type SettingsView } from "./api"
 import { loadTheme, saveTheme, type ThemeMode } from "./theme"
 import { canLeave, Notice, ResourceNotice, useResource, useUnsaved } from "./ui"
 
-type Section = "appearance" | "model" | "library" | "backup" | "reset"
+type Section = "appearance" | "desktop" | "model" | "library" | "backup" | "reset"
 const NAV: [Section, string, typeof Sun][] = [
   ["appearance", "外观", Palette],
+  ...(window.omna?.prefs ? [["desktop", "通知与快捷键", Bell] as [Section, string, typeof Sun]] : []),
   ["model", "提取模型", Sparkles],
   ["library", "本机数据", Database],
   ["backup", "备份", FolderArchive],
@@ -24,7 +25,7 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
         <div role="tablist" aria-label="设置分区">{NAV.map(([id, label, Glyph]) => <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => { if (section === id || canLeave()) setSection(id) }}><Glyph size={16} strokeWidth={1.75} aria-hidden="true"/>{label}</button>)}</div>
       </div>
       <div className="settings-pane" role="tabpanel">
-        {section === "appearance" ? <Appearance/> : <>
+        {section === "appearance" ? <Appearance/> : section === "desktop" ? <DesktopPrefsPane/> : <>
           <ResourceNotice resource={resource}/>
           {resource.data && <SettingsForm section={section} initial={resource.data} onChanged={() => { resource.reload(); onChanged() }}/>}
         </>}
@@ -239,6 +240,41 @@ function Appearance() {
         </div>
         </div>
       </section>
+  </div>
+}
+
+function DesktopPrefsPane() {
+  const [prefs, setPrefs] = useState(() => window.omna?.prefs?.() ?? null)
+  const [draft, setDraft] = useState(prefs?.shortcut ?? "")
+  const [error, setError] = useState("")
+  if (!prefs) return <div><h2>通知与快捷键</h2><p className="helper">只有桌面版能设置。</p></div>
+  async function save(patch: { notifications?: boolean; shortcut?: string }) {
+    setError("")
+    const next = await window.omna?.setPrefs?.(patch)
+    if (!next) { setError("没有保存成功，请重试。"); return }
+    setPrefs(next)
+    setDraft(next.shortcut)
+    if (patch.shortcut !== undefined && !next.shortcutRegistered) setError("这个快捷键没能注册，可能被其他软件占用了。换一个试试。")
+  }
+  const label = (value: string) => value.replace("CommandOrControl", "Ctrl").split("+").join(" ")
+  return <div>
+    <h2>通知与快捷键</h2>
+    {error && <Notice tone="error">{error}</Notice>}
+    <section className="settings-section">
+      <p className="settings-section-label">通知</p>
+      <div className="settings-card">
+        <label className="settings-row"><span className="settings-row-label">Agent 提出建议时弹出系统通知<br/><small className="helper">30 秒内的多条合成一条；关掉后托盘的小绿点仍会提醒</small></span><input type="checkbox" checked={prefs.notifications} disabled={!prefs.notificationsSupported} onChange={event => void save({ notifications: event.target.checked })}/></label>
+      </div>
+    </section>
+    <section className="settings-section">
+      <p className="settings-section-label">全局快捷键</p>
+      <div className="settings-card">
+        <div className="settings-row">
+          <span className="settings-row-label">打开主窗口并聚焦搜索<br/><small className="helper">{prefs.shortcutRegistered ? `当前：${label(prefs.shortcut)}` : `${label(prefs.shortcut)} 没能注册，可能被其他软件占用`}</small></span>
+          <div className="settings-row-side"><input aria-label="快捷键" value={draft} onChange={event => setDraft(event.target.value)} placeholder="CommandOrControl+Shift+M"/><button className="button" type="button" disabled={!draft.trim() || draft === prefs.shortcut} onClick={() => void save({ shortcut: draft })}>保存</button></div>
+        </div>
+      </div>
+    </section>
   </div>
 }
 

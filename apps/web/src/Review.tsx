@@ -261,7 +261,7 @@ function CategoryTag({ category }: { category: string }) {
   return <span className="inbox-tag"><Icon name={icon} />{categoryLabel(category)}</span>
 }
 
-function classify(item: Proposal, content: string, memories: Memory[], ready: boolean): Lane {
+export function classify(item: Proposal, content: string, memories: Memory[], ready: boolean): Lane {
   if (item.target_id) return "update"
   if (content.length > 2000) return "long"
   if (!ready) return "unchecked"

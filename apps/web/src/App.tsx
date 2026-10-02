@@ -42,6 +42,22 @@ export function App() {
     return () => window.removeEventListener("hashchange", onHash)
   }, [page])
   useEffect(() => {
+    const stopNavigate = window.omna?.onNavigate?.(target => {
+      if (!canLeave()) return
+      if (target === "review") { setFilter("pending"); setPage("memories"); history.replaceState(null, "", "#/review") }
+      else if (target === "settings" || target === "agents") { setPage(target); history.replaceState(null, "", `#/${target}`) }
+      else { setPage("memories"); history.replaceState(null, "", "#/") }
+      refresh()
+    })
+    const stopSearch = window.omna?.onFocusSearch?.(() => {
+      if (page !== "memories" && !canLeave()) return
+      setPage("memories")
+      history.replaceState(null, "", filter === "pending" ? "#/review" : "#/")
+      window.setTimeout(() => window.dispatchEvent(new Event("omna:focus-search")), 0)
+    })
+    return () => { stopNavigate?.(); stopSearch?.() }
+  }, [page, filter])
+  useEffect(() => {
     if (!authed) return
     let alive = true, inflight = false
     const poll = async () => {
