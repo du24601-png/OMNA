@@ -42,22 +42,44 @@ export function Flyout() {
   const [focus, setFocus] = useState<string | null>(null)
   // The suggestion a notification pointed at; shown even when it is not among the first three.
   const [pinned, setPinned] = useState<string | null>(null)
+  const [locating, setLocating] = useState(false)
+  const requestedTarget = useRef<string | null>(null)
+  const loadVersion = useRef(0)
+  const loading = useRef(false)
   const listRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState("")
   const [offline, setOffline] = useState(false)
   const [busy, setBusy] = useState(false)
   const keys = useRef(new Map<string, string>())
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
+    if (loading.current && !force) return
+    const version = ++loadVersion.current
+    loading.current = true
     try {
       const [nextStatus, proposals, memories] = await Promise.all([api.status(), api.proposals(), api.memories({ state: "current", limit: 50 })])
+      if (version !== loadVersion.current) return
       setStatus(nextStatus)
       setPending(proposals.proposals)
       setLibrary(memories.items)
       setHidden(old => old.filter(id => proposals.proposals.some(item => item.id === id)))
       setOffline(false)
+      const target = requestedTarget.current
+      if (target) {
+        requestedTarget.current = null
+        setLocating(false)
+        setFocus(target)
+        if (proposals.proposals.some(item => item.id === target)) setError("")
+        else {
+          setPinned(null)
+          setError("这条建议已处理或不存在。请选择其他建议，或打开主窗口核对。")
+        }
+      }
     } catch (err) {
+      if (version !== loadVersion.current) return
       setOffline(true)
       setError(explain(err))
+    } finally {
+      if (version === loadVersion.current) loading.current = false
     }
   }, [])
   useEffect(() => {
@@ -65,20 +87,23 @@ export function Flyout() {
     const timer = window.setInterval(() => { if (document.visibilityState === "visible") void load() }, POLL_MS)
     const stop = window.omna?.onFlyoutShown?.(id => {
       setError("")
-      if (id) { setFocus(id); setPinned(id) }
+      requestedTarget.current = id || null
+      setLocating(!!id)
+      setFocus(id || null)
+      setPinned(id || null)
       // Keys act only while the list has focus, so give it focus on every show.
       listRef.current?.focus()
-      void load()
+      void load(true)
     })
-    return () => { clearInterval(timer); stop?.() }
+    return () => { ++loadVersion.current; loading.current = false; clearInterval(timer); stop?.() }
   }, [load])
   const shown = (pending ?? []).filter(item => !hidden.includes(item.id))
   const visible = visibleRows(shown, pinned)
-  const current = visible.find(item => item.id === focus) ?? visible[0]
+  const current = locating ? undefined : focus ? visible.find(item => item.id === focus) : visible[0]
   const ready = library !== null
   const lane = (item: Proposal) => classify(item, item.payload.content.trim(), library ?? [], ready)
   async function decide(item: Proposal, decision: "accept" | "reject") {
-    if (busy) return
+    if (busy || locating || requestedTarget.current) return
     setError("")
     setHidden(old => [...old, item.id])
     setFocus(null)
@@ -90,7 +115,7 @@ export function Flyout() {
       const body = decision === "accept" ? { decision, content: item.payload.content } : { decision }
       const result = await api.decide(item.id, body, key)
       if (result.status !== "accepted" && result.status !== "rejected") throw new Error("服务没有确认结果，请到主窗口核对。")
-      void load()
+      void load(true)
     } catch (err) {
       setHidden(old => old.filter(id => id !== item.id))
       setFocus(item.id)
@@ -118,7 +143,7 @@ export function Flyout() {
     return () => window.removeEventListener("keydown", onKey)
   }, [])
   function onListKey(event: React.KeyboardEvent) {
-    if (event.ctrlKey || event.metaKey || event.altKey) return
+    if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey || locating || requestedTarget.current) return
     const index = visible.findIndex(item => item.id === current?.id)
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       const next = visible[event.key === "ArrowDown" ? index + 1 : index - 1]
@@ -147,16 +172,17 @@ export function Flyout() {
       : <div className="flyout-card"><div><strong>{reads ? `今天被读取 ${reads.total} 次` : "今天被读取 — 次"}</strong><p>{reads && reads.agents.length ? reads.agents.map(agent => `${agent.name} ${agent.count}`).join(" · ") : "今天还没有 Agent 读取"}</p></div></div>}
     <div className="flyout-section"><span>待确认 {shown.length || ""}</span>{shown.length > 0 && <button type="button" className="flyout-link" onClick={() => openMain("review")}>全部</button>}</div>
     <div className="flyout-list" ref={listRef} tabIndex={0} role="group" aria-label="待确认：↑↓ 选择，Y 记住，N 忽略" onKeyDown={onListKey}>
+      {locating && <p className="flyout-empty" role="status">正在定位这条建议…</p>}
       {pending === null && !offline && <p className="flyout-empty">正在载入…</p>}
       {pending !== null && !shown.length && <p className="flyout-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>没有要你确认的</p>}
       {visible.map(item => {
         const quick = lane(item) === "quick"
         const update = !!item.target_id
-        return <div key={item.id} className={`flyout-row${item.id === current?.id ? " focused" : ""}`} onMouseEnter={() => setFocus(item.id)}>
+        return <div key={item.id} className={`flyout-row${item.id === current?.id ? " focused" : ""}`} onMouseEnter={() => { if (!locating) setFocus(item.id) }}>
           <SourceMark origin={requesterOf(item)} compact/>
           <div className="flyout-copy"><p>{item.payload.content}</p><small>{requesterOf(item).name} · {update ? "修改" : "新增"}{categoryLabel(item.payload.category)}</small></div>
           {quick
-            ? <><button type="button" className="flyout-no" aria-label="忽略" title="忽略 (N)" onClick={() => void decide(item, "reject")}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button type="button" className="flyout-ok" aria-label="记住" title="记住 (Y)" onClick={() => void decide(item, "accept")}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></>
+            ? <><button type="button" className="flyout-no" disabled={busy || locating} aria-label="忽略" title="忽略 (N)" onClick={() => void decide(item, "reject")}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button type="button" className="flyout-ok" disabled={busy || locating} aria-label="记住" title="记住 (Y)" onClick={() => void decide(item, "accept")}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></>
             : <button type="button" className="flyout-more" onClick={() => openMain("review")}>{update ? "看差异" : "去确认"}</button>}
         </div>
       })}

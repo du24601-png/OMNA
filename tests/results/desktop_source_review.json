@@ -1,0 +1,106 @@
+{
+  "task": "Desktop shell, flyout and notification source review",
+  "date": "2026-10-03",
+  "base_commit": "b01d12e",
+  "status": "REVIEW_COMPLETE; ALL_3_FINDINGS_RESOLVED_IN_FOLLOWUP",
+  "scope": "Code review and synthetic reproductions. Native acceptance deferred at the user's request; no icon behavior changes and no business-code changes in this review.",
+  "reviewed": [
+    "apps/desktop/src/main.cjs",
+    "apps/desktop/src/preload.cjs",
+    "apps/desktop/src/tray-icons.cjs (read only)",
+    "apps/desktop/electron-builder.yml",
+    "apps/web/src/Flyout.tsx",
+    "apps/web/src/App.tsx (desktop events)",
+    "apps/web/src/Settings.tsx (desktop preferences)",
+    "server/zhiwo/services/review.py (notification since filtering)",
+    "server/zhiwo/services/status.py"
+  ],
+  "findings": [
+    {
+      "id": "notification-target-not-loaded",
+      "priority": "P1",
+      "status": "RESOLVED_CODE_REGRESSION",
+      "file": "apps/web/src/Flyout.tsx",
+      "line": 77,
+      "trigger": "The flyout already cached p1-p3. onFlyoutShown receives p5, but the refreshed proposal response is delayed. Press Y immediately.",
+      "cause": "Focus is set to p5 before loading completes; current falls back to visible[0] when p5 is absent. The cached library still classifies p1 as quick.",
+      "expected": "Do not decide another proposal while the requested target is loading.",
+      "observed": [
+        {
+          "id": "p1",
+          "decision": "accept"
+        }
+      ],
+      "recommendation": "Keep the notified target pending until it is loaded; disable decision keys during that interval and show a clear state if the target no longer exists.",
+      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/delayed-notification-target.png"
+    },
+    {
+      "id": "nested-button-shortcut-target",
+      "priority": "P1",
+      "status": "RESOLVED_CODE_REGRESSION",
+      "file": "apps/web/src/Flyout.tsx",
+      "line": 120,
+      "trigger": "Focus the second row's Remember button with the keyboard and press Y while the selected row remains p1.",
+      "cause": "The row button's keydown event bubbles to onListKey. The handler does not check the event target, and chooses the list current rather than the focused button's proposal.",
+      "expected": "List shortcuts do not decide a different row when a child button is focused.",
+      "observed": [
+        {
+          "id": "p1",
+          "decision": "accept"
+        }
+      ],
+      "recommendation": "Restrict list shortcuts to the list focus target; keep Enter/Space and click for the explicit row buttons.",
+      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/row-button-focus.png"
+    },
+    {
+      "id": "notification-fetch-cursor-race",
+      "priority": "P2",
+      "status": "RESOLVED_CODE_REGRESSION",
+      "file": "apps/desktop/src/main.cjs",
+      "line": 559,
+      "trigger": "Status snapshot reports T1. Before the subsequent since fetch completes, p2 at T2 arrives and is returned alongside p1. The next status poll reports T2 and fetches p2 again.",
+      "cause": "The cursor advances only to the status snapshot T1, while the queued results include newer rows; the queue does not deduplicate by proposal id.",
+      "expected": "Two unique proposals are counted once each.",
+      "observed": "3 条新建议等你确认",
+      "recommendation": "Deduplicate queued/announced proposal ids and align the cursor with the successfully fetched records without advancing it after failures.",
+      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json"
+    }
+  ],
+  "validation": [
+    {
+      "command": "node C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/repro.cjs",
+      "result": "All 3 defect reproductions observed",
+      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json",
+      "boundary": "Actual current React flyout in headless Edge with synthetic HTTP and window.omna substitutes; actual Electron entrypoint executed with VM platform/IO substitutes. No native acceptance."
+    },
+    {
+      "command": "node --test tests/desktop_failure.harness.cjs tests/desktop_flyout_position.harness.cjs",
+      "result": "11/11 PASS",
+      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/existing-tests.log",
+      "note": "The first sandboxed runner attempt was blocked with spawn EPERM before the tests executed; approved rerun succeeded."
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "cwd": "apps/web",
+      "result": "PASS, exit 0"
+    },
+    {
+      "command": "node --check apps/desktop/src/main.cjs",
+      "result": "PASS, exit 0"
+    },
+    {
+      "command": "node --check apps/desktop/src/preload.cjs",
+      "result": "PASS, exit 0"
+    }
+  ],
+  "references": [
+    "https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event",
+    "https://www.electronjs.org/docs/latest/api/browser-window"
+  ],
+  "native_acceptance": "Deferred at user request; earlier native evidence remains historical.",
+  "icon_changes": "NOT_PERFORMED",
+  "business_code_changes": "NOT_PERFORMED_IN_THIS_REVIEW",
+  "commit_or_push": "NOT_PERFORMED",
+  "next_step": "All three findings were fixed and verified in desktop_source_fixes.json; native acceptance remains deferred.",
+  "resolution_evidence": "tests/results/desktop_source_fixes.json"
+}

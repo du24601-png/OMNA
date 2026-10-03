@@ -1,0 +1,196 @@
+{
+  "task": "Native desktop acceptance and right-side tray flyout placement fix",
+  "user_local_date": "2026-10-03",
+  "base_commit": "b01d12e",
+  "overall_status": "PARTIAL: placement fix accepted natively, several native flyout behaviors PASS, remaining tray/notification checks NOT_RUN",
+  "environment": "Native Windows, Electron 44.4.5, Computer Use @oai/sky, actual Electron preload, current rebuilt web assets",
+  "isolation": {
+    "port": 8785,
+    "data": "new temporary synthetic library",
+    "connect_clicked": false,
+    "real_client_config_write": false,
+    "external_extractor_model_calls": false
+  },
+  "placement_fix": {
+    "status": "DONE",
+    "reported_failure": "User clicked the bottom-right tray icon; flyout appeared at bottom-left",
+    "cause": "The old placement branch treated any tray bounds inside the work area as a side taskbar; overflow bounds near the right therefore forced x to the left work-area edge",
+    "change": "Determine taskbar edge from the display bounds and work area before using icon bounds; retain existing clamping and top/left/right placement",
+    "before_tests": {
+      "passed": 4,
+      "failed": 3,
+      "reproductions": [
+        {
+          "case": "right overflow",
+          "actual": [
+            12,
+            508
+          ],
+          "expected": [
+            1540,
+            508
+          ]
+        },
+        {
+          "case": "negative-origin monitor",
+          "actual": [
+            -1908,
+            508
+          ],
+          "expected": [
+            -380,
+            508
+          ]
+        },
+        {
+          "case": "150 percent DIP",
+          "actual": [
+            12,
+            396
+          ],
+          "expected": [
+            1327,
+            396
+          ]
+        }
+      ]
+    },
+    "after_tests": {
+      "placement": "7/7 PASS",
+      "existing_desktop": "4/4 PASS",
+      "total": "11/11 PASS",
+      "command": "node --test tests/desktop_failure.harness.cjs tests/desktop_flyout_position.harness.cjs",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\position-tests.log"
+    },
+    "native_retest": {
+      "status": "PASS",
+      "user_confirmation": "现在在右下角",
+      "observed_page": "http://127.0.0.1:8785/#/flyout?material=1",
+      "screenshot_origin": [
+        1847,
+        726
+      ],
+      "screenshot_size": [
+        372,
+        525
+      ],
+      "evidence": "Computer Use screenshot and user confirmation in this conversation; screenshot payloads not exported"
+    },
+    "modified_code": "apps/desktop/src/main.cjs:418",
+    "regression": "tests/desktop_flyout_position.harness.cjs"
+  },
+  "native_checks": [
+    {
+      "name": "Onboarding skips without Connect; main hides to tray",
+      "status": "PASS"
+    },
+    {
+      "name": "Native flyout brand and pale gray checkmark buttons",
+      "status": "PASS",
+      "evidence": "Actual screenshot in conversation"
+    },
+    {
+      "name": "Initial native tray show focuses list sufficiently for Up/Down/Y without clicking",
+      "status": "PASS",
+      "evidence": "Down selected the second row, Up returned to first, Y accepted exactly the Vitest suggestion; before-keyboard.json and after-y.json"
+    },
+    {
+      "name": "Y/N on Pause, Open main, Settings leave proposals and memories unchanged",
+      "status": "PASS",
+      "evidence": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-y.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-n.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-y.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-n.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-y.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-n.json"
+      ],
+      "focus_evidence": "Keyboard Tab navigation; each actual button had visible focus outline in native screenshot"
+    },
+    {
+      "name": "Return to list; N rejects and Y accepts; three suggestions processed",
+      "status": "PASS",
+      "evidence": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-native-n.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-three-decisions.json"
+      ],
+      "result": "2 accepted, 1 rejected, 1 remaining; memory count 6 to 8"
+    },
+    {
+      "name": "Pause sharing and resume through actual native flyout",
+      "status": "PASS",
+      "evidence": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\paused.json",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\resumed.json"
+      ],
+      "result": "UI shows paused with 60 minutes, resume returns running; API sharing state agrees"
+    },
+    {
+      "name": "Escape actually hides native flyout",
+      "status": "PASS",
+      "evidence": "sky.list_windows returned no Electron window after Escape"
+    },
+    {
+      "name": "Tray icons in light/dark taskbars, 16px and 150 percent",
+      "status": "NOT_RUN",
+      "reason": "Taskbar and overflow shell are not targetable in Computer Use; DIP regression is code-only evidence"
+    },
+    {
+      "name": "Green tray center and breathing animation within 5 seconds",
+      "status": "NOT_RUN",
+      "reason": "Synthetic read succeeded, but taskbar icon pixels/timing could not be captured"
+    },
+    {
+      "name": "Native tray hover tooltip appears",
+      "status": "PASS",
+      "evidence": {
+        "type": "Human confirmation in this conversation",
+        "user_confirmation": "这个确认存在。",
+        "scope": "Tooltip existence only; remaining-minute content and countdown accuracy were not separately confirmed"
+      }
+    },
+    {
+      "name": "Paused tooltip remaining-minute content and countdown accuracy",
+      "status": "NOT_RUN",
+      "reason": "The user confirmed tooltip existence; displayed minutes and countdown accuracy were not separately checked"
+    },
+    {
+      "name": "Pause/resume tray center",
+      "status": "NOT_RUN",
+      "reason": "Native UI/API pause succeeded; tray center visual not accessible"
+    },
+    {
+      "name": "System notification delivery and clicking it to locate the suggestion",
+      "status": "NOT_RUN",
+      "observation": "Two synthetic propose commands succeeded with readable Chinese; no targetable toast or visible notification was captured",
+      "reason": "Without a verifiable native toast, delivery and click cannot be accepted or classified as product failure"
+    },
+    {
+      "name": "Outside click closes native flyout; repeated show restores list focus",
+      "status": "NOT_RUN",
+      "reason": "Escape hides successfully; hidden flyout is no longer returned by the window API, so another human tray click is needed for this separate scenario"
+    }
+  ],
+  "build": {
+    "status": "PASS",
+    "command": "node node_modules/typescript/bin/tsc --noEmit; node node_modules/vite/bin/vite.js build",
+    "note": "pnpm wrapper refused existing dependency junction; used installed compiler/build CLI without dependency changes"
+  },
+  "documentation": [
+    "README.md",
+    "ARCHITECTURE.md"
+  ],
+  "references": [
+    "https://www.electronjs.org/docs/latest/api/tray",
+    "https://www.electronjs.org/docs/latest/api/screen"
+  ],
+  "runtime_at_handoff": {
+    "state": "Development app retained hidden in tray for further native checks",
+    "port": 8785,
+    "synthetic_user_data": "C:\\Users\\Ryan D\\AppData\\Local\\Temp\\omna-native-01bf32f96767450c9942b4b8bf186195",
+    "sharing": "resumed",
+    "pending_suggestions": 1
+  },
+  "commit_or_push": "NOT_PERFORMED",
+  "next_step": "Complete the remaining native tray visual, notification and outside-click scenarios with human tray access"
+}

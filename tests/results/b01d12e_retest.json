@@ -1,0 +1,393 @@
+{
+  "task": "b01d12e supplement, including 2c1c421 file assignment items 1-5",
+  "base_commit": "b01d12e7fb678fb38ad114c7d53f72a126ebb89e",
+  "status": "DONE for requested web and harness supplement; native acceptance NOT_RUN",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "environment": {
+    "browser": "headless Microsoft Edge, external Playwright 1.62.1",
+    "routing": "Browser plugin not available; user explicitly requested headless browser",
+    "service": "tests/dev_onboarding.py, test mode, synthetic data, real local Mnemosyne",
+    "file_viewport": [
+      1040,
+      680
+    ],
+    "flyout_viewport": [
+      368,
+      520
+    ],
+    "desktop_bridge": "mock window.omna; onFlyoutShown listeners called with the fifth API-ordered suggestion id",
+    "model": "existing local embedding cache with HF_HUB_OFFLINE=1; extractor disabled"
+  },
+  "file_assignment_items": [
+    {
+      "item": 1,
+      "status": "PASS",
+      "scenario": "Only CLAUDE.md; connect both clients in one onboarding action; exactly one Claude Code card",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\ui-results.json"
+    },
+    {
+      "item": 2,
+      "status": "PASS",
+      "scenario": "Both instruction files; two correctly assigned cards; each organizer allows its client; dev_onboarding propose from both clients reaches its own card; remember total is 2 and exactly 2 memories are published",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\ui-results.json"
+    },
+    {
+      "item": 3,
+      "status": "PASS",
+      "scenario": "Connect OpenCode through Agent page first, then Claude Code in onboarding; CLAUDE.md remains assigned to OpenCode, no Claude Code card",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\ui-results.json"
+    },
+    {
+      "item": 4,
+      "status": "PASS",
+      "scenario": "Fresh library with both instruction files; Agent page OpenCode import card uses its own AGENTS.md",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\ui-results.json"
+    },
+    {
+      "item": 5,
+      "status": "PASS",
+      "command": "ZHIWO_PYTHON=D:\\zhiwo\\server\\.venv\\Scripts\\python.exe; ZHIWO_FASTEMBED_CACHE_DIR=D:\\zhiwo\\experiments\\kernel_spike\\runs\\p0_3\\fastembed-cache; python -X utf8 tests/onboarding_batches.py",
+      "passed": 38,
+      "files_checks": 4,
+      "flyout_checks": 3,
+      "evidence": "tests/results/onboarding_batches.json"
+    }
+  ],
+  "flyout": {
+    "status": "PASS",
+    "passed": 21,
+    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\ui-results.json",
+    "checks": [
+      {
+        "name": "isolated service: synthetic home, test mode, offline local model, no extractor",
+        "ok": true,
+        "detail": {
+          "test_mode": true,
+          "embeddings_loaded": true,
+          "extractor_configured": false
+        }
+      },
+      {
+        "name": "prepare exactly five pending suggestions",
+        "ok": true,
+        "detail": [
+          {
+            "id": "ca189b56-8d33-4030-a627-3be545745178",
+            "content": "习惯先写任务清单再开始工作"
+          },
+          {
+            "id": "602e6120-20c8-4359-b9e9-79155a86fd8b",
+            "content": "当前项目是个人食谱管理工具"
+          },
+          {
+            "id": "669cfbb1-59b0-4e7e-b741-6af6bffc46df",
+            "content": "正在学习意大利语"
+          },
+          {
+            "id": "b027a372-1635-45e9-8f35-b511ea8be0c0",
+            "content": "喜欢用深色编辑器"
+          },
+          {
+            "id": "a7d63aa5-19d8-4979-9a1e-c0f6ee154353",
+            "content": "每周六上午参加社区羽毛球活动"
+          }
+        ]
+      },
+      {
+        "name": "fifth suggestion is the third selected row",
+        "ok": true,
+        "detail": {
+          "targetId": "a7d63aa5-19d8-4979-9a1e-c0f6ee154353",
+          "visible": [
+            "习惯先写任务清单再开始工作",
+            "当前项目是个人食谱管理工具",
+            "每周六上午参加社区羽毛球活动"
+          ]
+        }
+      },
+      {
+        "name": "show focuses list before any click",
+        "ok": true
+      },
+      {
+        "name": "Y accepts precisely the fifth suggestion",
+        "ok": true,
+        "detail": {
+          "before": [
+            {
+              "id": "602e6120-20c8-4359-b9e9-79155a86fd8b",
+              "status": "pending",
+              "decision": null,
+              "content": "当前项目是个人食谱管理工具"
+            },
+            {
+              "id": "669cfbb1-59b0-4e7e-b741-6af6bffc46df",
+              "status": "pending",
+              "decision": null,
+              "content": "正在学习意大利语"
+            },
+            {
+              "id": "a7d63aa5-19d8-4979-9a1e-c0f6ee154353",
+              "status": "pending",
+              "decision": null,
+              "content": "每周六上午参加社区羽毛球活动"
+            },
+            {
+              "id": "b027a372-1635-45e9-8f35-b511ea8be0c0",
+              "status": "pending",
+              "decision": null,
+              "content": "喜欢用深色编辑器"
+            },
+            {
+              "id": "ca189b56-8d33-4030-a627-3be545745178",
+              "status": "pending",
+              "decision": null,
+              "content": "习惯先写任务清单再开始工作"
+            }
+          ],
+          "after": [
+            {
+              "id": "602e6120-20c8-4359-b9e9-79155a86fd8b",
+              "status": "pending",
+              "decision": null,
+              "content": "当前项目是个人食谱管理工具"
+            },
+            {
+              "id": "669cfbb1-59b0-4e7e-b741-6af6bffc46df",
+              "status": "pending",
+              "decision": null,
+              "content": "正在学习意大利语"
+            },
+            {
+              "id": "a7d63aa5-19d8-4979-9a1e-c0f6ee154353",
+              "status": "accepted",
+              "decision": "accept",
+              "content": "每周六上午参加社区羽毛球活动"
+            },
+            {
+              "id": "b027a372-1635-45e9-8f35-b511ea8be0c0",
+              "status": "pending",
+              "decision": null,
+              "content": "喜欢用深色编辑器"
+            },
+            {
+              "id": "ca189b56-8d33-4030-a627-3be545745178",
+              "status": "pending",
+              "decision": null,
+              "content": "习惯先写任务清单再开始工作"
+            }
+          ],
+          "memories": [
+            {
+              "id": "c4fd6f02-f344-46d2-9250-926e958faf65",
+              "content": "每周六上午参加社区羽毛球活动"
+            }
+          ]
+        }
+      },
+      {
+        "name": "button focus 暂停共享 1 小时: Y leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "暂停共享 1 小时",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "button focus 暂停共享 1 小时: N leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "暂停共享 1 小时",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "button focus 打开主窗口: Y leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "打开主窗口",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "button focus 打开主窗口: N leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "打开主窗口",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "button focus 设置: Y leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "设置",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "button focus 设置: N leaves proposals unchanged",
+        "ok": true,
+        "detail": {
+          "focused": "设置",
+          "decisionRequests": 0
+        }
+      },
+      {
+        "name": "keys on controls never call desktop actions",
+        "ok": true
+      },
+      {
+        "name": "ArrowDown selects second row after focus returns to list",
+        "ok": true
+      },
+      {
+        "name": "ArrowUp returns to first row",
+        "ok": true
+      },
+      {
+        "name": "N rejects the selected second suggestion",
+        "ok": true,
+        "detail": {
+          "rejectedId": "602e6120-20c8-4359-b9e9-79155a86fd8b",
+          "stillPendingId": "ca189b56-8d33-4030-a627-3be545745178"
+        }
+      },
+      {
+        "name": "repeat show restores focus and Y works without clicking",
+        "ok": true,
+        "detail": {
+          "acceptedId": "ca189b56-8d33-4030-a627-3be545745178"
+        }
+      },
+      {
+        "name": "repeat show from 暂停共享 1 小时 focuses list",
+        "ok": true
+      },
+      {
+        "name": "repeat show from 设置 focuses list",
+        "ok": true
+      },
+      {
+        "name": "Escape calls bridge hide even from control focus",
+        "ok": true,
+        "detail": {
+          "evidenceBoundary": "mock desktop bridge; native hiding NOT_RUN"
+        }
+      },
+      {
+        "name": "instruction contents and mtimes unchanged",
+        "ok": true,
+        "detail": {
+          "files": [
+            ".claude\\CLAUDE.md"
+          ]
+        }
+      },
+      {
+        "name": "page identity, nonblank, no framework overlay, clean console",
+        "ok": true,
+        "detail": {
+          "url": "http://127.0.0.1:65295/#/flyout",
+          "title": "OMNA",
+          "runtimeErrors": [],
+          "consoleIssues": []
+        }
+      }
+    ]
+  },
+  "desktop_harness": {
+    "status": "PASS",
+    "command": "node --test tests/desktop_failure.harness.cjs",
+    "passed": 4,
+    "failed": 0,
+    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\desktop_failure.log",
+    "test_names": [
+      "✔ service exit keeps a hidden main window hidden until tray click (34.0598ms)",
+      "✔ service exit updates an open window without taking keyboard focus (20.2255ms)",
+      "✔ startup failure still opens an actionable error window (21.6296ms)",
+      "✔ a failed suggestion fetch is tried again instead of dropping the notification (41.199ms)"
+    ]
+  },
+  "browser_qa": {
+    "passed": 52,
+    "failed": 0,
+    "page_identity_nonblank_console_overlay": "PASS in all 5 cases",
+    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\results.json",
+    "screenshots": {
+      "flyout": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\fifth-selected.png",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\after-keyboard-processing.png"
+      ],
+      "together-own": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\file-ownership.png",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\both-client-proposals-total-two.png"
+      ],
+      "earlier-opencode": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\file-ownership.png"
+      ],
+      "agent-own": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\agent-own-file.png"
+      ],
+      "together-shared": [
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\file-ownership.png",
+        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\agent-fallback-file.png"
+      ]
+    }
+  },
+  "initial_fixture_failures": {
+    "product_failure": false,
+    "evidence": [
+      "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt1\\results.json",
+      "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt2\\results.json"
+    ],
+    "repairs": [
+      "Wait for both client checkboxes before enumerating and selecting them",
+      "Use fs.realpathSync.native for both paths; TEMP 8.3 alias resolves to the same actual fake home",
+      "Reload when switching from an unfinished onboarding to Agent route in an extra shared-file fallback check; fragment-only navigation keeps onboarding state"
+    ],
+    "assertion_thresholds_unchanged": true
+  },
+  "changes": [
+    "README.md acceptance boundary updated",
+    "tests/results/onboarding_batches.json regenerated by its script",
+    "tests/results/b01d12e_retest.json added"
+  ],
+  "business_code_changes": false,
+  "cleanup": {
+    "flyout": {
+      "processes_stopped": true,
+      "temporary_data_removed": true,
+      "ports_released": true
+    },
+    "together-own": {
+      "processes_stopped": true,
+      "temporary_data_removed": true,
+      "ports_released": true
+    },
+    "earlier-opencode": {
+      "processes_stopped": true,
+      "temporary_data_removed": true,
+      "ports_released": true
+    },
+    "agent-own": {
+      "processes_stopped": true,
+      "temporary_data_removed": true,
+      "ports_released": true
+    },
+    "together-shared": {
+      "processes_stopped": true,
+      "temporary_data_removed": true,
+      "ports_released": true
+    }
+  },
+  "native_acceptance": {
+    "tray_icons_and_animation": "NOT_RUN",
+    "system_notification_delivery_and_click": "NOT_RUN",
+    "Electron_flyout_visibility_and_real_OS_focus": "NOT_RUN",
+    "reason": "explicit user scope; owner to accept native desktop"
+  },
+  "real_client_or_extractor_model_calls": "NOT_RUN",
+  "commit_or_push": "NOT_PERFORMED",
+  "next_step": "Owner performs native desktop acceptance; no scope or architecture decision needed"
+}

@@ -417,17 +417,28 @@ function main() {
 
   function placeFlyout() {
     const bounds = tray.getBounds()
-    const area = screen.getDisplayMatching(bounds).workArea
+    const display = screen.getDisplayMatching(bounds)
+    const area = display.workArea
     const [width, height] = flyout.getSize()
     const gap = 12
     let x = Math.round(bounds.x + bounds.width / 2 - width / 2)
     let y = area.y + area.height - height - gap
-    if (bounds.y + bounds.height <= area.y + 1) {
+    // An icon in Windows' tray overflow sits inside the work area. Its y
+    // coordinate cannot tell us that the taskbar is on the left or right.
+    // Use the taskbar's reserved display strip before inspecting icon bounds.
+    const bottom = area.y + area.height < display.bounds.y + display.bounds.height - 1
+    const top = area.y > display.bounds.y + 1
+    const left = area.x > display.bounds.x + 1
+    const right = area.x + area.width < display.bounds.x + display.bounds.width - 1
+    const edge = bottom ? "bottom" : top ? "top" : left ? "left" : right ? "right"
+      : bounds.y + bounds.height <= area.y + 1 ? "top"
+        : bounds.x + bounds.width <= area.x + 1 ? "left"
+          : bounds.x >= area.x + area.width - 1 ? "right" : "bottom"
+    if (edge === "top") {
       y = area.y + gap
-    } else if (bounds.y < area.y + area.height - 1) {
-      // Taskbar on the left or right edge.
+    } else if (edge === "left" || edge === "right") {
       y = Math.round(bounds.y + bounds.height / 2 - height / 2)
-      x = bounds.x >= area.x + area.width - 1 ? area.x + area.width - width - gap : area.x + gap
+      x = edge === "right" ? area.x + area.width - width - gap : area.x + gap
     }
     x = Math.min(Math.max(x, area.x + gap), area.x + area.width - width - gap)
     y = Math.min(Math.max(y, area.y + gap), area.y + area.height - height - gap)
@@ -539,14 +550,21 @@ function main() {
       if (status !== 200) return
       let items = []
       try {
-        items = JSON.parse(body).proposals || []
+        items = JSON.parse(body).proposals
+        if (!Array.isArray(items)) return
       } catch {
         return
       }
-      // Only a list that arrived and parsed moves the cursor; a failed fetch
-      // is tried again on the next poll instead of dropping that round.
-      pendingMark = latestAt
-      const fromAgents = items.filter(item => item.origin === "agent")
+      // The list can include proposals newer than the status snapshot. Move
+      // through the successfully fetched records so they are not fetched and
+      // announced again. Failed fetches still leave the cursor unchanged.
+      pendingMark = items.reduce((mark, item) => typeof item.created_at === "string" && item.created_at > mark ? item.created_at : mark, latestAt)
+      const queuedIds = new Set(noteQueue.map(item => item.id))
+      const fromAgents = items.filter(item => {
+        if (item.origin !== "agent" || queuedIds.has(item.id)) return false
+        queuedIds.add(item.id)
+        return true
+      })
       if (!fromAgents.length) return
       noteQueue.push(...fromAgents)
       if (!noteTimer) noteTimer = setTimeout(flushNotes, Math.max(0, lastNoteAt + NOTE_GAP_MS - Date.now()))

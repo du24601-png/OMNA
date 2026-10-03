@@ -695,6 +695,12 @@ kbd { font-family:inherit; font-size:11px; padding:1px 5px; border-radius:3px; b
 .mem-page .inbox-page { max-width:none; margin:0; }
 .mem-page .inbox-head { display:none; }
 .mem-page .inbox, .mem-page .inbox-note { max-width:760px; }
+.mem-page .mem-scroll:has(> .inbox-empty) { display:flex; flex-direction:column; padding-bottom:0; }
+.mem-page .inbox-empty { width:100%; }
+.mem-page .inbox-empty .inbox { flex:1; max-width:none; }
+.mem-page .inbox-empty .batch-bars { width:min(760px,100%); }
+.mem-page .inbox-empty .empty-state { flex:1; width:100%; margin:0; padding:32px; align-self:center; display:flex; flex-direction:column; justify-content:center; }
+.mem-page .inbox-empty .empty-state p { margin-bottom:0; }
 
 .settings-page { position:static; inset:auto; margin:0; width:auto; height:auto; flex:1; min-height:0; border-radius:0; display:flex; flex-direction:column; color:var(--text); --set-bg:var(--bg); --set-text:var(--text); --set-muted:var(--muted); --set-line:var(--border); --set-hover:var(--hover); --set-selected:var(--selected); --set-btn:var(--btn); --set-btn-hover:var(--btn-hover); --set-btn-active:var(--btn-active); --set-field:var(--field); }
 :root[data-mode="dark"] .settings-page { --set-bg:var(--bg); --set-text:var(--text); --set-muted:var(--muted); --set-line:var(--border); --set-hover:var(--hover); --set-selected:var(--selected); --set-btn:var(--btn); --set-btn-hover:var(--btn-hover); --set-btn-active:var(--btn-active); --set-field:var(--field); }

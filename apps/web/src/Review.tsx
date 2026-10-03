@@ -19,6 +19,7 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
   const library = memories.data?.items ?? []
   const libraryReady = memories.data !== null && !memories.error
   const pending = (resource.data?.proposals ?? []).filter(item => !finished.includes(item.id))
+  const empty = !!resource.data && !pending.length && !resource.error
   const shownKey = pending.map(item => item.id).join("\n")
   const currentId = pending.some(item => item.id === selected) ? selected : pending[0]?.id ?? null
   useEffect(() => {
@@ -68,14 +69,14 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
     onSaved()
   }
   if (resource.loading && !resource.data && !resource.error) return <InboxSkeleton />
-  return <div className="page inbox-page">
+  return <div className={`page inbox-page${empty ? " inbox-empty" : ""}`}>
     <ResourceNotice resource={resource} pending={false} />
     {memories.error && <div className="notice error inbox-note" role="alert"><div><strong>还没核对已有记忆</strong><p>{memories.error}</p></div><button className="button secondary" onClick={memories.reload}>重试</button></div>}
     {notice && <div className="notice success inbox-note" role="status"><span>{notice.text}</span>{notice.id && <button className="text-button" onClick={() => onOpen(notice.id!)}>查看正式记忆</button>}</div>}
     <div className="inbox">
       <header className="inbox-head"><h1>待确认</h1>{resource.data && <span>{pending.length}</span>}</header>
       <BatchBar proposals={pending} tick={tick} online={live} onChanged={() => { resource.reload(); onSaved() }} />
-      {resource.data && !pending.length && !resource.error && <Empty title="当前没有待确认的记忆">导入或 Agent 提出的内容，会先出现在这里。</Empty>}
+      {empty && <Empty title="当前没有待确认的记忆" />}
       {!!pending.length && <ol className="inbox-rows">
         {pending.map(item => <InboxRow key={item.id} proposal={item} library={library} libraryReady={libraryReady} focused={item.id === currentId} open={item.id === openId} online={live} command={command} onSelect={toggle => choose(item.id, toggle)} onDone={finish} />)}
       </ol>}

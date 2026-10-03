@@ -179,3 +179,31 @@ test("a failed suggestion fetch is tried again instead of dropping the notificat
   assert.equal(notices.length, 1, "the suggestion from the failed round is still announced")
   assert.match(notices[0].title, /Claude Code/)
 })
+
+for (const flushBetweenPolls of [false, true]) {
+  test(flushBetweenPolls ? "a proposal newer than the status snapshot is not announced twice" : "a status/list race counts two unique proposals as two", async () => {
+    const notices = []
+    let latest = "2099-01-01T00:00:00+00:00"
+    let items = []
+    const route = pathname => {
+      if (pathname.startsWith("/api/v1/status")) return { status: 200, body: { service: { embeddings_loaded: true }, pending: { count: 2, latest_at: latest }, recent_reads: [] } }
+      if (pathname.startsWith("/api/v1/proposals")) return { status: 200, body: { proposals: items } }
+      return null
+    }
+    const { win, intervals, timeouts } = await boot({ route, notices })
+    win.hide()
+    await new Promise(resolve => setImmediate(resolve))
+    const poll = intervals.find(callback => callback.name === "pollStatus")
+    const proposal = (id, at) => ({ id, created_at: at, origin: "agent", requester: { name: "Synthetic Agent" }, payload: { content: "合成建议 " + id } })
+    latest = "2099-01-01T00:00:05+00:00"
+    items = [proposal("p1", latest), proposal("p2", "2099-01-01T00:00:06+00:00")]
+    await poll()
+    if (flushBetweenPolls) for (const callback of timeouts.splice(0)) callback()
+    latest = "2099-01-01T00:00:06+00:00"
+    items = [items[1]]
+    await poll()
+    for (const callback of timeouts.splice(0)) callback()
+    assert.equal(notices.length, 1, "each unique suggestion is announced once")
+    assert.equal(notices[0].title, "2 条新建议等你确认")
+  })
+}
