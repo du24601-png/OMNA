@@ -116,7 +116,7 @@ Basic Memory 把记忆存成本地 Markdown 文件，人和 AI 读写同一批�
 | ![待确认页面](images/review.png) | ![我的 Agent 页面](images/agents.png) |
 
 
-截图使用合成演示数据。
+截图为 1.x 界面，使用合成演示数据；2.0 的待确认和 Agent 页面布局有变化，审核和授权规则不变。
 
 ## 6. 机会、风险和下一步
 

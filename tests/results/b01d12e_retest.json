@@ -23,25 +23,25 @@
       "item": 1,
       "status": "PASS",
       "scenario": "Only CLAUDE.md; connect both clients in one onboarding action; exactly one Claude Code card",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\ui-results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\ui-results.json"
     },
     {
       "item": 2,
       "status": "PASS",
       "scenario": "Both instruction files; two correctly assigned cards; each organizer allows its client; dev_onboarding propose from both clients reaches its own card; remember total is 2 and exactly 2 memories are published",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\ui-results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\ui-results.json"
     },
     {
       "item": 3,
       "status": "PASS",
       "scenario": "Connect OpenCode through Agent page first, then Claude Code in onboarding; CLAUDE.md remains assigned to OpenCode, no Claude Code card",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\ui-results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\ui-results.json"
     },
     {
       "item": 4,
       "status": "PASS",
       "scenario": "Fresh library with both instruction files; Agent page OpenCode import card uses its own AGENTS.md",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\ui-results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\ui-results.json"
     },
     {
       "item": 5,
@@ -56,7 +56,7 @@
   "flyout": {
     "status": "PASS",
     "passed": 21,
-    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\ui-results.json",
+    "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\ui-results.json",
     "checks": [
       {
         "name": "isolated service: synthetic home, test mode, offline local model, no extractor",
@@ -301,7 +301,7 @@
     "command": "node --test tests/desktop_failure.harness.cjs",
     "passed": 4,
     "failed": 0,
-    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\desktop_failure.log",
+    "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\desktop_failure.log",
     "test_names": [
       "✔ service exit keeps a hidden main window hidden until tray click (34.0598ms)",
       "✔ service exit updates an open window without taking keyboard focus (20.2255ms)",
@@ -313,33 +313,33 @@
     "passed": 52,
     "failed": 0,
     "page_identity_nonblank_console_overlay": "PASS in all 5 cases",
-    "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\results.json",
+    "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\results.json",
     "screenshots": {
       "flyout": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\fifth-selected.png",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\after-keyboard-processing.png"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\fifth-selected.png",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\flyout\\after-keyboard-processing.png"
       ],
       "together-own": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\file-ownership.png",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\both-client-proposals-total-two.png"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\file-ownership.png",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-own\\both-client-proposals-total-two.png"
       ],
       "earlier-opencode": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\file-ownership.png"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\earlier-opencode\\file-ownership.png"
       ],
       "agent-own": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\agent-own-file.png"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\agent-own\\agent-own-file.png"
       ],
       "together-shared": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\file-ownership.png",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\agent-fallback-file.png"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\file-ownership.png",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\together-shared\\agent-fallback-file.png"
       ]
     }
   },
   "initial_fixture_failures": {
     "product_failure": false,
     "evidence": [
-      "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt1\\results.json",
-      "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt2\\results.json"
+      "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt1\\results.json",
+      "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\b01d12e-retest\\attempt2\\results.json"
     ],
     "repairs": [
       "Wait for both client checkboxes before enumerating and selecting them",

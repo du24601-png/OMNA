@@ -51,7 +51,7 @@
       "input": {
         "pattern": "**/*"
       },
-      "output": "C:\\Users\\Ryan D\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json"
+      "output": "%USERPROFILE%\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json"
     },
     {
       "tool": "zhiwo_search_memory",
@@ -65,9 +65,9 @@
       "tool": "read",
       "status": "completed",
       "input": {
-        "filePath": "C:\\Users\\Ryan D\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json"
+        "filePath": "%USERPROFILE%\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json"
       },
-      "output": "<path>C:\\Users\\Ryan D\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json</path>\n<type>file</type>\n<content>\n1: {\n2:   \"$schema\": \"https://opencode.ai/config.json\",\n3:   \"model\": \"opencode-go/deepseek-v4-flash\",\n4:   \"mcp\": {\n5:     \"zhiwo\": {\n6:       \"type\": \"local\",\n7:       \"command\": [\n8:         \"D:\\\\zhiwo\\\\server\\\\.venv\\\\Scripts\\\\python.exe\",\n9:         \"-m\",\n10:         \"zhiwo.gateway.stdio_bridge\"\n11:       ],\n12:       \"environment\": {\n13:         \"ZHIWO_API_ORIGIN\": \"http://127.0.0.1:64645\",\n14:         \"PYTHONPATH\": \"D:\\\\zhiwo\\\\server\",\n15:         \"ZHIWO_AGENT_CREDENTIAL\": \"[re"
+      "output": "<path>%USERPROFILE%\\AppData\\Local\\Temp\\ae-oc-E1-bc73y58h\\run\\opencode.json</path>\n<type>file</type>\n<content>\n1: {\n2:   \"$schema\": \"https://opencode.ai/config.json\",\n3:   \"model\": \"opencode-go/deepseek-v4-flash\",\n4:   \"mcp\": {\n5:     \"zhiwo\": {\n6:       \"type\": \"local\",\n7:       \"command\": [\n8:         \"D:\\\\zhiwo\\\\server\\\\.venv\\\\Scripts\\\\python.exe\",\n9:         \"-m\",\n10:         \"zhiwo.gateway.stdio_bridge\"\n11:       ],\n12:       \"environment\": {\n13:         \"ZHIWO_API_ORIGIN\": \"http://127.0.0.1:64645\",\n14:         \"PYTHONPATH\": \"D:\\\\zhiwo\\\\server\",\n15:         \"ZHIWO_AGENT_CREDENTIAL\": \"[re"
     }
   ],
   "stderr_tail": "",

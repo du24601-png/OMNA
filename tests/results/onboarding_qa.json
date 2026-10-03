@@ -349,7 +349,7 @@
     ],
     "runtime_data_and_fake_home_removed": true,
     "initial_failed_temp_removed": true,
-    "evidence_retained_outside_repo": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ff47-2c83-7633-81b6-f5bb9113ff24\\omna-qa",
+    "evidence_retained_outside_repo": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ff47-2c83-7633-81b6-f5bb9113ff24\\omna-qa",
     "port_8765_untouched": true
   },
   "git": {

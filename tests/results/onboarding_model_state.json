@@ -81,7 +81,7 @@
   ],
   "browser": "headless Microsoft Edge via external Playwright",
   "synthetic_health_only": true,
-  "screenshots": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\model-state",
+  "screenshots": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\model-state",
   "removed_obsolete_assertions": [
     "4-step guide direct-file / ChatGPT import navigation",
     "guide extractor disclosure and import availability",

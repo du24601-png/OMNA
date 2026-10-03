@@ -232,7 +232,7 @@ P3.3 的实现：提取地址和模型名写在 `settings` 表。密钥用 Windo
 | 目录 | 内容 |
 | --- | --- |
 | `PRODUCT.md`、`ARCHITECTURE.md`、`AGENTS.md`、`README.md` | 产品范围、架构、开发规则与使用说明，不额外维护另一套 PRD/架构/进度 |
-| `apps/web/` | 四页界面、圆角顶栏、设置弹窗、客户端连接 UI、来源标志、`Skeleton` 加载占位、API client；品牌资源在 `brand/` 与 `apps/web/public/sources/` |
+| `apps/web/` | 主窗口三页（记忆、Agent、设置）、托盘小窗 `#/flyout`、新手引导 `#/onboarding`、连接导入卡、待确认批量横条、批次逻辑 `batch.ts`、客户端连接 UI、来源标志、API client；品牌资源在 `brand/` 与 `apps/web/public/sources/` |
 | `apps/desktop/` | Electron main/preload、打包与服务启动 |
 | `server/zhiwo/api/`、`gateway/` | Owner HTTP API、MCP bridge 与 Agent 入口 |
 | `server/zhiwo/services/`、`adapters/` | 产品逻辑、Mnemosyne 和提取模型适配 |

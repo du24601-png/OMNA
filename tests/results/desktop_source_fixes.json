@@ -29,8 +29,8 @@
       "command": "node --test tests/desktop_failure.harness.cjs tests/desktop_flyout_position.harness.cjs",
       "before": "11 PASS, 2 FAIL: wrong unique count and second notification",
       "after": "13/13 PASS",
-      "before_evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/notes-before.log",
-      "after_evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/notes-after.log",
+      "before_evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/notes-before.log",
+      "after_evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/notes-after.log",
       "boundary": "Actual Electron entrypoint with synthetic platform/IO; not native tray acceptance."
     },
     {
@@ -38,10 +38,10 @@
       "before": "1 PASS, 5 FAIL; the initial stale-response fixture lacked a request-start barrier, then was corrected and independently failed on p1 versus expected p4",
       "after": "6/6 PASS",
       "before_evidence": [
-        "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/flyout-before.log",
-        "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/stale-before.log"
+        "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/flyout-before.log",
+        "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/stale-before.log"
       ],
-      "after_evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/flyout-after.log",
+      "after_evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/flyout-after.log",
       "boundary": "Current Vite source in real headless Edge; all APIs and window.omna are synthetic, so no real memory, client configuration or native notification is exercised."
     },
     {
@@ -53,7 +53,7 @@
       "command": "node node_modules/vite/bin/vite.js build",
       "cwd": "apps/web",
       "result": "PASS, exit 0; existing 500 kB chunk advisory only",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/build.log"
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-fixes/build.log"
     },
     {
       "command": "node --check apps/desktop/src/main.cjs; node --check apps/desktop/src/preload.cjs; git diff --check",
@@ -63,7 +63,7 @@
   "regression_total": "19/19 PASS",
   "test_browser": "Headless Microsoft Edge",
   "test_dependencies": "Existing external Playwright module; no new dependency or lockfile change",
-  "playwright_module": "C:/Users/Ryan D/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+  "playwright_module": "%USERPROFILE%/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
   "development_assets": "Current web build copied into apps/desktop/runtime/web; active desktop process was not restarted. It uses the new source/assets after restart.",
   "documentation": [
     "README.md",

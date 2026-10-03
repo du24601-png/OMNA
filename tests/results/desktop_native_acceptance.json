@@ -60,7 +60,7 @@
       "existing_desktop": "4/4 PASS",
       "total": "11/11 PASS",
       "command": "node --test tests/desktop_failure.harness.cjs tests/desktop_flyout_position.harness.cjs",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\position-tests.log"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\position-tests.log"
     },
     "native_retest": {
       "status": "PASS",
@@ -98,12 +98,12 @@
       "name": "Y/N on Pause, Open main, Settings leave proposals and memories unchanged",
       "status": "PASS",
       "evidence": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-y.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-n.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-y.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-n.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-y.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-n.json"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-y.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\main-button-n.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-y.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\pause-button-n.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-y.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\settings-button-n.json"
       ],
       "focus_evidence": "Keyboard Tab navigation; each actual button had visible focus outline in native screenshot"
     },
@@ -111,8 +111,8 @@
       "name": "Return to list; N rejects and Y accepts; three suggestions processed",
       "status": "PASS",
       "evidence": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-native-n.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-three-decisions.json"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-native-n.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\after-three-decisions.json"
       ],
       "result": "2 accepted, 1 rejected, 1 remaining; memory count 6 to 8"
     },
@@ -120,8 +120,8 @@
       "name": "Pause sharing and resume through actual native flyout",
       "status": "PASS",
       "evidence": [
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\paused.json",
-        "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\resumed.json"
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\paused.json",
+        "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a10044-2b7e-7001-b5f1-159ac37f027e\\native-desktop\\resumed.json"
       ],
       "result": "UI shows paused with 60 minutes, resume returns running; API sharing state agrees"
     },
@@ -187,7 +187,7 @@
   "runtime_at_handoff": {
     "state": "Development app retained hidden in tray for further native checks",
     "port": 8785,
-    "synthetic_user_data": "C:\\Users\\Ryan D\\AppData\\Local\\Temp\\omna-native-01bf32f96767450c9942b4b8bf186195",
+    "synthetic_user_data": "%USERPROFILE%\\AppData\\Local\\Temp\\omna-native-01bf32f96767450c9942b4b8bf186195",
     "sharing": "resumed",
     "pending_suggestions": 1
   },

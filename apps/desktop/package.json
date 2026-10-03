@@ -1,7 +1,7 @@
 {
   "name": "@zhiwo/desktop",
   "productName": "OMNA",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "OMNA 本地个人记忆",
   "author": "OMNA",

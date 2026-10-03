@@ -1113,7 +1113,7 @@
       "evidence": "tests/results/onboarding_model_state.json"
     },
     {
-      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\run_qa.py",
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 %USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\run_qa.py",
       "status": "FAIL",
       "note": "两项产品行为失败；主引导、独立补测、样式修复前后证据分别保存，不用测试夹具超时替代产品结论"
     },
@@ -1130,8 +1130,8 @@
   "fix": {
     "file": "apps/web/src/styles.css",
     "scope": "仅颜色：运行中/已验证文字、提取就绪标签、成功提示、差异新增转中性色；绿色状态点保留；暂停/断连点沿用原色",
-    "red": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\color-before\\results.json",
-    "green": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
+    "red": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\color-before\\results.json",
+    "green": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
   },
   "open_findings": [
     {
@@ -1140,7 +1140,7 @@
       "file": "apps/web/src/Onboarding.tsx:103",
       "reproduction": "新临时库，勾选 OpenCode 和 Claude Code 后连接，进入第 2 步；或两者已连接后进入引导。CLAUDE.md 仅一张卡但归 OpenCode；点整理后 Claude Code 仍只读，向 Claude Code 模拟提交得到 403",
       "cause": "连接排序由检测/本次连接顺序决定，先遍历的 OpenCode 先占用共用文件",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\attempt2\\results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\attempt2\\results.json"
     },
     {
       "id": "F2",
@@ -1148,7 +1148,7 @@
       "file": "apps/web/src/Onboarding.tsx:106",
       "reproduction": "假 home 同时存在 .claude/CLAUDE.md 与 .config/opencode/AGENTS.md，两客户端已连接，进入第 2 步。接口列出两份文件，但只显示 OpenCode 的 CLAUDE.md 卡",
       "cause": "每个客户端用 files.find 只选首份文件，未优先自有文件；OpenCode 先取共用文件，Claude Code 没有剩余候选",
-      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
+      "evidence": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
     }
   ],
   "not_run": [
@@ -1177,6 +1177,6 @@
     "committed": false,
     "pushed": false
   },
-  "evidence_dir": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest",
+  "evidence_dir": "%USERPROFILE%\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest",
   "next": "另开产品行为修复范围：确定共用文件应优先归 Claude Code，且 OpenCode 自有文件优先于 fallback；修复后只重跑第 3 项及相关第 2 步。此次没有服务端或架构变更。"
 }

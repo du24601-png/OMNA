@@ -32,7 +32,7 @@
         }
       ],
       "recommendation": "Keep the notified target pending until it is loaded; disable decision keys during that interval and show a clear state if the target no longer exists.",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/delayed-notification-target.png"
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/delayed-notification-target.png"
     },
     {
       "id": "nested-button-shortcut-target",
@@ -50,7 +50,7 @@
         }
       ],
       "recommendation": "Restrict list shortcuts to the list focus target; keep Enter/Space and click for the explicit row buttons.",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/row-button-focus.png"
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/row-button-focus.png"
     },
     {
       "id": "notification-fetch-cursor-race",
@@ -63,20 +63,20 @@
       "expected": "Two unique proposals are counted once each.",
       "observed": "3 条新建议等你确认",
       "recommendation": "Deduplicate queued/announced proposal ids and align the cursor with the successfully fetched records without advancing it after failures.",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json"
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json"
     }
   ],
   "validation": [
     {
-      "command": "node C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/repro.cjs",
+      "command": "node %USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/repro.cjs",
       "result": "All 3 defect reproductions observed",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json",
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/reproductions.json",
       "boundary": "Actual current React flyout in headless Edge with synthetic HTTP and window.omna substitutes; actual Electron entrypoint executed with VM platform/IO substitutes. No native acceptance."
     },
     {
       "command": "node --test tests/desktop_failure.harness.cjs tests/desktop_flyout_position.harness.cjs",
       "result": "11/11 PASS",
-      "evidence": "C:/Users/Ryan D/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/existing-tests.log",
+      "evidence": "%USERPROFILE%/.codex/visualizations/2026/10/03/01a10044-2b7e-7001-b5f1-159ac37f027e/desktop-source-review/existing-tests.log",
       "note": "The first sandboxed runner attempt was blocked with spawn EPERM before the tests executed; approved rerun succeeded."
     },
     {

@@ -7,33 +7,27 @@
 
 <p align="center"><b>换一个 AI，也不用重新介绍自己。</b></p>
 
-<p align="center">Windows 桌面应用 · 1.0.0 · 数据保存在本机</p>
+<p align="center">Windows 桌面应用 · 2.0.0 · 数据保存在本机</p>
 
 <p align="center"><a href="README.md"><img alt="简体中文" src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2-252a32?style=for-the-badge"></a> <a href="README_EN.md"><img alt="English" src="https://img.shields.io/badge/English-Read-687386?style=for-the-badge"></a></p>
 
-OMNA（知我）是一款本地个人记忆工具，把你的背景、偏好和项目信息保存在一处，供不同 AI 工具按授权使用。AI 帮你整理，你决定记住什么、分享给谁，并能随时查看和纠正。
+OMNA（知我）是一款本地个人记忆工具。它把你的背景、偏好和正在做的事保存在一处，让 Claude Code、OpenCode、ChatGPT（Codex）等 AI 工具按你的授权读取。AI 可以提建议，但只有你确认过的内容才会被记住；谁读了什么，每一次都有记录。
 
 想了解它与现有 AI 记忆产品的区别，可阅读[竞品分析报告](docs/competitive-analysis.md)。
 
-## 视频 Demo
+## 2.0 有什么不同
 
-> 演示视频制作中，完成后将在这里展示完整使用流程。
+1.x 是一个需要打开来看的记忆看板。2.0 改成在托盘里安静运行：平时不打扰你，只在需要你做决定时出现。
 
-## 界面展示
+- **托盘图标与小窗**：图标显示五种状态（平时、Agent 正在读取、有建议待确认、已暂停共享、出问题了）。左键打开小窗，能看今天被读取了几次，用 ✓ / ✕ 或键盘 Y / N 处理新建议。
+- **系统通知**：Agent 提出建议时弹一条普通通知，30 秒内的多条合并，点击打开小窗并定位到那一条；可以在设置里关闭。
+- **3 步新手引导**：连接本机的 AI 工具；让它把自己说明文件（`CLAUDE.md`、`AGENTS.md`）里关于你的内容整理出来，你勾选后记住；最后看一眼「AI 眼中的你」。
+- **按批管理**：同一次导入或同一次整理的普通新增可以一键记住，也可以整批撤销。修改、很像已有记忆的、缺少依据的，仍然逐条处理。
+- **暂停共享 1 小时**：所有 Agent 暂时读不到、也不能提议，到期自动恢复，重启后仍保持。
+- **全局快捷键**：`Ctrl Shift M` 打开主窗口并聚焦搜索。
+- **主窗口精简为三页**：记忆、Agent、设置。1.x 的「关于我」首页、读取折线图和 AI 摘要入口已去掉。
 
-<sub>以下截图使用合成演示数据。</sub>
-
-**关于我** · 按主题查看已确认的记忆，手动生成 AI 摘要，了解各 Agent 的读取情况。
-
-![关于我：已确认的记忆、AI 摘要和各 Agent 的读取次数](docs/images/about-me.png)
-
-| 待确认 · 审核 AI 提出的记忆 | 我的 Agent · 管理连接与访问权限 |
-| --- | --- |
-| ![待确认：Agent 提出的新增和修改](docs/images/review.png) | ![我的 Agent：连接状态与授权](docs/images/agents.png) |
-
-**记忆** · 按主题、来源和状态查找记忆，查看历史版本，随时编辑或停止共享。
-
-![记忆列表：主题、来源与时间](docs/images/memories.png)
+> 界面截图正在按 2.0 重新制作。
 
 ## 工作原理
 
@@ -50,9 +44,9 @@ OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读
 | `propose_memory` | 提出新增或修改建议，进入待确认，你批准后才生效 |
 | `explain_memory` | 查看一条获准记忆经过审核的证据片段 |
 
-每次调用都按连接、工具、类别、共享开关和有效期过滤。停止共享、仅自己可见、已过期、未批准或已被取代的内容，不会从任何一个工具返回。
+每次调用都按连接、工具、类别、共享开关和有效期过滤。停止共享、仅自己可见、已过期、未批准或已被取代的内容，不会从任何一个工具返回。暂停共享期间，四个工具都会拒绝并留下记录。
 
-已适配的客户端：WorkBuddy、ZCode、OpenCode、ChatGPT（Codex）、Claude 桌面版、Claude Code。其他支持 stdio MCP 的客户端，可以在「我的 Agent」里生成配置后手动粘贴。
+已适配的客户端：WorkBuddy、ZCode、OpenCode、ChatGPT（Codex）、Claude 桌面版、Claude Code。其他支持 stdio MCP 的客户端，可以在「Agent」页生成配置后手动粘贴。
 
 ## 本地与隐私
 
@@ -61,44 +55,49 @@ OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读
 - 本地服务只监听 `127.0.0.1:8765`。访问凭证由桌面端在首次启动时随机生成，不需要手动输入。
 - 没有遥测，没有云同步，没有后台采集。
 
-有两种情况数据会离开这台电脑，OMNA 不会假装它们不存在：
+有三种情况数据会离开这台电脑，OMNA 不会假装它们不存在：
 
-1. 导入时提取候选、生成 AI 摘要，会把这一次的文本发给你在设置里配置的模型服务。不配置模型也能手动添加、查看和搜索。
-2. 如果你授权的 Agent 背后是云端模型，返回给它的记忆会随它的请求离开设备。撤销授权只能阻止之后的读取，已经发出的内容收不回来。
+1. 导入文本时，如果你在设置里配置了提取模型，这一次的文本会发给那个模型服务。不配置也能用：带标题和列表的文本会按结构拆成候选，其余只保存来源。
+2. 让已连接的 AI 工具整理它的说明文件时，是那个工具用它自己的模型读文件、提建议；文件内容随它平时的请求发给它的模型服务。
+3. 如果你授权的 Agent 背后是云端模型，返回给它的记忆会随它的请求离开设备。撤销授权只能阻止之后的读取，已经发出的内容收不回来。
 
 ## 安装
 
 **系统要求：** Windows 10 / 11 x64，约 700 MB 磁盘空间。不需要另装 Python、Node.js 或其他运行库。
 
-1. 从 [Releases](../../releases) 下载 `OMNA-Setup-1.0.0.exe`（约 210 MB）。
+1. 从 [Releases](../../releases) 下载 `OMNA-Setup-2.0.0.exe`（约 210 MB）。
 2. 安装包目前没有代码签名，Windows SmartScreen 可能提示「无法识别的应用」。确认来源后点「更多信息」→「仍要运行」。
 3. 安装到当前用户，不需要管理员权限，可以自选目录，会创建桌面和开始菜单快捷方式。
-4. 首次启动要加载本地模型，可能需要二三十秒；之后几秒内就能打开。
+4. 首次启动要加载本地模型，可能需要二三十秒；之后几秒内就能打开。第一次打开且记忆库为空时会进入新手引导。
 
-**日常使用：** 关闭窗口时 OMNA 会缩到系统托盘，Agent 仍然可以访问。托盘菜单里可以重新打开窗口、打开日志文件夹、重启服务或完全退出。服务日志在 `%APPDATA%\OMNA\logs\service.log`。
+**从 1.x 升级：** 直接安装新版本即可，记忆库仍在 `%APPDATA%\OMNA`。首次启动时会自动做一次数据库迁移（为 Agent 增加单独的「可以提哪些类别」设置，已有连接沿用原来的读取类别），原有记忆不变。已有数据的记忆库不会再出现新手引导。升级前建议先在「设置 → 本机数据」里做一次备份。
+
+**日常使用：** 关闭窗口时 OMNA 缩到系统托盘，Agent 仍然可以访问。左键托盘图标打开小窗；右键菜单可以打开主窗口、打开日志文件夹、重启服务或完全退出。服务日志在 `%APPDATA%\OMNA\logs\service.log`。
 
 **卸载：** 从 Windows 设置或开始菜单卸载。卸载不会删除 `%APPDATA%\OMNA` 里的记忆数据；如果想彻底清除，先在「设置 → 清空数据」里清空，或卸载后手动删除这个文件夹。
 
 ## 连接一个 Agent
 
-1. 打开「我的 Agent」。OMNA 会列出本机检测到的客户端。
-2. 选一个客户端，点「连接」，选择「只读」或「可提议修改」。确认后 OMNA 把 MCP 配置写进该客户端的配置文件，原有配置会保留。
-3. 连接后默认只能读「偏好」和「目标」两类。需要更多类别，在它的「权限」里勾选。
-4. 重启客户端，把页面上给出的那句话（例如「请查一下我的偏好」）发给它。第一次调用成功后，状态会变成「已验证」。
+1. 打开「Agent」页（或在新手引导第 1 步）。OMNA 会列出本机检测到的客户端。
+2. 点「连接」。OMNA 把 MCP 配置写进该客户端自己的配置文件，原有配置会保留。默认只读，并且只能读「偏好」和「目标」；需要更多，在它的「权限」里改。
+3. 重启客户端，把页面上给出的那句话发给它。第一次读取成功后，状态变成「已验证」。
+4. 如果这个客户端有你写过的说明文件，页面上会出现一张卡片，可以让它把其中关于你的内容整理成建议，你勾选后记住，也能整批撤销。
 
 之后在「访问记录」里能看到它每次调用了哪个工具、拿到了哪几条记忆。
 
 ## 当前版本的限制
 
-- 桌面代码检查（2026-10-03）复现的三个问题已修复：通知目标载入前暂停提案处理，目标缺失时提示重新选择；列表快捷键只作用于列表本身，行内按钮使用点击或 Enter/Space；通知游标跟随成功取回的最新记录前进，并按建议 id 去重。代码回归 19/19、TypeScript 检查和前端构建通过，见 [修复结果](tests/results/desktop_source_fixes.json)及[原始复现](tests/results/desktop_source_review.json)。测试使用合成接口及桌面桥接，不代表原生通知送达验收。图标状态逻辑保持现状，原生验收按负责人要求暂缓。
-
-- v2 的文件归属和小窗网页交互已完成 `b01d12e` 补测：每个文件场景使用新临时库、假用户目录；小窗用无头 Edge 和模拟桌面桥接，验证第 5 条定位、按钮焦点下 Y/N 不处理提案、列表键盘操作、每次显示后聚焦列表及 Esc 调用收起。桌面壳夹具 4/4、批次检查 38/38 通过，见 [补测结果](tests/results/b01d12e_retest.json)。原生开发版此前已检查引导标题栏、两次跳过后收进托盘、Ctrl Shift M 聚焦搜索，以及批量记住后的撤销入口。2026-10-03 修复托盘折叠区点击后小窗误放左下的问题；负责人确认右下定位，原生列表焦点、↑↓ / Y / N、按钮焦点下不处理提案、暂停与恢复、Esc 收起通过，定位回归与原桌面壳检查合计 11/11。悬停提示出现已由负责人人工确认；托盘图标在不同主题和缩放下的外观、呼吸动画、暂停图标、悬停提示的剩余分钟内容及倒计时准确性、通知送达及点击、点外部收起和重复显示后的真实焦点仍为 `NOT_RUN`，见 [原生验收结果](tests/results/desktop_native_acceptance.json)。未配置提取模型时，按结构拆分可能把仓库操作规则误分为个人信息，例如把「运行 pnpm test 前先 pnpm build」分到身份；请逐条核对并取消不应记住的内容。此次只报告该服务端分类问题，未修改拆分器。
-- 连接导入卡尚未读到配置、配置读取失败或服务断连时，「直接读取文件」不可用；恢复后按实际配置显示模型或按结构拆分的说明，保留已选内容。配置状态的网页检查使用合成健康响应，未调用真实提取模型。
 - 只提供 Windows x64 版本，安装包未签名。
 - 本地端口固定为 8765，被其他程序占用时 OMNA 会提示并停止启动，不会连到别人的服务。
-- 真实客户端的端到端调用目前只在 OpenCode 上验证过；其他客户端验证了配置写入。
-- 安装包在开发机上完成了安装、启动、保存、搜索、MCP 调用、重启和卸载的验收；在完全没有开发工具的新机器上安装，以及装好后完全断网运行，还没有单独验证。
-- 中文检索在 20 条固定合成查询上的 Hit@5 为 19/20：直接查询 10/10，改写查询 9/10。该结果只代表这组小样本，不代表真实用户效果；检索有时会带回与任务关系不大的记忆。见[样本与查询](experiments/kernel_spike/fixtures/p0_3_queries.json)和[验证结果](experiments/kernel_spike/results/p0_3_windows.json)。
+- 2.0 的完整 Windows 验收还没有做完：干净机器安装、从 1.x 升级、卸载残留，以及托盘图标在不同缩放和深浅色任务栏下的外观、通知送达和点击，仍是 `NOT_RUN`。已做的原生检查和代码回归见[原生检查记录](tests/results/desktop_native_acceptance.json)和 [`tests/results/`](tests/results/)。
+- 真实客户端的端到端调用目前只在 OpenCode 上验证过（1.x）；2.0 的「让 AI 工具整理说明文件」还没有用真实客户端验证，其他客户端验证了配置写入。
+- 是否、何时读取记忆由 Agent 自己决定。OMNA 只能证明内容交给了它，不能证明它用了。
+- 没有配置提取模型时，按结构拆分可能把仓库操作规则误分为个人信息，例如把「运行 pnpm test 前先 pnpm build」分到「身份」；记住之前请逐条核对。
+- 中文检索在 20 条固定合成查询上的 Hit@5 为 19/20（直接查询 10/10，改写查询 9/10），只代表这组小样本。与任务字面无关的偏好可能不会被取回。见[样本与查询](experiments/kernel_spike/fixtures/p0_3_queries.json)和[验证结果](experiments/kernel_spike/results/p0_3_windows.json)。
+
+## 后续计划
+
+以下是方向，尚未实现：每次都带给 Agent 的少量「核心记忆」、「建议失效」类建议、按项目隔离的记忆空间、导出成可粘贴进 ChatGPT / Claude 记忆导入的文本、macOS 版本。
 
 ## 从源码构建
 
@@ -126,22 +125,25 @@ uv run --directory server python -c "from fastembed import TextEmbedding; TextEm
 
 ### 开发运行
 
-本地服务和前端分开启动。数据目录请用一个独立的新目录，不要指向正在使用的记忆库。
+本地服务和前端分开启动。数据目录请用一个独立的新目录，不要指向正在使用的记忆库；端口不要用 8765，以免和已安装的 OMNA 冲突。
 
 ```powershell
 $env:ZHIWO_DATA_DIR = "D:\omna-dev-data"
 $env:ZHIWO_OWNER_CREDENTIAL = "dev-only-credential"
 $env:ZHIWO_FASTEMBED_CACHE_DIR = "D:\omna-model"
-uv run --directory server uvicorn zhiwo.api.app:app --host 127.0.0.1 --port 8765
+uv run --directory server uvicorn zhiwo.api.app:app --host 127.0.0.1 --port 8786
 ```
 
 另开一个终端：
 
 ```powershell
+$env:VITE_API_ORIGIN = "http://127.0.0.1:8786"
 pnpm --filter @zhiwo/web dev
 ```
 
 浏览器打开 `http://127.0.0.1:5173`，输入上面设置的凭证。提取模型可以在设置页里配置，也可以用 `ZHIWO_EXTRACTOR_BASE_URL`、`ZHIWO_EXTRACTOR_MODEL`、`ZHIWO_EXTRACTOR_API_KEY` 三个环境变量提供（任意 OpenAI 兼容接口）。
+
+检查新手引导和「连接」时，用 `tests/dev_onboarding.py`：它以测试模式启动一个临时服务，并把客户端配置写进一个假的用户目录，不会改动你真实的 AI 工具配置。用法见脚本开头的说明。开发版桌面壳可以用 `--omna-port` 和 `--omna-user-data` 换端口和数据目录，但它使用真实用户目录，请不要在里面点「连接」。
 
 ### 打安装包
 
@@ -150,36 +152,39 @@ powershell -NoProfile -ExecutionPolicy Bypass -File apps\desktop\scripts\prepare
 pnpm --filter @zhiwo/desktop dist
 ```
 
-`prepare-runtime` 会在 `apps/desktop/runtime/` 生成随包的 Python、锁定依赖、前端构建和模型；`dist` 输出 `apps/desktop/dist/OMNA-Setup-1.0.0.exe`。访问 GitHub 较慢时，可以先设置 `ELECTRON_MIRROR` 和 `ELECTRON_BUILDER_BINARIES_MIRROR` 指向镜像。
+`prepare-runtime` 会在 `apps/desktop/runtime/` 生成随包的 Python、锁定依赖、前端构建和模型；`dist` 输出 `apps/desktop/dist/OMNA-Setup-2.0.0.exe`。访问 GitHub 较慢时，可以先设置 `ELECTRON_MIRROR` 和 `ELECTRON_BUILDER_BINARIES_MIRROR` 指向镜像。
 
 ### 测试
 
-测试都在临时目录里用合成数据运行，例如：
+测试都在临时目录里用合成数据运行，不会碰真实记忆库，也不会使用 8765 端口。服务端测试逐个运行，例如：
 
 ```powershell
-server\.venv\Scripts\python.exe tests\test_client_connect.py
-server\.venv\Scripts\python.exe tests\test_embedding_probe.py
+server\.venv\Scripts\python.exe tests\test_batches.py
+server\.venv\Scripts\python.exe tests\test_sharing_pause.py
 ```
 
-`tests/onboarding_model_state.py` 验证 Agent 连接导入卡 ⋯ 菜单「直接读取文件」的配置未知、读取错误、已配置、断连、恢复和未配置状态，以及确认框的提取方式说明。新版 3 屏引导没有文件导入；旧版引导导入入口、提取文案、按钮可用性和导入文本断连保留断言已移除。运行前设置 `OMNA_PLAYWRIGHT_MODULE` 为仓库外已安装的 Playwright 模块目录、`OMNA_UI_EVIDENCE_DIR` 为仓库外截图目录，以及本机模型缓存 `ZHIWO_FASTEMBED_CACHE_DIR`；可用 `ZHIWO_PYTHON`、`OMNA_NODE` 指定解释器。脚本使用独立临时库、假客户端目录和非 8765 随机端口，结束时清理进程和临时数据；健康响应和网络故障是仅限浏览器的测试夹具，不代表真实提取模型验收。当前使用本机 Microsoft Edge，无需改项目依赖。
+- `tests/test_*.py`：服务端与验收测试（`test_profile_summary.py`、`test_access_summary.py` 是旧版 pytest 文件，可跳过）。
+- `tests/onboarding_batches.py`：在 Node 里运行前端的批次逻辑，对接临时服务，覆盖整理批次、导入批次、批量记住、整批撤销和说明文件归属；需要 `apps/web` 的依赖。
+- `tests/desktop_*.harness.cjs`：桌面壳的代码回归（`node --test`），用替身代替 Electron；其中 `desktop_flyout.harness.cjs` 需要仓库外的 Playwright 和运行中的前端。
+- `tests/onboarding_model_state.py`：连接导入卡在提取模型配置未知、出错、已配置、未配置时的表现，需要仓库外的 Playwright。
 
-
-涉及真实客户端的测试需要本机装好 OpenCode，可以用 `OPENCODE_BIN` 指定可执行文件。`test_p2_4_client.py` 缺少 OpenCode 时直接失败；`test_p3_2_desktop.py` 需要先打出安装包，找不到 OpenCode 时把这一项记为 `NOT_RUN`。
+需要真实客户端的测试要本机装好 OpenCode，可以用 `OPENCODE_BIN` 指定可执行文件。`test_p2_4_client.py` 缺少 OpenCode 时直接失败；`test_p3_2_desktop.py` 需要先打出安装包，找不到 OpenCode 时把这一项记为 `NOT_RUN`。
 
 ## 技术栈
 
-- 桌面端：Electron 44，托管本地服务、托盘和单实例；渲染层关闭 Node 集成
+- 桌面端：Electron 44，托管本地服务、托盘、托盘小窗、通知和全局快捷键；渲染层关闭 Node 集成
 - 界面：React 19、Vite、Tailwind CSS
 - 本地服务：Python 3.12、FastAPI、uvicorn、MCP Python SDK
 - 记忆内核：[Mnemosyne](https://pypi.org/project/mnemosyne-memory/) 3.15.1，fastembed 本地向量
 - 存储：两个 SQLite。正式记忆只在 Mnemosyne 里；`zhiwo.db` 存来源、待确认、授权和访问记录
 
 ```text
-apps/web        界面
-apps/desktop    Electron 主进程、打包脚本和安装器配置
+apps/web        界面（主窗口、托盘小窗、新手引导）
+apps/desktop    Electron 主进程、托盘图标、打包脚本和安装器配置
 server/zhiwo    本地服务、MCP stdio 桥、Mnemosyne 适配层
 tests           服务与验收测试，results/ 下是验收证据
 experiments     早期技术验证脚本与结果
+docs            竞品分析、v2 方案与设计稿
 brand           标志与图标
 ```
 
@@ -190,6 +195,8 @@ brand           标志与图标
 | [PRODUCT.md](PRODUCT.md) | 产品范围、页面与交互规则 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 模块边界、数据归属和接口契约 |
 | [AGENTS.md](AGENTS.md) | AI 协作开发规则 |
+| [docs/v2/PLAN.md](docs/v2/PLAN.md) | 2.0 方案与验收标准 |
+| [docs/competitive-analysis.md](docs/competitive-analysis.md) | 竞品分析 |
 
 ## 许可证
 
