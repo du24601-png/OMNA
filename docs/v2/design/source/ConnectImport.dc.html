@@ -21,6 +21,11 @@ body{margin:0}
 .c-pri:hover{opacity:.88}
 .c-sec:hover{background:var(--sel)}
 .c-link:hover{color:var(--text)}
+.c-row:hover{background:var(--hover)}
+.ci input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
+@keyframes c-breath{0%,100%{opacity:1}50%{opacity:.3}}
+.c-live{animation:c-breath 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.c-live{animation:none}}
 </style>
 </helmet>
 <div class="ci" style="width: 1040px; height: 680px; display: flex; flex-direction: column; overflow: hidden">
@@ -83,40 +88,102 @@ body{margin:0}
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span style="width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg></span>
 <div style="flex: 1; min-width: 0">
-<div style="font-size: 15px; font-weight: 600">Codex 里有你写过的 11 条偏好</div>
-<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px">其中 6 条已经在你的记忆里。下面 5 条是新的：4 条直接导入，很像的 1 条交给你确认。</div>
+<div style="font-size: 15px; font-weight: 600">Codex 里有一份你写过的说明</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.6">让 Codex 自己读一遍，挑出关于你的内容交给 OMNA。它用自己的模型，你不用配置；提的每一条都要你确认才生效。</div>
+<div style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted); margin-top: 6px">~/.codex/AGENTS.md</div>
 </div>
 </div>
-<div style="margin-top: 14px; padding: 4px 0 4px 44px; display: flex; flex-direction: column; gap: 2px">
-<sc-for list="{{items}}" as="it" hint-placeholder-count="5">
-<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 13.5px">
-<span style="width: 4px; height: 4px; border-radius: 999px; background: var(--muted); flex-shrink: 0"></span>
-<span style="flex: 1">{{it.text}}</span>
-<sc-if value="{{it.conflict}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11.5px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 999px">和已有的「中文回答…」很像，放进待确认</span></sc-if>
-</div>
-</sc-for>
-</div>
+<sc-if value="{{needConsent}}" hint-placeholder-val="{{ true }}">
+<div style="margin: 14px 0 0 44px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 12.5px; line-height: 1.6">Codex 现在是「只读」。整理需要允许它<b style="font-weight: 600">提议修改</b>；读取范围不变，以后可以在「改权限」里收回。</div>
+</sc-if>
 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-left: 44px">
-<span style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted)">C:\Users\linyu\.codex\AGENTS.md · 只读，不改动</span>
+<button type="button" class="c-link" onClick="{{direct}}" style="border: 0; background: transparent; padding: 0; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">直接读取文件（不用 AI）</button>
 <div style="display: flex; gap: 8px">
 <button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">不用了</button>
-<button type="button" class="c-pri" onClick="{{doImport}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">导入 5 条</button>
+<button type="button" class="c-pri" onClick="{{start}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">{{startLabel}}</button>
 </div>
 </div>
 </div>
 </sc-if>
 
-<sc-if value="{{imported}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{waiting}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<div style="display: flex; align-items: center; gap: 10px">
+<span class="c-live" style="width: 8px; height: 8px; border-radius: 999px; background: var(--accent); flex-shrink: 0"></span>
+<span style="flex: 1; font-size: 15px; font-weight: 600">{{waitTitle}}</span>
+<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12.5px; cursor: pointer">取消</button>
+</div>
+<div style="margin: 12px 0 0 18px; font-size: 12.5px; color: var(--muted)">复制这句话，到 Codex 里发送：</div>
+<div style="display: flex; align-items: flex-start; gap: 10px; margin: 6px 0 0 18px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
+<span style="flex: 1">请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。</span>
+<button type="button" class="c-sec" onClick="{{copy}}" style="flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">{{copyLabel}}</button>
+</div>
+<div style="margin: 10px 0 0 18px; font-size: 12px; color: var(--muted)">Codex 提交的建议会一条条出现在下面；不用一直等，关掉这页也会继续收。</div>
+<div style="margin: 8px 0 0 18px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{arrived}}" as="it" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13.5px">
+<span style="width: 4px; height: 4px; border-radius: 999px; background: var(--muted); flex-shrink: 0"></span>
+<span style="flex: 1">{{it.text}}</span>
+<span style="font-size: 11.5px; color: var(--muted)">{{it.cat}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{received}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
+<div style="font-size: 15px; font-weight: 600">Codex 提了 5 条</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px">4 条是新的；有 1 条和你已有的很像，放进待确认让你挑。取消勾选的就不记。</div>
+<div style="margin-top: 12px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="5">
+<label class="c-row" style="display: flex; align-items: center; gap: 10px; padding: 5px 6px; border-radius: 6px; font-size: 13.5px; cursor: pointer">
+<input type="checkbox" checked="{{it.on}}" disabled="{{it.conflict}}" onChange="{{it.toggle}}" aria-label="记住：{{it.text}}">
+<span style="flex: 1; {{it.st}}">{{it.text}}</span>
+<sc-if value="{{it.conflict}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11.5px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 999px">和「中文回答…」很像，放进待确认</span></sc-if>
+<span style="font-size: 11.5px; color: var(--muted)">{{it.cat}}</span>
+</label>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px">
+<button type="button" class="c-sec" onClick="{{later}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">先放进待确认</button>
+<button type="button" class="c-pri" onClick="{{remember}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">记住 {{keep}} 条</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{directOffer}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<div style="font-size: 15px; font-weight: 600">按标题和列表拆出 11 条</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.6">其中 6 条已经在你的记忆里。剩下 5 条放进待确认：没用 AI 判断，类别是按标题猜的，确认时可以改。</div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px">
+<span style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted)">~/.codex/AGENTS.md · 只读，不改动</span>
+<div style="display: flex; gap: 8px">
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">返回</button>
+<button type="button" class="c-pri" onClick="{{later}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">放进待确认 5 条</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{remembered}}" hint-placeholder-val="{{ false }}">
 <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--accent-soft)">
-<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">已导入 4 条</b>，和已有记忆很像的 1 条放进了待确认。Claude Code 和 OpenCode 下次也会用上。</span>
-<button type="button" class="c-sec" onClick="{{undo}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">撤销这次导入</button>
+<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">已记住 {{keep}} 条</b>，很像的 1 条在待确认里等你挑。Claude Code 和 OpenCode 下次也会用上。</span>
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">撤销这次整理</button>
+</div>
+</sc-if>
+
+<sc-if value="{{queued}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--accent-soft)">
+<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">5 条已放进待确认</b>，托盘小窗和「记忆 › 待确认」里都能处理，确认前不会生效。</span>
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">去确认</button>
 </div>
 </sc-if>
 
 <sc-if value="{{dismissed}}" hint-placeholder-val="{{ false }}">
 <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted)">
-<span style="flex: 1">好的，不导入。以后想导入，在「记忆」页右上角的「＋」里。</span>
-<button type="button" class="c-sec" onClick="{{undo}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer">改主意了</button>
+<span style="flex: 1">好的，不整理。以后想带上它的说明，在「记忆」页右上角的「＋」里。</span>
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer">改主意了</button>
 </div>
 </sc-if>
 
@@ -131,22 +198,58 @@ body{margin:0}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { s: 'offer' };
+    this.state = { s: 'offer', allowed: false, copied: false, got: 0, off: [] };
+    this.timer = null;
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
   }
   renderVals() {
-    const s = this.state.s;
+    const st = this.state;
+    const all = [
+      { id: 'a', text: 'Python 项目用 uv 管理依赖', cat: '偏好', conflict: false },
+      { id: 'b', text: '依赖升级前先列出变更日志', cat: '偏好', conflict: false },
+      { id: 'c', text: '在做数据管道重构，月底上线', cat: '项目', conflict: false },
+      { id: 'd', text: 'SQL 关键字用大写', cat: '偏好', conflict: false },
+      { id: 'e', text: '回复用英文', cat: '偏好', conflict: true }
+    ];
+    const isOn = (id) => st.off.indexOf(id) < 0;
+    const items = all.map((it) => ({
+      text: it.text, cat: it.cat, conflict: it.conflict, on: it.conflict ? false : isOn(it.id),
+      st: it.conflict || isOn(it.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
+      toggle: () => this.setState({ off: isOn(it.id) ? st.off.concat(it.id) : st.off.filter((x) => x !== it.id) })
+    }));
+    const keep = all.filter((it) => !it.conflict && isOn(it.id)).length;
+    const trickle = () => {
+      // Prototype only: Codex's suggestions arrive one by one after the sentence is sent.
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        const got = Math.min(all.length, this.state.got + 1);
+        this.setState(got >= all.length ? { got, s: 'received' } : { got });
+        if (got >= all.length) clearInterval(this.timer);
+      }, 800);
+    };
     return {
-      offer: s === 'offer', imported: s === 'done', dismissed: s === 'no',
-      items: [
-        { text: 'Python 项目用 uv 管理依赖', conflict: false },
-        { text: '依赖升级前先列出变更日志', conflict: false },
-        { text: '排查报错时先给一个最小复现', conflict: false },
-        { text: 'SQL 关键字用大写', conflict: false },
-        { text: '回复用英文', conflict: true }
-      ],
-      doImport: () => this.setState({ s: 'done' }),
-      dismiss: () => this.setState({ s: 'no' }),
-      undo: () => this.setState({ s: 'offer' })
+      offer: st.s === 'offer',
+      needConsent: !st.allowed,
+      startLabel: st.allowed ? '让 Codex 整理' : '允许提议，让它整理',
+      waiting: st.s === 'waiting',
+      waitTitle: st.got ? ('已收到 ' + st.got + ' 条，Codex 还在提交…') : (st.copied ? '等 Codex 提交…' : '发给 Codex 这句话'),
+      copyLabel: st.copied ? '已复制' : '复制',
+      arrived: all.slice(0, st.got).map((it) => ({ text: it.text, cat: it.cat })),
+      received: st.s === 'received',
+      directOffer: st.s === 'direct',
+      remembered: st.s === 'done',
+      queued: st.s === 'queued',
+      dismissed: st.s === 'no',
+      items, keep,
+      start: () => this.setState({ s: 'waiting', allowed: true, got: 0, copied: false }),
+      copy: () => { if (!st.copied) trickle(); this.setState({ copied: true }); },
+      remember: () => this.setState({ s: 'done' }),
+      later: () => this.setState({ s: 'queued' }),
+      direct: () => this.setState({ s: 'direct' }),
+      dismiss: () => { clearInterval(this.timer); this.setState({ s: 'no' }); },
+      reset: () => { clearInterval(this.timer); this.setState({ s: 'offer', got: 0, copied: false, off: [] }); }
     };
   }
 }
