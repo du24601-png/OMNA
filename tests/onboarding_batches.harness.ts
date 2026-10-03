@@ -5,6 +5,7 @@ import "./onboarding_batches.shim"
 import { ApiError, api, setCredential, type Proposal } from "../apps/web/src/api"
 import { assignFiles, carryOut, choicesOf, fileForClient, loadLibrary, normalize, sortCandidates, undoBatches } from "../apps/web/src/batch"
 import type { AgentFile } from "../apps/web/src/api"
+import { visibleRows } from "../apps/web/src/Flyout"
 
 const BASE = process.env.OMNA_BASE!
 const AGENT_ID = process.env.OMNA_AGENT_ID!
@@ -162,8 +163,18 @@ function fileAssignment() {
   check("files: import card prefers a client's own file", fileForClient([shared, own], "opencode")?.id === "opencode" && fileForClient([shared], "opencode")?.id === "claude-code")
 }
 
+// Code-review finding: a notification about the 4th suggestion opened the flyout on another row.
+function flyoutRows() {
+  const rows = ["a", "b", "c", "d", "e"].map(id => ({ id }))
+  const ids = (pinned: string | null) => visibleRows(rows, pinned).map(item => item.id).join("")
+  check("flyout: a notified suggestion beyond the first three is shown", ids("d") === "abd", ids("d"))
+  check("flyout: a notified suggestion already shown keeps the order", ids("b") === "abc", ids("b"))
+  check("flyout: a decided (gone) suggestion falls back to the first three", ids("z") === "abc" && ids(null) === "abc")
+}
+
 try {
   fileAssignment()
+  flyoutRows()
   similarityEdges()
   await organizeFlow()
   await importFlow()

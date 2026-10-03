@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-03",
+  "scope": "Fix two previously observed defects; source review only for tray icons, animation, flyout and notifications.",
+  "base_commit": "2c1c421",
+  "fixes": [
+    {
+      "id": "dev-seed-output",
+      "status": "PASS_CODE_REGRESSION",
+      "change": "Configure stdout and stderr as UTF-8 before argument parsing or HTTP operations.",
+      "tests": "Real dev_seed.py subprocess with PYTHONIOENCODING=cp1252, temporary synthetic credentials and a loopback synthetic HTTP endpoint. No real library or client configuration was touched.",
+      "before": "Both assertions failed: successful POST exited 1 with UnicodeEncodeError; HTTP error text was escaped instead of readable Chinese.",
+      "after": "2/2 passed: one submitted proposal, exit 0, exact Chinese output; HTTP 503 remains nonzero and readable."
+    },
+    {
+      "id": "service-stop-window",
+      "status": "PASS_CODE_REGRESSION",
+      "change": "Runtime service exit loads the failure page without showing or focusing the window. Startup failures retain the default show/focus behavior.",
+      "tests": "Execute the real main.cjs entrypoint in a Node VM with Electron, process, timers and IO substitutes. This is explicitly a code test, not native Windows tray acceptance.",
+      "before": "Hidden-window and focus-preservation assertions failed; startup-error assertion passed.",
+      "after": "3/3 passed: hidden stays hidden until tray callback, open window gets error content without focus, startup error remains visible."
+    }
+  ],
+  "commands": [
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests/test_dev_seed.py",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "passed": 2
+    },
+    {
+      "command": "node tests/desktop_failure.harness.cjs",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "passed": 3
+    }
+  ],
+  "source_review": [
+    {
+      "area": "tray icons",
+      "status": "REVIEWED",
+      "evidence": "tray-icons.cjs implements the mirrored brand, green center, pending green dot, removed paused center and faded amber warning. main.cjs renders at round(16 * scaleFactor), selects system-integrated light/dark palette and refreshes on nativeTheme.updated.",
+      "limit": "No native 16px/150% or light/dark taskbar presentation was verified."
+    },
+    {
+      "area": "reading animation",
+      "status": "REVIEWED",
+      "evidence": "main.cjs polls status every 4000ms, detects changed read event ids, animates in 100ms frames for 2000ms and checks Windows animation settings. Icon frames are cached. CSS has a global reduced-motion rule.",
+      "limit": "No real display timing or breathing appearance was verified."
+    },
+    {
+      "area": "flyout",
+      "status": "REVIEWED_WITH_FINDING",
+      "evidence": "368x520 isolated BrowserWindow, tray/work-area placement, blur hiding, brand component, light-mode pale gray/black accept button, pause/resume routes and remaining minutes exist in source.",
+      "limit": "No native focus, outside-click, material or pause icon behavior was exercised."
+    },
+    {
+      "area": "notifications",
+      "status": "REVIEWED_WITH_FINDINGS",
+      "evidence": "Agent-only proposals, support/preference gates, suppression when windows are in focus, 30000ms coalescing and a click callback carrying the first proposal id are implemented.",
+      "limit": "No native toast registration, delivery, grouping or click was exercised."
+    }
+  ],
+  "findings": [
+    {
+      "id": "notification-target-not-visible",
+      "priority": "P2",
+      "status": "OPEN_SOURCE_CONFIRMED",
+      "file": "apps/web/src/Flyout.tsx",
+      "lines": [55, 60],
+      "trigger": "Three older pending suggestions exist and a notification refers to a newer suggestion.",
+      "impact": "onFlyoutShown only changes focus id. visible remains shown.slice(0,3), so current falls back to the first older row. The requested new suggestion is neither displayed nor selected; Y/N would act on another row.",
+      "next": "Make the requested proposal part of the visible slice before choosing the keyboard target."
+    },
+    {
+      "id": "flyout-keys-ignore-list-focus",
+      "priority": "P2",
+      "status": "OPEN_SOURCE_CONFIRMED",
+      "file": "apps/web/src/Flyout.tsx",
+      "lines": [95, 114],
+      "trigger": "Keyboard focus is on pause, open-window or settings instead of the pending list.",
+      "impact": "The window-wide key handler excludes only input/textarea and modifier keys, so Y/N can accept/reject current even when the list does not have focus. This differs from the product's focus requirement.",
+      "next": "Give the list a keyboard focus target and scope arrow/Y/N handling to that target."
+    },
+    {
+      "id": "notification-cursor-advances-before-success",
+      "priority": "P2",
+      "status": "OPEN_SOURCE_CONFIRMED",
+      "file": "apps/desktop/src/main.cjs",
+      "lines": [534, 547],
+      "trigger": "Status reports a new pending timestamp, but fetching or parsing the proposal list fails once.",
+      "impact": "pendingMark is advanced before request/parse success. With no newer suggestion, later polls exit at latestAt <= pendingMark, so the failed notification batch is never collected again.",
+      "next": "Advance the cursor after the proposal list has been received and parsed successfully."
+    }
+  ],
+  "limits": {
+    "native_post_fix_acceptance": "NOT_RUN",
+    "new_dependencies": "None",
+    "ui_service_launches_this_run": "None",
+    "extra_review_findings_fixed": false,
+    "installation_or_packaging": "NOT_RUN",
+    "commit_or_push": "NOT_RUN"
+  }
+}

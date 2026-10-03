@@ -31,6 +31,9 @@ STATE = "dev-seed.json"
 
 
 def main() -> int:
+    # Windows redirected output may use cp1252 even though the payload is Chinese.
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["seed", "read", "propose"])
     parser.add_argument("--port", type=int, required=True)

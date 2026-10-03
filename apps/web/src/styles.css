@@ -737,6 +737,8 @@ html.flyout-material { --fly-bg:rgba(249,249,249,.84); }
 .flyout-link { border:0; background:transparent; padding:2px 6px; border-radius:4px; font-size:12px; color:var(--muted); }
 .flyout-link:hover { background:var(--hover); color:var(--text); }
 .flyout-list { display:flex; flex-direction:column; padding:0 6px; }
+.flyout-list:focus { outline:none; }
+.flyout-list:focus-visible { outline:2px solid var(--accent-text); outline-offset:-2px; border-radius:6px; }
 .flyout-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px; }
 .flyout-row.focused { background:var(--selected); }
 .flyout-row .memo-source.compact .source-mark, .flyout-row .memo-source.compact .source-fallback, .flyout-row .source-you { width:26px; height:26px; border-radius:6px; font-size:10px; }

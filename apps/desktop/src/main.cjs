@@ -81,6 +81,7 @@ function main() {
   let readingTimer = null
   let lastReadId = null
   let pendingMark = null
+  let pendingBusy = false
   let pollTimer = null
   let polling = false
   let locked = false
@@ -219,7 +220,7 @@ function main() {
         if (!settled) fail(new Failure("本地服务启动后退出了", `退出码 ${code}。`))
         else if (!quitting) {
           ready = false
-          showFailure(new Failure("本地服务停止了", "已连接的 Agent 暂时读不到记忆。可以从托盘菜单重新启动 OMNA。"))
+          showFailure(new Failure("本地服务停止了", "已连接的 Agent 暂时读不到记忆。可以从托盘菜单重新启动 OMNA。"), false)
         }
       })
       const poll = async () => {
@@ -530,21 +531,28 @@ function main() {
       pendingMark = latestAt || new Date().toISOString()
       return
     }
-    if (!latestAt || latestAt <= pendingMark) return
-    const since = pendingMark
-    pendingMark = latestAt
-    const { status, body } = await request(`/api/v1/proposals?status=pending&since=${encodeURIComponent(since)}`, { Authorization: `Bearer ${credential}` })
-    if (status !== 200) return
-    let items = []
+    if (!latestAt || latestAt <= pendingMark || pendingBusy) return
+    pendingBusy = true
     try {
-      items = JSON.parse(body).proposals || []
-    } catch {
-      return
+      const since = pendingMark
+      const { status, body } = await request(`/api/v1/proposals?status=pending&since=${encodeURIComponent(since)}`, { Authorization: `Bearer ${credential}` })
+      if (status !== 200) return
+      let items = []
+      try {
+        items = JSON.parse(body).proposals || []
+      } catch {
+        return
+      }
+      // Only a list that arrived and parsed moves the cursor; a failed fetch
+      // is tried again on the next poll instead of dropping that round.
+      pendingMark = latestAt
+      const fromAgents = items.filter(item => item.origin === "agent")
+      if (!fromAgents.length) return
+      noteQueue.push(...fromAgents)
+      if (!noteTimer) noteTimer = setTimeout(flushNotes, Math.max(0, lastNoteAt + NOTE_GAP_MS - Date.now()))
+    } finally {
+      pendingBusy = false
     }
-    const fromAgents = items.filter(item => item.origin === "agent")
-    if (!fromAgents.length) return
-    noteQueue.push(...fromAgents)
-    if (!noteTimer) noteTimer = setTimeout(flushNotes, Math.max(0, lastNoteAt + NOTE_GAP_MS - Date.now()))
   }
 
   function flushNotes() {
@@ -623,12 +631,13 @@ function main() {
     return win.loadURL(page(title, detail, false))
   }
 
-  function showFailure(error) {
+  function showFailure(error, reveal = true) {
     const title = error instanceof Failure ? error.title : "OMNA 没能打开"
     const detail = error instanceof Failure ? error.detail : String(error && error.message ? error.message : error)
     if (win) {
       win.loadURL(page(title, `${detail}\n日志：${logFile}`, true))
-      show()
+      // Startup failures need attention; background failures wait for a tray click.
+      if (reveal) show()
     }
   }
 

@@ -30,6 +30,20 @@
       "ok": true
     },
     {
+      "name": "flyout: a notified suggestion beyond the first three is shown",
+      "ok": true,
+      "detail": "abd"
+    },
+    {
+      "name": "flyout: a notified suggestion already shown keeps the order",
+      "ok": true,
+      "detail": "abc"
+    },
+    {
+      "name": "flyout: a decided (gone) suggestion falls back to the first three",
+      "ok": true
+    },
+    {
       "name": "normalize: strips nested Markdown like split.normalize",
       "ok": true
     },
@@ -146,9 +160,9 @@
       "name": "organize: batch is undoable",
       "ok": true,
       "detail": {
-        "batch_id": "134c4945-8beb-4bb3-8b9b-9e3dfbcb6f20",
+        "batch_id": "a6a3bb1b-c29c-4848-8a40-1fbd70d184db",
         "kind": "organize",
-        "agent_id": "c8af1680-df9a-4a00-b05f-bfe631810773",
+        "agent_id": "1dca88ce-95d0-45e2-aaf1-287cd42aa548",
         "pending": 2,
         "pending_additions": 2,
         "plain_additions": 2,
@@ -184,7 +198,7 @@
           ],
           "path": "~/.claude/CLAUDE.md",
           "size": 312,
-          "modified_at": "2026-10-03T05:37:30.417554+00:00",
+          "modified_at": "2026-10-03T07:45:40.154668+00:00",
           "empty": false,
           "imported_at": null
         }
@@ -204,8 +218,8 @@
       "ok": true,
       "detail": [
         [
-          "git 提交信息用中文，动词开头写",
-          "git 提交信息用中文，动词开头"
+          "git 提交信息用中文，动词开头",
+          "git 提交信息用中文，动词开头写"
         ]
       ]
     },
@@ -281,7 +295,7 @@
         ],
         "path": "~/.claude/CLAUDE.md",
         "size": 312,
-        "modified_at": "2026-10-03T05:37:30.417554+00:00",
+        "modified_at": "2026-10-03T07:45:40.154668+00:00",
         "empty": false,
         "imported_at": null
       }
@@ -352,5 +366,5 @@
       "ok": true
     }
   ],
-  "seconds": 17.2
+  "seconds": 15.6
 }

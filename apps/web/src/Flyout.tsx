@@ -26,12 +26,23 @@ function minutesLeft(until: string | null) {
   return Math.max(1, Math.ceil((new Date(until).getTime() - Date.now()) / 60000))
 }
 
+// Three rows; a suggestion a notification pointed at takes the last row when
+// it is further down, so the flyout shows and selects the one it was opened for.
+export function visibleRows<T extends { id: string }>(shown: T[], pinned: string | null) {
+  const first = shown.slice(0, 3)
+  const target = pinned ? shown.find(item => item.id === pinned) : undefined
+  return target && !first.includes(target) ? [...first.slice(0, 2), target] : first
+}
+
 export function Flyout() {
   const [status, setStatus] = useState<TrayStatus | null>(null)
   const [pending, setPending] = useState<Proposal[] | null>(null)
   const [library, setLibrary] = useState<Memory[] | null>(null)
   const [hidden, setHidden] = useState<string[]>([])
   const [focus, setFocus] = useState<string | null>(null)
+  // The suggestion a notification pointed at; shown even when it is not among the first three.
+  const [pinned, setPinned] = useState<string | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState("")
   const [offline, setOffline] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -52,11 +63,17 @@ export function Flyout() {
   useEffect(() => {
     void load()
     const timer = window.setInterval(() => { if (document.visibilityState === "visible") void load() }, POLL_MS)
-    const stop = window.omna?.onFlyoutShown?.(id => { setError(""); if (id) setFocus(id); void load() })
+    const stop = window.omna?.onFlyoutShown?.(id => {
+      setError("")
+      if (id) { setFocus(id); setPinned(id) }
+      // Keys act only while the list has focus, so give it focus on every show.
+      listRef.current?.focus()
+      void load()
+    })
     return () => { clearInterval(timer); stop?.() }
   }, [load])
   const shown = (pending ?? []).filter(item => !hidden.includes(item.id))
-  const visible = shown.slice(0, 3)
+  const visible = visibleRows(shown, pinned)
   const current = visible.find(item => item.id === focus) ?? visible[0]
   const ready = library !== null
   const lane = (item: Proposal) => classify(item, item.payload.content.trim(), library ?? [], ready)
@@ -93,23 +110,25 @@ export function Flyout() {
     }
   }
   useEffect(() => {
+    // Escape closes from anywhere; the list keys live on the list itself.
     function onKey(event: KeyboardEvent) {
-      if (event.ctrlKey || event.metaKey || event.altKey) return
-      if (event.key === "Escape") { window.omna?.flyout?.hide(); return }
-      if ((event.target as HTMLElement | null)?.closest("input, textarea")) return
-      const index = visible.findIndex(item => item.id === current?.id)
-      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        const next = visible[event.key === "ArrowDown" ? index + 1 : index - 1]
-        if (next) { event.preventDefault(); setFocus(next.id) }
-        return
-      }
-      if (!current) return
-      if ((event.key === "y" || event.key === "Y") && lane(current) === "quick") { event.preventDefault(); void decide(current, "accept") }
-      if (event.key === "n" || event.key === "N") { event.preventDefault(); void decide(current, "reject") }
+      if (event.key === "Escape" && !event.ctrlKey && !event.metaKey && !event.altKey) window.omna?.flyout?.hide()
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  })
+  }, [])
+  function onListKey(event: React.KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey || event.altKey) return
+    const index = visible.findIndex(item => item.id === current?.id)
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      const next = visible[event.key === "ArrowDown" ? index + 1 : index - 1]
+      if (next) { event.preventDefault(); setFocus(next.id) }
+      return
+    }
+    if (!current) return
+    if ((event.key === "y" || event.key === "Y") && lane(current) === "quick") { event.preventDefault(); void decide(current, "accept") }
+    if (event.key === "n" || event.key === "N") { event.preventDefault(); void decide(current, "reject") }
+  }
   const openMain = (route = "") => window.omna?.flyout?.openMain(route)
   const paused = !!status?.sharing.paused
   const reads = status?.reads_today
@@ -127,7 +146,7 @@ export function Flyout() {
       ? <div className="flyout-card warn"><strong>已暂停共享</strong><p>所有 Agent 暂时读不到你的记忆，也不能提议，{minutesLeft(status?.sharing.paused_until ?? null)} 分钟后自动恢复。</p></div>
       : <div className="flyout-card"><div><strong>{reads ? `今天被读取 ${reads.total} 次` : "今天被读取 — 次"}</strong><p>{reads && reads.agents.length ? reads.agents.map(agent => `${agent.name} ${agent.count}`).join(" · ") : "今天还没有 Agent 读取"}</p></div></div>}
     <div className="flyout-section"><span>待确认 {shown.length || ""}</span>{shown.length > 0 && <button type="button" className="flyout-link" onClick={() => openMain("review")}>全部</button>}</div>
-    <div className="flyout-list">
+    <div className="flyout-list" ref={listRef} tabIndex={0} role="group" aria-label="待确认：↑↓ 选择，Y 记住，N 忽略" onKeyDown={onListKey}>
       {pending === null && !offline && <p className="flyout-empty">正在载入…</p>}
       {pending !== null && !shown.length && <p className="flyout-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>没有要你确认的</p>}
       {visible.map(item => {
