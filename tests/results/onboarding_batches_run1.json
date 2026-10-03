@@ -120,9 +120,9 @@
       "name": "organize: batch is undoable",
       "ok": true,
       "detail": {
-        "batch_id": "aa14972d-ba37-4984-83de-298699cf4c53",
+        "batch_id": "c2e5b01c-f9d2-4b16-ab69-d7cd6547c82a",
         "kind": "organize",
-        "agent_id": "04d6978c-5eee-4c5d-80e6-038c5dca2ae9",
+        "agent_id": "d509b3a9-3044-47c9-ad3a-d0ee08d69b1f",
         "pending": 2,
         "pending_additions": 2,
         "plain_additions": 2,
@@ -158,7 +158,7 @@
           ],
           "path": "~/.claude/CLAUDE.md",
           "size": 312,
-          "modified_at": "2026-10-03T03:31:26.495138+00:00",
+          "modified_at": "2026-10-03T03:30:29.656996+00:00",
           "empty": false,
           "imported_at": null
         }
@@ -178,8 +178,8 @@
       "ok": true,
       "detail": [
         [
-          "git 提交信息用中文，动词开头",
-          "git 提交信息用中文，动词开头写"
+          "git 提交信息用中文，动词开头写",
+          "git 提交信息用中文，动词开头"
         ]
       ]
     },
@@ -188,8 +188,8 @@
       "ok": true,
       "detail": [
         "独立开发者，主要写 TypeScript 和 Python",
-        "测试框架用 Vitest，不用 Jest",
-        "在做本地优先的笔记应用「纸鸢」"
+        "在做本地优先的笔记应用「纸鸢」",
+        "测试框架用 Vitest，不用 Jest"
       ]
     },
     {
@@ -255,7 +255,7 @@
         ],
         "path": "~/.claude/CLAUDE.md",
         "size": 312,
-        "modified_at": "2026-10-03T03:31:26.495138+00:00",
+        "modified_at": "2026-10-03T03:30:29.656996+00:00",
         "empty": false,
         "imported_at": null
       }
@@ -326,5 +326,5 @@
       "ok": true
     }
   ],
-  "seconds": 27.5
+  "seconds": 23.7
 }

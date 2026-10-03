@@ -3,7 +3,8 @@
 // service. Synthetic data only. Prints one JSON object.
 import "./onboarding_batches.shim"
 import { ApiError, api, setCredential, type Proposal } from "../apps/web/src/api"
-import { carryOut, choicesOf, loadLibrary, normalize, sortCandidates, undoBatches } from "../apps/web/src/batch"
+import { assignFiles, carryOut, choicesOf, fileForClient, loadLibrary, normalize, sortCandidates, undoBatches } from "../apps/web/src/batch"
+import type { AgentFile } from "../apps/web/src/api"
 
 const BASE = process.env.OMNA_BASE!
 const AGENT_ID = process.env.OMNA_AGENT_ID!
@@ -143,7 +144,26 @@ async function extraFlows() {
   check("undo: changed member refuses whole batch and deletes none", conflict && await current() === before + 2)
 }
 
+// Whitelist shapes as /api/v1/agent-files returns them (synthetic, no I/O).
+function fileAssignment() {
+  const file = (id: string, clients: string[]): AgentFile => ({ id, clients: clients.map(c => ({ id: c, name: c })), path: `~/${id}`, size: 10, modified_at: "", empty: false, imported_at: null })
+  const shared = file("claude-code", ["claude-code", "opencode"])
+  const own = file("opencode", ["opencode"])
+  const name = (map: Map<string, AgentFile>) => Object.fromEntries([...map].map(([client, f]) => [client, f.id]))
+  // Retest finding: connected in one click, the shared CLAUDE.md went to OpenCode.
+  const together = name(assignFiles([shared], [[], ["opencode", "claude-code"]]))
+  check("files: shared CLAUDE.md goes to Claude Code when both connect together", JSON.stringify(together) === JSON.stringify({ "claude-code": "claude-code" }), together)
+  // Retest finding: with its own AGENTS.md, OpenCode still took the shared file and one card was missing.
+  const both = name(assignFiles([shared, own], [[], ["opencode", "claude-code"]]))
+  check("files: OpenCode with its own AGENTS.md gets a second card", both["claude-code"] === "claude-code" && both["opencode"] === "opencode", both)
+  // Owner rule: across clicks, the first connected client keeps a shared file.
+  const earlier = name(assignFiles([shared], [["opencode"], ["claude-code"]]))
+  check("files: an earlier connection keeps the shared file", JSON.stringify(earlier) === JSON.stringify({ opencode: "claude-code" }), earlier)
+  check("files: import card prefers a client's own file", fileForClient([shared, own], "opencode")?.id === "opencode" && fileForClient([shared], "opencode")?.id === "claude-code")
+}
+
 try {
+  fileAssignment()
   similarityEdges()
   await organizeFlow()
   await importFlow()

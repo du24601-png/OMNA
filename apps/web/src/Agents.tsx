@@ -8,6 +8,7 @@ import { api, explain, type AccessDetail, type AgentClient, type AgentConnection
 import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, dateLabel, deliveryLabel, groupAccess, listTime, outcomeLabel, toolLabel, type AccessGroup } from "./format"
 import { ClientMark, ConnectPanel, PresetChoice, presetOf, type Preset } from "./Clients"
 import { ConnectImport } from "./ConnectImport"
+import { fileForClient } from "./batch"
 import { canLeave, CopyButton, Icon, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
 import type { Service } from "./App"
 
@@ -168,7 +169,7 @@ export function AgentPage({ tick, online, runtime, extractor }: { tick: number; 
       tick={tick + localTick}
       issued={issued?.id === agent.id ? issued : null}
       runtime={runtime}
-      file={current.client ? filesRes.data?.files.find(file => !file.empty && file.clients.some(item => item.id === current.client!.id)) : undefined}
+      file={current.client && filesRes.data ? fileForClient(filesRes.data.files, current.client.id) : undefined}
       extractor={extractor}
       agents={agents}
       onChanged={refresh}

@@ -1,4 +1,4 @@
-"""Isolated rendered regression for unknown / configured / offline extractor copy.
+"""Isolated regression for the import card's direct-file menu and consent copy.
 
 Uses synthetic dev_onboarding data and a fake client home, two free ports (never
 8765), and external Playwright dependencies. Health states and network failures

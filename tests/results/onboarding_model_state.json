@@ -4,165 +4,76 @@
   "scope": "rendered UI with synthetic health states; no live model calls",
   "checks": [
     {
-      "name": "connection fixture writes only to fake home",
+      "name": "connection writes only to fake home",
       "ok": true,
       "detail": {
         "relative": ".codex\\config.toml"
       }
     },
     {
-      "name": "real test service has no extractor",
+      "name": "real service is test mode without extractor",
       "ok": true
     },
     {
-      "name": "guide unknown state makes no AI/upload promise",
-      "ok": true,
-      "detail": "guide-unknown.png"
-    },
-    {
-      "name": "guide unknown state blocks import",
-      "ok": true
-    },
-    {
-      "name": "guide configured model disclosure is truthful",
-      "ok": true,
-      "detail": "guide-model.png"
-    },
-    {
-      "name": "guide configured online state enables import",
-      "ok": true
-    },
-    {
-      "name": "guide config error state makes no AI/upload promise",
-      "ok": true,
-      "detail": "guide-config-error.png"
-    },
-    {
-      "name": "guide config error is visible and blocks import",
-      "ok": true
-    },
-    {
-      "name": "guide offline state makes no AI/upload promise",
-      "ok": true,
-      "detail": "guide-offline.png"
-    },
-    {
-      "name": "guide offline state blocks import",
-      "ok": true
-    },
-    {
-      "name": "guide offline preserves input",
-      "ok": true
-    },
-    {
-      "name": "guide recovery restores model disclosure and import",
-      "ok": true,
-      "detail": "guide-restored.png"
-    },
-    {
-      "name": "guide recovery preserves input",
-      "ok": true
-    },
-    {
-      "name": "guide confirmed no-model state shows structured fallback",
-      "ok": true,
-      "detail": "guide-split.png"
-    },
-    {
-      "name": "guide fixture never calls extraction",
-      "ok": true
-    },
-    {
-      "name": "guide identity, console, runtime and overlay",
-      "ok": true,
-      "detail": {
-        "runtimeErrors": [],
-        "unexpectedConsole": [],
-        "expectedInjectedHealthErrors": [
-          {
-            "type": "error",
-            "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
-            "url": "http://127.0.0.1:60130/api/v1/health"
-          },
-          {
-            "type": "error",
-            "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
-            "url": "http://127.0.0.1:60130/api/v1/health"
-          }
-        ]
-      }
-    },
-    {
-      "name": "card unknown offer makes no AI/upload promise",
-      "ok": true,
-      "detail": "card-unknown-offer.png"
-    },
-    {
-      "name": "card unknown state makes no AI/upload promise",
+      "name": "unknown: menu label and availability",
       "ok": true,
       "detail": "card-unknown.png"
     },
     {
-      "name": "card unknown state blocks import",
-      "ok": true
-    },
-    {
-      "name": "card configured model disclosure is truthful",
+      "name": "configured: menu label and availability",
       "ok": true,
-      "detail": "card-model.png"
+      "detail": "card-configured.png"
     },
     {
-      "name": "card configured online state enables import",
-      "ok": true
-    },
-    {
-      "name": "card config error state makes no AI/upload promise",
+      "name": "configured consent discloses sending to model; no import before consent",
       "ok": true,
-      "detail": "card-config-error.png"
+      "detail": "card-model-consent.png"
     },
     {
-      "name": "card config error is visible and blocks import",
-      "ok": true
+      "name": "configuration-error: menu label and availability",
+      "ok": true,
+      "detail": "card-configuration-error.png"
     },
     {
-      "name": "card offline state makes no AI/upload promise",
+      "name": "offline: menu label and availability",
       "ok": true,
       "detail": "card-offline.png"
     },
     {
-      "name": "card offline state blocks import",
+      "name": "recovered: menu label and availability",
+      "ok": true,
+      "detail": "card-recovered.png"
+    },
+    {
+      "name": "unconfigured: menu label and availability",
+      "ok": true,
+      "detail": "card-unconfigured.png"
+    },
+    {
+      "name": "unconfigured consent describes structural split; no import before consent",
+      "ok": true,
+      "detail": "card-split-consent.png"
+    },
+    {
+      "name": "state regression never calls extraction",
       "ok": true
     },
     {
-      "name": "card recovery restores model disclosure and import",
-      "ok": true,
-      "detail": "card-restored.png"
-    },
-    {
-      "name": "card confirmed no-model state shows structured fallback",
-      "ok": true,
-      "detail": "card-split.png"
-    },
-    {
-      "name": "card fixture never calls extraction",
-      "ok": true
-    },
-    {
-      "name": "card identity, console, runtime and overlay",
+      "name": "page identity, content, runtime, console and overlay",
       "ok": true,
       "detail": {
-        "runtimeErrors": [],
+        "errors": [],
         "unexpectedConsole": [],
         "expectedInjectedHealthErrors": [
           {
             "type": "error",
             "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
-            "url": "http://127.0.0.1:60130/api/v1/health"
+            "url": "http://127.0.0.1:52131/api/v1/health"
           },
           {
             "type": "error",
             "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
-            "url": "http://127.0.0.1:60130/api/v1/health"
+            "url": "http://127.0.0.1:52131/api/v1/health"
           }
         ]
       }
@@ -170,44 +81,20 @@
   ],
   "browser": "headless Microsoft Edge via external Playwright",
   "synthetic_health_only": true,
-  "screenshots": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ff47-2c83-7633-81b6-f5bb9113ff24\\omna-model-state-qa\\after",
+  "screenshots": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\model-state",
+  "removed_obsolete_assertions": [
+    "4-step guide direct-file / ChatGPT import navigation",
+    "guide extractor disclosure and import availability",
+    "guide text-input preservation during outage and recovery"
+  ],
+  "replacement": "Agent import card menu: unknown, configured, config error, offline, recovery, unconfigured; consent copy and zero import requests",
   "ports": [
-    60129,
-    60130
+    52130,
+    52131
   ],
   "cleanup": {
     "processes_stopped": true,
     "temporary_data_removed": true
   },
-  "seconds": 40.8,
-  "delivery": {
-    "status": "DONE",
-    "task": "Correct extractor configuration copy and submission gating in onboarding and connection import card",
-    "root_cause": "App collapsed extractor=null to false before the card; onboarding also used a truthy test for unknown configuration",
-    "changes": [
-      "Preserve boolean|null through App, AgentPage, AgentDetail and ConnectImport",
-      "Require an online service and a non-null extractor state before direct import",
-      "Use neutral copy for unknown, configuration errors and offline states; show configuration errors in onboarding",
-      "Restore the actual model or structured fallback disclosure after recovery and preserve input",
-      "Update existing README and ARCHITECTURE; add no backend or dependency changes"
-    ],
-    "before_evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ff47-2c83-7633-81b6-f5bb9113ff24\\omna-model-state-qa\\before\\results.json",
-    "before_product_failures": 8,
-    "before_fixture_note": "A separate fake-home assertion failed because Windows exposed the same temporary path through an 8.3 alias. Resolve the runner's expected path to the full path; keep the exact relative-path assertion.",
-    "validation": [
-      { "command": "tests: python -X utf8 tests/onboarding_model_state.py", "status": "PASS", "passed": 29, "total": 29, "model_calls": 0 },
-      { "command": "tests: python -X utf8 tests/onboarding_batches.py", "status": "PASS", "passed": 31, "total": 31, "evidence": "tests/results/onboarding_batches.json" },
-      { "command": "apps/web: .\\node_modules\\.bin\\tsc --noEmit", "status": "PASS", "exit_code": 0 },
-      { "command": "apps/web: .\\node_modules\\.bin\\vite build", "status": "PASS", "exit_code": 0, "note": "Existing bundle-size warning remains" },
-      { "command": "python -m py_compile tests/onboarding_model_state.py", "status": "PASS", "exit_code": 0 },
-      { "command": "git diff --check", "status": "PASS", "exit_code": 0 }
-    ],
-    "safety": { "real_user_data_used": false, "port_8765_used": false, "test_ports_no_longer_listening": true, "committed": false, "pushed": false },
-    "remaining": [
-      { "status": "NOT_RUN", "scope": "Desktop tray, finish-to-tray and onboarding titlebar window controls", "reason": "Reserved for owner by the handoff. Desktop launch flags alone do not isolate the client home because serviceEnv strips the test-mode/client-home overrides." },
-      { "status": "NOT_RUN", "scope": "Real extraction model or external client invocation", "reason": "Browser health fixtures verify UI state only" },
-      { "status": "OPEN", "scope": "Structured splitter can classify a repository operation rule as identity", "evidence": "tests/results/onboarding_qa.json", "action": "Report retained in README; separate service repair scope" }
-    ],
-    "next": "Owner completes native desktop acceptance; scope the structured splitter classification repair separately"
-  }
+  "seconds": 24.1
 }

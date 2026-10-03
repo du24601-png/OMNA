@@ -1,7 +1,7 @@
 // Shared by onboarding step 3 and the connect-import card: sort one or more
 // batches' pending suggestions into plain additions, near duplicates and the
 // ones that need one-by-one review, then carry out what the owner picked.
-import { ApiError, api, type Memory, type Proposal } from "./api"
+import { ApiError, api, type AgentFile, type Memory, type Proposal } from "./api"
 
 export type Lane = "plain" | "similar" | "review"
 export type Candidate = {
@@ -185,4 +185,34 @@ function grams(value: string) {
   const out = new Set<string>()
   for (let index = 0; index < text.length - 1; index++) out.add(text.slice(index, index + 2))
   return out
+}
+
+// Instruction files: the whitelist lists a file's own client first; any
+// other client there only falls back to it (OpenCode reads CLAUDE.md when it
+// has no AGENTS.md of its own).
+export function ownsFile(file: AgentFile, clientId: string) {
+  return file.clients[0]?.id === clientId
+}
+
+export function fileForClient(files: AgentFile[], clientId: string) {
+  const readable = files.filter(file => !file.empty && file.clients.some(item => item.id === clientId))
+  return readable.find(file => ownsFile(file, clientId)) ?? readable[0]
+}
+
+// One organizer per file. `groups` are clients connected together, earliest
+// first. Within a group each client takes its own file before anyone takes a
+// fallback; across groups the earlier connection wins.
+export function assignFiles(files: AgentFile[], groups: string[][]) {
+  const taken = new Map<string, AgentFile>()
+  const used = new Set<string>()
+  const pick = (clientId: string, own: boolean) => {
+    if (taken.has(clientId)) return
+    const file = files.find(item => !item.empty && !used.has(item.id) && item.clients.some(c => c.id === clientId) && (!own || ownsFile(item, clientId)))
+    if (file) { taken.set(clientId, file); used.add(file.id) }
+  }
+  for (const group of groups) {
+    for (const id of group) pick(id, true)
+    for (const id of group) pick(id, false)
+  }
+  return taken
 }

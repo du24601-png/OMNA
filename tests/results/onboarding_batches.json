@@ -4,6 +4,32 @@
   "pass": true,
   "checks": [
     {
+      "name": "files: shared CLAUDE.md goes to Claude Code when both connect together",
+      "ok": true,
+      "detail": {
+        "claude-code": "claude-code"
+      }
+    },
+    {
+      "name": "files: OpenCode with its own AGENTS.md gets a second card",
+      "ok": true,
+      "detail": {
+        "opencode": "opencode",
+        "claude-code": "claude-code"
+      }
+    },
+    {
+      "name": "files: an earlier connection keeps the shared file",
+      "ok": true,
+      "detail": {
+        "opencode": "claude-code"
+      }
+    },
+    {
+      "name": "files: import card prefers a client's own file",
+      "ok": true
+    },
+    {
       "name": "normalize: strips nested Markdown like split.normalize",
       "ok": true
     },
@@ -120,9 +146,9 @@
       "name": "organize: batch is undoable",
       "ok": true,
       "detail": {
-        "batch_id": "55013f4c-eac3-4bab-9f03-f4d6eb2903f7",
+        "batch_id": "134c4945-8beb-4bb3-8b9b-9e3dfbcb6f20",
         "kind": "organize",
-        "agent_id": "018ba191-6497-4ab0-948b-1f58562baf68",
+        "agent_id": "c8af1680-df9a-4a00-b05f-bfe631810773",
         "pending": 2,
         "pending_additions": 2,
         "plain_additions": 2,
@@ -158,7 +184,7 @@
           ],
           "path": "~/.claude/CLAUDE.md",
           "size": 312,
-          "modified_at": "2026-10-03T03:17:13.721751+00:00",
+          "modified_at": "2026-10-03T05:37:30.417554+00:00",
           "empty": false,
           "imported_at": null
         }
@@ -187,9 +213,9 @@
       "name": "import: three plain additions",
       "ok": true,
       "detail": [
-        "独立开发者，主要写 TypeScript 和 Python",
+        "在做本地优先的笔记应用「纸鸢」",
         "测试框架用 Vitest，不用 Jest",
-        "在做本地优先的笔记应用「纸鸢」"
+        "独立开发者，主要写 TypeScript 和 Python"
       ]
     },
     {
@@ -255,7 +281,7 @@
         ],
         "path": "~/.claude/CLAUDE.md",
         "size": 312,
-        "modified_at": "2026-10-03T03:17:13.721751+00:00",
+        "modified_at": "2026-10-03T05:37:30.417554+00:00",
         "empty": false,
         "imported_at": null
       }
@@ -326,5 +352,5 @@
       "ok": true
     }
   ],
-  "seconds": 24.0
+  "seconds": 17.2
 }

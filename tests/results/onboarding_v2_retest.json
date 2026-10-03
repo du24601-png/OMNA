@@ -1,0 +1,1182 @@
+{
+  "status": "FAIL",
+  "acceptance_done": false,
+  "base_commit": "35ff4136df557293bf67cfc0431a2ad6f1ec3328",
+  "worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-onboarding-import-600939",
+  "branch": "claude/omna-v2-onboarding-import-600939",
+  "scope": "Windows 原生；真实本地 Mnemosyne + 合成数据 + dev_onboarding 假用户目录；外部 Playwright 无头 Edge；未调用真实提取模型",
+  "checklist": [
+    {
+      "item": 1,
+      "status": "PASS",
+      "detail": "空库自动引导，共 3 步；连接仅写入假用户目录"
+    },
+    {
+      "item": 2,
+      "status": "PASS",
+      "detail": "单独连接 Claude Code 后：一次点击开放提议；提示词前缀正确；4 条提交显示 3 条勾选和 1 条留待确认；最后一次提交后 1849ms 显示；记住 2、拒绝 1、相似 1 待确认"
+    },
+    {
+      "item": 3,
+      "status": "FAIL",
+      "detail": "共用 CLAUDE.md 错分给 OpenCode；有 OpenCode 自有 AGENTS.md 时仍选共用文件，只显示一张卡"
+    },
+    {
+      "item": 4,
+      "status": "PASS",
+      "detail": "画像只有已确认记忆；权限文案与接口一致；完成返回记忆页"
+    },
+    {
+      "item": 5,
+      "status": "PASS",
+      "detail": "新连接合并卡、允许并开始、勾选记住、确认后撤销及删除计数、不用了/停止后的验证提示、直接读取确认及去确认"
+    },
+    {
+      "item": 6,
+      "status": "PASS",
+      "detail": "从＋导入合成 Markdown 3 条，一键记住与撤销计数正确；撤销后 id/content 集合恢复；单条批次无横条"
+    },
+    {
+      "item": 7,
+      "status": "PASS",
+      "detail": "网页主按钮/勾选/开关浅色品牌黑、深色浅底；颜色缺陷最小修复后绿色只留状态点；品牌标志；960×600 和 1440×900 无横向溢出。验证标签/成功/差异的颜色证据为明确标注的合成样式夹具"
+    },
+    {
+      "item": 8,
+      "status": "PASS",
+      "detail": "实际终止本次 Python 服务后，Agent、待确认、设置、引导、导入弹窗和托盘网页小窗都有可见错误提示"
+    }
+  ],
+  "ui_checks": [
+    {
+      "id": "1.empty-auto-three-steps",
+      "status": "PASS",
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step1.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step1.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.brand.onboarding-step1.light",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(23, 23, 23)",
+            "color": "rgb(255, 255, 255)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          }
+        ],
+        "switches": []
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.green.onboarding-step1.light",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt3"
+    },
+    {
+      "id": "7.brand.onboarding-step1.dark",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(245, 244, 241)",
+            "color": "rgb(23, 23, 23)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          }
+        ],
+        "switches": []
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.green.onboarding-step1.dark",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt3"
+    },
+    {
+      "id": "1.connection-fake-home-only",
+      "status": "PASS",
+      "detail": {
+        "relative": [
+          ".claude.json"
+        ],
+        "noCodexConfig": true
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "2.single-claude-organizer-fixture",
+      "status": "PASS",
+      "run": "attempt3"
+    },
+    {
+      "id": "2.one-click-allows-proposing",
+      "status": "PASS",
+      "detail": {
+        "tools": [
+          "get_context",
+          "search_memory",
+          "propose_memory"
+        ],
+        "categories": [
+          "identity",
+          "goal",
+          "preference",
+          "project",
+          "event",
+          "other"
+        ]
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "2.prompt-prefix",
+      "status": "PASS",
+      "run": "attempt3"
+    },
+    {
+      "id": "2.four-arrive-three-checkboxes",
+      "status": "PASS",
+      "detail": {
+        "millisecondsAfterLastSubmission": 1849
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "2.poll-within-about-four-seconds",
+      "status": "PASS",
+      "detail": {
+        "milliseconds": 1849
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "2.similar-held-message",
+      "status": "PASS",
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step2.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step2.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.brand.onboarding-step2.light",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(23, 23, 23)",
+            "color": "rgb(255, 255, 255)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(27, 27, 27)",
+            "accent": "rgb(23, 23, 23)"
+          }
+        ],
+        "switches": []
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.green.onboarding-step2.light",
+      "status": "PASS",
+      "detail": [
+        {
+          "tag": "I",
+          "class": "ob-live",
+          "text": ""
+        }
+      ],
+      "run": "attempt3"
+    },
+    {
+      "id": "7.brand.onboarding-step2.dark",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(245, 244, 241)",
+            "color": "rgb(23, 23, 23)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          },
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(243, 243, 243)",
+            "accent": "rgb(245, 244, 241)"
+          }
+        ],
+        "switches": []
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.green.onboarding-step2.dark",
+      "status": "PASS",
+      "detail": [
+        {
+          "tag": "I",
+          "class": "ob-live",
+          "text": ""
+        }
+      ],
+      "run": "attempt3"
+    },
+    {
+      "id": "2.two-accepted-one-rejected-similar-pending",
+      "status": "PASS",
+      "detail": {
+        "statuses": [
+          "accepted",
+          "accepted",
+          "rejected",
+          "pending"
+        ],
+        "library": [
+          {
+            "id": "470d3667-39eb-4bce-8aa2-481b8a745edf",
+            "content": "SQL 关键字用大写"
+          },
+          {
+            "id": "9bcc9408-5b79-4d0f-bb47-d586f538b484",
+            "content": "Python 项目用 uv 管理依赖"
+          },
+          {
+            "id": "c1817b46-334c-4181-84b9-543568806cb9",
+            "content": "先给结论，再讲原因，不需要客套"
+          }
+        ]
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "4.portrait-confirmed-only",
+      "status": "PASS",
+      "detail": {
+        "portrait": "偏好\nSQL 关键字用大写\nPython 项目用 uv 管理依赖\n先给结论，再讲原因，不需要客套\n\nClaude Code 现在能读到其中的「目标」「偏好」，身份信息默认不给。"
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "4.permission-copy-matches-policy",
+      "status": "PASS",
+      "detail": {
+        "line": "Claude Code 现在能读到其中的「目标」「偏好」，身份信息默认不给。",
+        "policy": [
+          {
+            "name": "Claude Code",
+            "categories": [
+              "preference",
+              "goal"
+            ]
+          }
+        ]
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step3.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.layout.onboarding-step3.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "4.finish-memory-page",
+      "status": "PASS",
+      "run": "attempt3"
+    },
+    {
+      "id": "3.shared-file-one-claude-card",
+      "status": "FAIL",
+      "detail": {
+        "observed": "OpenCode\n~/.claude/CLAUDE.md\n让它整理\n\n会允许它「提议修改」，读取范围不变；它提的每一条都要你勾选才记住。",
+        "files": {
+          "files": [
+            {
+              "id": "claude-code",
+              "clients": [
+                {
+                  "id": "claude-code",
+                  "name": "Claude Code"
+                },
+                {
+                  "id": "opencode",
+                  "name": "OpenCode"
+                }
+              ],
+              "path": "~/.claude/CLAUDE.md",
+              "size": 463,
+              "modified_at": "2026-10-03T03:45:07.845732+00:00",
+              "empty": false,
+              "imported_at": null
+            },
+            {
+              "id": "codex",
+              "clients": [
+                {
+                  "id": "codex",
+                  "name": "ChatGPT"
+                }
+              ],
+              "path": "~/.codex/AGENTS.md",
+              "size": 151,
+              "modified_at": "2026-10-03T03:45:07.846732+00:00",
+              "empty": false,
+              "imported_at": null
+            }
+          ]
+        }
+      },
+      "run": "attempt3"
+    },
+    {
+      "id": "7.titlebar-brand-logo",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "7.flyout-brand-logo",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "web.identity-console-runtime-overlay",
+      "status": "PASS",
+      "detail": {
+        "runtimeErrors": [],
+        "consoleIssues": [
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-clients"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agents"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/proposals?status=pending"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=50"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/proposals?status=pending"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=1"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agents"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-clients"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/proposals?status=pending"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=50"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=1"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agents"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-clients"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/proposals?status=pending"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=50"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/memories?state=current&limit=50"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/health"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/settings"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/settings"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-clients"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agents"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-files"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-clients"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agents"
+          },
+          {
+            "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+            "url": "http://127.0.0.1:56599/api/v1/agent-files"
+          }
+        ]
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.agent",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.pending",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.settings",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.onboarding",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.import-composer",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "8.actual-disconnect.flyout",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "6.markdown-three-top-bar",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "7.layout.pending-batch.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.layout.pending-batch.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.brand.pending-batch.light",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(23, 23, 23)",
+            "color": "rgb(255, 255, 255)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [],
+        "switches": []
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.green.pending-batch.light",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt4"
+    },
+    {
+      "id": "7.brand.pending-batch.dark",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(245, 244, 241)",
+            "color": "rgb(23, 23, 23)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [],
+        "switches": []
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.green.pending-batch.dark",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt4"
+    },
+    {
+      "id": "6.remember-accurate-and-undo-offer",
+      "status": "PASS",
+      "detail": [
+        {
+          "id": "187db7be-6a82-457f-9aac-b6af112466d7",
+          "content": "合成测试：长途旅行选择火车"
+        },
+        {
+          "id": "3c32360d-266f-40eb-bf5c-38bf30cf59ab",
+          "content": "SQL 关键字用大写"
+        },
+        {
+          "id": "a2f6db07-6ea0-47e3-b1b3-2fbdf9d34d08",
+          "content": "先给结论，再讲原因，不需要客套"
+        },
+        {
+          "id": "ac3ee479-d17c-4c22-8e78-9ec0aa5cebce",
+          "content": "合成测试：音乐优先爵士乐"
+        },
+        {
+          "id": "b1b29b1b-b070-4b96-b4a3-2f78c7ba3cb4",
+          "content": "合成测试：每周六上午游泳"
+        },
+        {
+          "id": "f8e4c787-1ae1-4668-859d-36558e995389",
+          "content": "Python 项目用 uv 管理依赖"
+        }
+      ],
+      "run": "attempt4"
+    },
+    {
+      "id": "6.undo-confirmation-before-deletion",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "6.undo-restores-original-library",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "6.single-no-batch-bar",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.new-pending-merged-card",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "7.brand.agent-card.light",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(23, 23, 23)",
+            "color": "rgb(255, 255, 255)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(92, 92, 92)",
+            "accent": "rgb(23, 23, 23)"
+          }
+        ],
+        "switches": [
+          {
+            "background": "rgb(23, 23, 23)",
+            "color": "rgb(92, 92, 92)",
+            "accent": "auto"
+          }
+        ]
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.green.agent-card.light",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt4"
+    },
+    {
+      "id": "7.brand.agent-card.dark",
+      "status": "PASS",
+      "detail": {
+        "buttons": [
+          {
+            "background": "rgb(245, 244, 241)",
+            "color": "rgb(23, 23, 23)",
+            "accent": "auto"
+          }
+        ],
+        "checks": [
+          {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(173, 173, 173)",
+            "accent": "rgb(245, 244, 241)"
+          }
+        ],
+        "switches": [
+          {
+            "background": "rgb(245, 244, 241)",
+            "color": "rgb(173, 173, 173)",
+            "accent": "auto"
+          }
+        ]
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.green.agent-card.dark",
+      "status": "PASS",
+      "detail": [],
+      "run": "attempt4"
+    },
+    {
+      "id": "7.layout.agent-card-offer.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "7.layout.agent-card-offer.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "attempt4"
+    },
+    {
+      "id": "5.start-prompt-prefix",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.remembers-selected-two",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.undo-requires-counted-confirmation",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.undo-deletes-exact-two",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.no-restores-verify-and-reoffer",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.stop-restores-verify-and-reoffer",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.direct-file-confirms-first",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "5.direct-file-import-go-review",
+      "status": "PASS",
+      "run": "attempt4"
+    },
+    {
+      "id": "3.own-opencode-file-adds-card",
+      "status": "FAIL",
+      "detail": {
+        "observed": "OpenCode\n~/.claude/CLAUDE.md\n让它整理\n\n会允许它「提议修改」，读取范围不变；它提的每一条都要你勾选才记住。",
+        "files": {
+          "files": [
+            {
+              "id": "claude-code",
+              "clients": [
+                {
+                  "id": "claude-code",
+                  "name": "Claude Code"
+                },
+                {
+                  "id": "opencode",
+                  "name": "OpenCode"
+                }
+              ],
+              "path": "~/.claude/CLAUDE.md",
+              "size": 463,
+              "modified_at": "2026-10-03T03:56:14.409576+00:00",
+              "empty": false,
+              "imported_at": null
+            },
+            {
+              "id": "codex",
+              "clients": [
+                {
+                  "id": "codex",
+                  "name": "ChatGPT"
+                }
+              ],
+              "path": "~/.codex/AGENTS.md",
+              "size": 151,
+              "modified_at": "2026-10-03T03:56:14.410577+00:00",
+              "empty": false,
+              "imported_at": null
+            },
+            {
+              "id": "opencode",
+              "clients": [
+                {
+                  "id": "opencode",
+                  "name": "OpenCode"
+                }
+              ],
+              "path": "~/.config/opencode/AGENTS.md",
+              "size": 54,
+              "modified_at": "2026-10-03T03:56:19.425934+00:00",
+              "empty": false,
+              "imported_at": null
+            }
+          ]
+        }
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.flyout-green-only-dot.light",
+      "status": "PASS",
+      "detail": {
+        "label": "rgb(92, 92, 92)",
+        "dot": "rgb(46, 118, 86)"
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.flyout-green-only-dot.dark",
+      "status": "PASS",
+      "detail": {
+        "label": "rgb(173, 173, 173)",
+        "dot": "rgb(108, 196, 155)"
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.green-style-fixtures.light",
+      "status": "PASS",
+      "detail": {
+        "syntheticStyleOnly": true,
+        "values": [
+          {
+            "class": "state-text verified",
+            "tag": "P",
+            "color": "rgb(92, 92, 92)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "class": "settings-status ready",
+            "tag": "SPAN",
+            "color": "rgb(92, 92, 92)",
+            "background": "rgba(0, 0, 0, 0.04)"
+          },
+          {
+            "class": "notice success",
+            "tag": "DIV",
+            "color": "rgb(27, 27, 27)",
+            "background": "rgba(0, 0, 0, 0.04)"
+          },
+          {
+            "class": "",
+            "tag": "INS",
+            "color": "rgb(27, 27, 27)",
+            "background": "rgba(0, 0, 0, 0.067)"
+          }
+        ]
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.green-style-fixtures.dark",
+      "status": "PASS",
+      "detail": {
+        "syntheticStyleOnly": true,
+        "values": [
+          {
+            "class": "state-text verified",
+            "tag": "P",
+            "color": "rgb(173, 173, 173)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "class": "settings-status ready",
+            "tag": "SPAN",
+            "color": "rgb(173, 173, 173)",
+            "background": "rgba(255, 255, 255, 0.05)"
+          },
+          {
+            "class": "notice success",
+            "tag": "DIV",
+            "color": "rgb(243, 243, 243)",
+            "background": "rgba(255, 255, 255, 0.05)"
+          },
+          {
+            "class": "",
+            "tag": "INS",
+            "color": "rgb(243, 243, 243)",
+            "background": "rgba(255, 255, 255, 0.08)"
+          }
+        ]
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.layout.flyout-web.960",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 960,
+          "height": 600
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 600
+      },
+      "run": "color-after"
+    },
+    {
+      "id": "7.layout.flyout-web.1440",
+      "status": "PASS",
+      "detail": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "wide": [],
+        "clipped": [],
+        "rootHeight": 900
+      },
+      "run": "color-after"
+    }
+  ],
+  "ui_totals": {
+    "pass": 67,
+    "fail": 2
+  },
+  "commands": [
+    {
+      "cwd": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-onboarding-import-600939\\apps\\web",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "cwd": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-onboarding-import-600939\\apps\\web",
+      "command": "node node_modules/vite/bin/vite.js build",
+      "status": "PASS",
+      "exit_code": 0,
+      "note": "修复后重跑；保留既有 JS 包 >500kB 提示"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests\\onboarding_batches.py",
+      "run": 1,
+      "status": "PASS",
+      "checks": 31,
+      "evidence": "tests/results/onboarding_batches_run1.json"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests\\onboarding_batches.py",
+      "run": 2,
+      "status": "PASS",
+      "checks": 31,
+      "evidence": "tests/results/onboarding_batches_run2.json"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests\\onboarding_batches.py",
+      "run": 3,
+      "status": "PASS",
+      "checks": 31,
+      "evidence": "tests/results/onboarding_batches_run3.json"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests\\test_batches.py",
+      "status": "PASS",
+      "evidence": "tests/results/batches_windows.json",
+      "cache_junction": "experiments/kernel_spike/runs 临时联接已删除；主仓库缓存未删除"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 tests\\onboarding_model_state.py",
+      "status": "PASS",
+      "checks": 12,
+      "evidence": "tests/results/onboarding_model_state.json"
+    },
+    {
+      "command": "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -X utf8 C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\run_qa.py",
+      "status": "FAIL",
+      "note": "两项产品行为失败；主引导、独立补测、样式修复前后证据分别保存，不用测试夹具超时替代产品结论"
+    },
+    {
+      "command": "node --check tests/onboarding_model_state.harness.cjs; python -m py_compile tests/onboarding_model_state.py; git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "removed_obsolete_assertions": [
+    "4-step guide direct-file / ChatGPT import navigation",
+    "guide extractor disclosure and import availability",
+    "guide text-input preservation during outage and recovery"
+  ],
+  "fix": {
+    "file": "apps/web/src/styles.css",
+    "scope": "仅颜色：运行中/已验证文字、提取就绪标签、成功提示、差异新增转中性色；绿色状态点保留；暂停/断连点沿用原色",
+    "red": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\color-before\\results.json",
+    "green": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
+  },
+  "open_findings": [
+    {
+      "id": "F1",
+      "status": "FAIL",
+      "file": "apps/web/src/Onboarding.tsx:103",
+      "reproduction": "新临时库，勾选 OpenCode 和 Claude Code 后连接，进入第 2 步；或两者已连接后进入引导。CLAUDE.md 仅一张卡但归 OpenCode；点整理后 Claude Code 仍只读，向 Claude Code 模拟提交得到 403",
+      "cause": "连接排序由检测/本次连接顺序决定，先遍历的 OpenCode 先占用共用文件",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\attempt2\\results.json"
+    },
+    {
+      "id": "F2",
+      "status": "FAIL",
+      "file": "apps/web/src/Onboarding.tsx:106",
+      "reproduction": "假 home 同时存在 .claude/CLAUDE.md 与 .config/opencode/AGENTS.md，两客户端已连接，进入第 2 步。接口列出两份文件，但只显示 OpenCode 的 CLAUDE.md 卡",
+      "cause": "每个客户端用 files.find 只选首份文件，未优先自有文件；OpenCode 先取共用文件，Claude Code 没有剩余候选",
+      "evidence": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest\\results.json"
+    }
+  ],
+  "not_run": [
+    {
+      "status": "NOT_RUN",
+      "scope": "已安装 OMNA、开发 Electron 连接、真实外部 MCP 客户端、原生托盘与窗口控制、真实提取模型",
+      "reason": "本轮明确限制为 dev_onboarding 隔离网页和模拟客户端提交；网页截图不能代替原生桌面壳或真实客户端"
+    }
+  ],
+  "cleanup": {
+    "processes_stopped": true,
+    "temporary_runtime_removed": true,
+    "initial_sandbox_temp_and_batch_residue_removed": [
+      "zhiwo-onboarding-rj60tnt8",
+      "zhiwo-batches-kd1614q0"
+    ],
+    "test_ports_no_longer_listening": true,
+    "dependency_junctions_preserved": [
+      "node_modules",
+      "apps/web/node_modules",
+      "apps/desktop/node_modules"
+    ],
+    "cache_junction_removed": true,
+    "port_8765_used": false,
+    "installed_omna_used": false,
+    "committed": false,
+    "pushed": false
+  },
+  "evidence_dir": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ffcd-b738-73f3-9f30-e752c6bc0266\\omna-v2-retest",
+  "next": "另开产品行为修复范围：确定共用文件应优先归 Claude Code，且 OpenCode 自有文件优先于 fallback；修复后只重跑第 3 项及相关第 2 步。此次没有服务端或架构变更。"
+}

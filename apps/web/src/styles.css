@@ -122,7 +122,7 @@ html.omna-desktop :is(.dock, .home-brand, button, a, input, textarea, select, la
 .settings-row input:not([type=checkbox]):not([type=radio]):not([type=file]) { width:280px; max-width:48%; height:32px; margin:0; padding:0 10px; border-radius:8px; background:var(--set-field); border:1px solid var(--set-line); color:var(--set-text); font-size:13px; font-weight:400; }
 .settings-row input[type=file] { width:240px; max-width:48%; font-size:12px; color:var(--set-muted); }
 .settings-status { font-size:12px; line-height:1.4; color:var(--set-muted); background:var(--set-btn); border-radius:8px; padding:3px 8px; }
-.settings-status.ready { color:var(--success); background:var(--success-bg); }
+.settings-status.ready { color:var(--muted); background:var(--secondary); }
 .settings-note { padding:12px 14px; }
 .settings-note .helper,.settings-note ul { margin:0; color:var(--set-muted); font-size:13px; line-height:1.7; }
 .settings-impact { padding-left:18px; }
@@ -238,7 +238,7 @@ details:not([open]) > :not(summary) { display:none !important; }
 .notice { display:flex; gap:12px; justify-content:space-between; align-items:flex-start; font-size:13px; padding:12px 16px; border-radius:8px; margin-bottom:16px; background:var(--secondary); line-height:1.7; overflow-wrap:anywhere; }
 .notice p { margin-top:4px; }
 .notice.error { color:var(--error); background:var(--error-bg); }
-.notice.success { color:var(--success); background:var(--success-bg); }
+.notice.success { color:var(--text); background:var(--secondary); }
 .notice.warning { color:var(--warning); background:var(--warning-bg); }
 .loading-line { display:flex; gap:12px; align-items:center; color:var(--muted); font-size:13px; margin:16px 0; }
 .skeleton { display:block; border-radius:6px; background:#ececee; animation:skeleton-pulse 1.6s ease-in-out infinite; }
@@ -423,7 +423,7 @@ details:not([open]) > :not(summary) { display:none !important; }
 .diff h3 span { display:block; margin-top:4px; font-size:var(--fs-meta); color:var(--muted); font-weight:400; }
 .diff p { font-size:var(--fs-body); }
 .diff del { background:var(--error-bg); color:var(--error); text-decoration-thickness:1px; }
-.diff ins { background:var(--success-bg); color:var(--success); text-underline-offset:3px; }
+.diff ins { background:var(--selected); color:var(--text); text-underline-offset:3px; }
 .diff-caption { grid-column:1/-1; color:var(--muted); font-size:var(--fs-meta)!important; }
 .evidence-box { border-left:2px solid var(--border); padding-left:16px; margin-bottom:16px; }
 .evidence-box blockquote { font-size:13px; color:var(--muted); margin:8px 0; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -470,7 +470,7 @@ details:not([open]) > :not(summary) { display:none !important; }
 .conn-dot.inline.off { box-shadow:inset 0 0 0 1.5px var(--muted); }
 @keyframes pulse { 50% { opacity:.35; } }
 .state-text { color:var(--muted); }
-.state-text.verified { color:var(--success); }
+.state-text.verified { color:var(--muted); }
 .state-text.pending { color:var(--warning); }
 .conn-missing { margin-top:6px; padding:8px 12px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); }
 .conn-missing summary { cursor:pointer; padding:4px 0; }
@@ -721,8 +721,9 @@ html.flyout-material { --fly-bg:rgba(249,249,249,.84); }
 .flyout-brand { display:inline-flex; align-items:center; gap:10px; }
 .flyout-brand b { font-size:13px; font-weight:600; letter-spacing:.22em; }
 .flyout-mark { width:18px; height:auto; color:var(--text); fill:currentColor; }
-.flyout-state { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--success); }
-.flyout-state i { width:6px; height:6px; border-radius:999px; background:currentColor; }
+.flyout-state { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.flyout-state i { width:6px; height:6px; border-radius:999px; background:var(--success); }
+.flyout-state.paused i, .flyout-state.off i { background:currentColor; }
 .flyout-state.paused { color:var(--warning); }
 .flyout-state.off { color:var(--error); }
 .flyout-fill { flex:1; }

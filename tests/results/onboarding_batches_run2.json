@@ -4,6 +4,63 @@
   "pass": true,
   "checks": [
     {
+      "name": "normalize: strips nested Markdown like split.normalize",
+      "ok": true
+    },
+    {
+      "name": "organize: unmarked near additions form one pair",
+      "ok": true,
+      "detail": [
+        {
+          "id": "one",
+          "first": {
+            "proposal": {
+              "id": "one",
+              "status": "pending",
+              "change_type": "add",
+              "target_id": null,
+              "batch_id": "synthetic",
+              "payload": {
+                "content": "git 提交信息用中文，动词开头",
+                "category": "preference"
+              },
+              "evidence": {
+                "text": "git 提交信息用中文，动词开头"
+              }
+            },
+            "batch": "synthetic",
+            "lane": "similar",
+            "like": {
+              "content": "git 提交信息用中文，动词开头写",
+              "proposalId": "two"
+            }
+          },
+          "second": {
+            "proposal": {
+              "id": "two",
+              "status": "pending",
+              "change_type": "add",
+              "target_id": null,
+              "batch_id": "synthetic",
+              "payload": {
+                "content": "git 提交信息用中文，动词开头写",
+                "category": "preference"
+              },
+              "evidence": {
+                "text": "git 提交信息用中文，动词开头写"
+              }
+            },
+            "batch": "synthetic",
+            "lane": "similar",
+            "like": {
+              "content": "git 提交信息用中文，动词开头",
+              "proposalId": "one"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "organize: agent starts read-only",
       "ok": true,
       "detail": [
@@ -14,7 +71,7 @@
     {
       "name": "organize: session prompt comes from the service",
       "ok": true,
-      "detail": "请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条用 propose_memory 提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。"
+      "detail": "请先查一下 OMNA 里我的偏好，再读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条用 propose_memory 提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。"
     },
     {
       "name": "organize: four suggestions land in the batch",
@@ -63,9 +120,9 @@
       "name": "organize: batch is undoable",
       "ok": true,
       "detail": {
-        "batch_id": "c3c3ea09-4e1d-4245-ae80-13bd329b1dfe",
+        "batch_id": "ff708be5-1042-40ff-bb54-4bdf60b921e1",
         "kind": "organize",
-        "agent_id": "1dc28f56-3962-49ef-949a-704117e2d727",
+        "agent_id": "85d94949-9835-4483-ac18-5ff3ecff54af",
         "pending": 2,
         "pending_additions": 2,
         "plain_additions": 2,
@@ -101,7 +158,7 @@
           ],
           "path": "~/.claude/CLAUDE.md",
           "size": 312,
-          "modified_at": "2026-10-03T01:03:46.487926+00:00",
+          "modified_at": "2026-10-03T03:30:54.100242+00:00",
           "empty": false,
           "imported_at": null
         }
@@ -198,15 +255,76 @@
         ],
         "path": "~/.claude/CLAUDE.md",
         "size": 312,
-        "modified_at": "2026-10-03T01:03:46.487926+00:00",
+        "modified_at": "2026-10-03T03:30:54.100242+00:00",
         "empty": false,
         "imported_at": null
       }
+    },
+    {
+      "name": "import: pair first retains exactly 1",
+      "ok": true,
+      "detail": {
+        "accepted": 1,
+        "rejected": 1,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "import: pair both retains exactly 2",
+      "ok": true,
+      "detail": {
+        "accepted": 2,
+        "rejected": 0,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "import: all unchecked rejects without publishing",
+      "ok": true,
+      "detail": {
+        "accepted": 0,
+        "rejected": 2,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "retry: response loss is observable",
+      "ok": true,
+      "detail": {
+        "accepted": 0,
+        "rejected": 0,
+        "left": 0,
+        "errors": [
+          "本地服务未运行，没记住的还在，可以重试。"
+        ],
+        "categories": {}
+      }
+    },
+    {
+      "name": "retry: same request after response loss creates no duplicate",
+      "ok": true,
+      "detail": {
+        "accepted": 1,
+        "rejected": 0,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "undo: changed member refuses whole batch and deletes none",
+      "ok": true
     },
     {
       "name": "instruction file not modified",
       "ok": true
     }
   ],
-  "seconds": 8.7
+  "seconds": 31.9
 }

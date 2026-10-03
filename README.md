@@ -159,7 +159,8 @@ server\.venv\Scripts\python.exe tests\test_client_connect.py
 server\.venv\Scripts\python.exe tests\test_embedding_probe.py
 ```
 
-`tests/onboarding_model_state.py` 验证引导和连接导入卡的配置未知、读取错误、已配置、断连、恢复和未配置状态。运行前设置 `OMNA_PLAYWRIGHT_MODULE` 为仓库外已安装的 Playwright 模块目录、`OMNA_UI_EVIDENCE_DIR` 为仓库外截图目录，以及本机模型缓存 `ZHIWO_FASTEMBED_CACHE_DIR`；可用 `ZHIWO_PYTHON`、`OMNA_NODE` 指定解释器。脚本使用独立临时库、假客户端目录和非 8765 随机端口，结束时清理进程和临时数据；健康响应和网络故障是仅限浏览器的测试夹具，不代表真实提取模型验收。当前使用本机 Microsoft Edge，无需改项目依赖。
+`tests/onboarding_model_state.py` 验证 Agent 连接导入卡 ⋯ 菜单「直接读取文件」的配置未知、读取错误、已配置、断连、恢复和未配置状态，以及确认框的提取方式说明。新版 3 屏引导没有文件导入；旧版引导导入入口、提取文案、按钮可用性和导入文本断连保留断言已移除。运行前设置 `OMNA_PLAYWRIGHT_MODULE` 为仓库外已安装的 Playwright 模块目录、`OMNA_UI_EVIDENCE_DIR` 为仓库外截图目录，以及本机模型缓存 `ZHIWO_FASTEMBED_CACHE_DIR`；可用 `ZHIWO_PYTHON`、`OMNA_NODE` 指定解释器。脚本使用独立临时库、假客户端目录和非 8765 随机端口，结束时清理进程和临时数据；健康响应和网络故障是仅限浏览器的测试夹具，不代表真实提取模型验收。当前使用本机 Microsoft Edge，无需改项目依赖。
+
 
 涉及真实客户端的测试需要本机装好 OpenCode，可以用 `OPENCODE_BIN` 指定可执行文件。`test_p2_4_client.py` 缺少 OpenCode 时直接失败；`test_p3_2_desktop.py` 需要先打出安装包，找不到 OpenCode 时把这一项记为 `NOT_RUN`。
 

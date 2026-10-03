@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { api, explain, type AgentClient, type AgentConnection, type AgentFile, type Memory, type Proposal } from "./api"
-import { BATCH_POLL_MS, carryOut, loadLibrary, sortCandidates, type Candidate } from "./batch"
+import { BATCH_POLL_MS, assignFiles, carryOut, loadLibrary, sortCandidates, type Candidate } from "./batch"
 import { BrandMark } from "./Brand"
 import { ClientMark } from "./Clients"
 import { CATEGORIES, TOOLS, categoryLabel, joinNames } from "./format"
@@ -32,7 +32,8 @@ export function Onboarding({ service, controls, onExit }: { service: Service; co
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [picked, setPicked] = useState<Record<string, boolean>>({})
-  const [order, setOrder] = useState<string[]>([])
+  // Clients connected together in one click, in the order of the clicks.
+  const [connectGroups, setConnectGroups] = useState<string[][]>([])
   const [phases, setPhases] = useState<Record<string, Phase>>({})
   const [sessions, setSessions] = useState<Record<string, Session>>({})
   const [orgErrors, setOrgErrors] = useState<Record<string, string>>({})
@@ -89,7 +90,7 @@ export function Onboarding({ service, controls, onExit }: { service: Service; co
       try { await api.connectClient(client.id, "read", keyFor(`connect:${client.id}`)); done.push(client.id) }
       catch (err) { failed.push(client.name); first ??= err }
     }
-    setOrder(old => [...old, ...done.filter(id => !old.includes(id))])
+    if (done.length) setConnectGroups(old => [...old, done])
     await reload()
     setBusy(false)
     if (failed.length) setError(`没连上 ${failed.join("、")}：${explain(first)}`)
@@ -98,14 +99,12 @@ export function Onboarding({ service, controls, onExit }: { service: Service; co
 
   // ── step 2 ──
   // One card per instruction file, given to the first connected client that
-  // reads it: ones connected before onboarding first, then in connect order.
-  const rank = (id: string) => order.indexOf(id)
-  const connected = detected.filter(linked).sort((a, b) => rank(a.id) - rank(b.id))
-  const organizers: Organizer[] = []
-  for (const client of connected) {
-    const file = files.find(item => !item.empty && item.clients.some(c => c.id === client.id) && !organizers.some(o => o.file.id === item.id))
-    if (file) organizers.push({ client, file })
-  }
+  // reads it: ones connected before onboarding first, then click by click;
+  // clients connected in the same click take their own files first.
+  const connected = detected.filter(linked)
+  const later = new Set(connectGroups.flat())
+  const assigned = assignFiles(files, [connected.filter(client => !later.has(client.id)).map(client => client.id), ...connectGroups])
+  const organizers: Organizer[] = connected.filter(client => assigned.has(client.id)).map(client => ({ client, file: assigned.get(client.id)! }))
   const agentOf = (client: AgentClient) => agents.find(agent => agent.id === client.agent_id)
   const setPhase = (id: string, phase: Phase) => setPhases(old => ({ ...old, [id]: phase }))
   async function organize(client: AgentClient) {
