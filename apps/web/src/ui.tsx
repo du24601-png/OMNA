@@ -43,6 +43,12 @@ export function Empty({ title, children, action }: { title: string; children?: R
 export function PageTitle({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
   return <div className="page-heading"><div><h1>{title}</h1>{description && <p>{description}</p>}</div>{children}</div>
 }
+export function CopyButton({ text, label = "复制", className = "copy-button", onCopied }: { text: string; label?: string; className?: string; onCopied?: () => void }) {
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle")
+  return <button type="button" className={className} onClick={async () => {
+    try { await navigator.clipboard.writeText(text); setState("done"); onCopied?.() } catch { setState("failed") }
+  }}><Icon name={state === "done" ? "check" : "copy"} />{state === "done" ? "已复制" : state === "failed" ? "复制失败，请手动选中" : label}</button>
+}
 export function canLeave() { return window.dispatchEvent(new Event("zhiwo:leave", { cancelable: true })) }
 export function useUnsaved(dirty: boolean, busy = false) {
   useEffect(() => {

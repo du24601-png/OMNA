@@ -12,16 +12,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
-.ob{--mica:#F3F3F3;--card:#FFFFFF;--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.04);--sel:rgba(0,0,0,.065);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--warn-soft:rgba(196,140,40,.13);--kbd:rgba(0,0,0,.06);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);background:var(--mica);-webkit-font-smoothing:antialiased}
+.ob{--mica:#F3F3F3;--card:#FFFFFF;--stroke:rgba(0,0,0,.08);--text:#1B1B1B;--muted:#5C5C5C;--hover:rgba(0,0,0,.04);--sel:rgba(0,0,0,.065);--accent:#2E7656;--accent-ink:#FFFFFF;--accent-soft:rgba(46,118,86,.11);--warn:#8A5A12;--warn-soft:rgba(196,140,40,.13);font-family:'Segoe UI Variable Text','Segoe UI','Noto Sans SC',system-ui,sans-serif;color:var(--text);background:var(--mica);-webkit-font-smoothing:antialiased}
 .ob button{font-family:inherit}
-.o-pri:hover{opacity:.88}
+.o-pri:hover{opacity:.82}
 .o-sec:hover{background:var(--sel)}
 .o-row:hover{background:var(--hover)}
-.o-link:hover{color:var(--text)}
 .o-win:hover{background:#C42B1C;color:#FFFFFF}
-.o-chip:hover{background:var(--sel)}
-.ob input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
-.ob input[type=radio]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
+.ob input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#1B1B1B;flex-shrink:0;cursor:pointer}
 .o-scroll{scrollbar-width:thin}
 @keyframes o-breath{0%,100%{opacity:1}50%{opacity:.3}}
 .o-live{animation:o-breath 1.6s ease-in-out infinite}
@@ -32,11 +29,11 @@ body{margin:0}
 
 <div style="height: 44px; flex-shrink: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; padding-left: 18px">
 <div style="display: flex; align-items: center; gap: 10px">
-<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<svg width="16" height="14.5" viewBox="40 18 348 316" aria-hidden="true"><path d="M 172,38 C 184,30 196,39 196,51 L 196,72 C 196,91 190,101 179,113 L 146,147 C 129,164 129,186 146,205 L 179,240 C 191,253 196,264 196,280 L 196,303 C 196,316 185,323 172,316 L 83,261 C 67,251 59,238 59,220 L 59,135 C 59,116 66,105 83,95 Z" fill="currentColor"></path><path d="M 172,38 C 184,30 196,39 196,51 L 196,72 C 196,91 190,101 179,113 L 146,147 C 129,164 129,186 146,205 L 179,240 C 191,253 196,264 196,280 L 196,303 C 196,316 185,323 172,316 L 83,261 C 67,251 59,238 59,220 L 59,135 C 59,116 66,105 83,95 Z" transform="translate(428 0) scale(-1 1)" fill="currentColor"></path><circle cx="214" cy="176" r="40.75" fill="currentColor"></circle></svg>
 <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
 </div>
 <div aria-label="{{progressLabel}}" style="display: flex; gap: 6px">
-<sc-for list="{{dots}}" as="dt" hint-placeholder-count="4">
+<sc-for list="{{dots}}" as="dt" hint-placeholder-count="3">
 <span style="height: 6px; border-radius: 999px; transition: width .25s ease, background-color .25s ease; {{dt.st}}"></span>
 </sc-for>
 </div>
@@ -47,9 +44,9 @@ body{margin:0}
 
 <sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
 <div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
-<div style="font-size: 12px; color: var(--muted)">第 1 步 · 共 4 步</div>
+<div style="font-size: 12px; color: var(--muted)">第 1 步 · 共 3 步</div>
 <h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">先连上你常用的 AI 工具</h1>
-<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">OMNA 会把配置写进它们自己的设置里，原有配置都保留。连上之后，它们只能读你的「偏好」和「目标」，随时可以改。</p>
+<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">OMNA 把配置写进它们自己的设置里，原有配置都保留。连上之后，它们只能读你的「偏好」和「目标」。</p>
 <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 24px">
 <sc-for list="{{clients}}" as="c" hint-placeholder-count="3">
 <label class="o-row" style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); cursor: pointer">
@@ -59,176 +56,68 @@ body{margin:0}
 <span style="display: block; font-size: 14px; font-weight: 500">{{c.name}}</span>
 <span style="display: block; font-size: 12px; color: var(--muted); margin-top: 1px">{{c.note}}</span>
 </span>
-<sc-if value="{{c.hasFiles}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px">有你写过的说明</span></sc-if>
+<sc-if value="{{c.hasFiles}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; color: var(--muted); background: var(--sel); padding: 2px 8px; border-radius: 999px">有你写过的说明</span></sc-if>
 </label>
 </sc-for>
 </div>
-<div style="margin-top: 10px; font-size: 12px; color: var(--muted)">没检测到 ZCode、ChatGPT、Claude 桌面版 · <button type="button" class="o-link" style="border: 0; background: transparent; padding: 0; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">手动连接其他客户端</button></div>
+<div style="margin-top: 10px; font-size: 12px; color: var(--muted)">没检测到 ZCode、ChatGPT、Claude 桌面版。装好后可以在「Agent」页连接。</div>
 </div>
 </sc-if>
 
 <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
 <div class="o-scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 28px 64px 16px">
-<div style="font-size: 12px; color: var(--muted)">第 2 步 · 共 4 步</div>
-<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">带上你已经写过的东西</h1>
-<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">让刚连上的 AI 工具自己读一遍你写给它的说明，挑出关于你的内容交给 OMNA。下一步由你确认，确认之前什么都不会生效。</p>
+<div style="font-size: 12px; color: var(--muted)">第 2 步 · 共 3 步</div>
+<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">带上你写过的说明</h1>
+<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">让刚连上的 AI 工具读一遍它的说明文件，把关于你的内容交给 OMNA。勾上的才会记住。</p>
 
-<div style="margin-top: 20px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); overflow: hidden">
-<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px 4px">
-<span style="font-size: 13px; font-weight: 600">让 AI 工具帮你整理</span>
-<span style="font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px">推荐</span>
-<span style="flex: 1"></span>
-<span style="font-size: 12px; color: var(--muted)">用它自己的模型，不用你配置</span>
-</div>
+<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px">
 <sc-for list="{{organizers}}" as="a" hint-placeholder-count="2">
-<div style="padding: 10px 14px 12px; border-top: 1px solid var(--stroke); margin-top: 8px">
+<div style="border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); padding: 14px 16px">
 <div style="display: flex; align-items: center; gap: 12px">
 <span style="width: 30px; height: 30px; border-radius: 7px; background: {{a.color}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">{{a.mono}}</span>
 <span style="flex: 1; min-width: 0">
 <span style="display: block; font-size: 14px; font-weight: 500">{{a.name}}</span>
 <span style="display: block; font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted); margin-top: 1px">{{a.file}}</span>
 </span>
-<sc-if value="{{a.isIdle}}" hint-placeholder-val="{{ true }}"><button type="button" class="o-sec" onClick="{{a.start}}" style="height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12.5px; cursor: pointer">让它整理</button></sc-if>
+<sc-if value="{{a.isIdle}}" hint-placeholder-val="{{ true }}"><button type="button" class="o-sec" onClick="{{a.start}}" style="height: 32px; padding: 0 14px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer">让它整理</button></sc-if>
 <sc-if value="{{a.isWaiting}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted)"><span class="o-live" style="width: 7px; height: 7px; border-radius: 999px; background: var(--accent)"></span>{{a.waitLabel}}</span></sc-if>
-<sc-if value="{{a.isDone}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--accent)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>收到 {{a.got}} 条</span></sc-if>
 </div>
-
-<sc-if value="{{a.isConsent}}" hint-placeholder-val="{{ false }}">
-<div style="margin: 10px 0 0 42px; padding: 12px 14px; border-radius: 6px; background: var(--mica)">
-<div style="font-size: 13px; line-height: 1.6">整理需要 {{a.name}} 能<b style="font-weight: 600">「提议修改」</b>。它提的每一条都进待确认，你点了才生效；读取范围不变。</div>
-<div style="display: flex; gap: 8px; margin-top: 10px">
-<button type="button" class="o-pri" onClick="{{a.allow}}" style="height: 30px; padding: 0 14px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 12.5px; font-weight: 600; cursor: pointer">允许提议，开始整理</button>
-<button type="button" class="o-sec" onClick="{{a.cancel}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12.5px; cursor: pointer">先不要</button>
-</div>
-</div>
+<sc-if value="{{a.isIdle}}" hint-placeholder-val="{{ true }}">
+<div style="margin: 8px 0 0 42px; font-size: 12px; color: var(--muted); line-height: 1.6">会允许它「提议修改」，读取范围不变；它提的每一条都要你勾选才记住。</div>
 </sc-if>
-
-<sc-if value="{{a.showPrompt}}" hint-placeholder-val="{{ false }}">
-<div style="margin: 10px 0 0 42px">
-<div style="font-size: 12px; color: var(--muted)">复制这句话，到 {{a.name}} 里发送：</div>
+<sc-if value="{{a.isWaiting}}" hint-placeholder-val="{{ false }}">
+<div style="margin: 12px 0 0 42px">
+<div style="font-size: 12px; color: var(--muted)">重启 {{a.name}}，把这句话发给它：</div>
 <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
-<span style="flex: 1">请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。</span>
+<span style="flex: 1">请先查一下 OMNA 里我的偏好，再读一下你的全局说明文件，把其中关于我本人的内容整理成记忆，逐条提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。</span>
 <button type="button" class="o-sec" onClick="{{a.copy}}" style="flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">{{a.copyLabel}}</button>
 </div>
-<sc-if value="{{a.isSlow}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 8px; padding: 10px 12px; border-radius: 6px; background: var(--warn-soft); font-size: 12.5px; line-height: 1.6">还没收到。确认 {{a.name}} 已经重启、在它那边发了这句话；它要先读取一次 OMNA 才算连上。也可以改用下面的「直接读取文件」。</div>
+<sc-if value="{{a.hasItems}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 2px; margin-top: 10px">
+<sc-for list="{{a.items}}" as="it" hint-placeholder-count="4">
+<label class="o-row" style="display: flex; align-items: center; gap: 10px; padding: 5px 6px; margin-left: -6px; border-radius: 6px; cursor: pointer">
+<input type="checkbox" checked="{{it.on}}" onChange="{{it.toggle}}" aria-label="记住：{{it.text}}">
+<span style="flex: 1; font-size: 13.5px; line-height: 1.5; {{it.st}}">{{it.text}}</span>
+<span style="font-size: 11.5px; color: var(--muted)">{{it.cat}}</span>
+</label>
+</sc-for>
+</div>
 </sc-if>
+<sc-if value="{{a.hasHeld}}" hint-placeholder-val="{{ false }}"><div style="margin-top: 6px; font-size: 12px; color: var(--muted)">另有 {{a.held}} 条和上面的很像，留在「记忆 › 待确认」里，以后再挑。</div></sc-if>
 </div>
 </sc-if>
 </div>
 </sc-for>
 <sc-if value="{{noOrganizer}}" hint-placeholder-val="{{ false }}">
-<div style="padding: 12px 14px 14px; border-top: 1px solid var(--stroke); margin-top: 8px; font-size: 13px; color: var(--muted)">上一步没有连上有说明文件的工具。可以用下面的方式带上已有内容，或者先跳过。</div>
+<div style="padding: 14px 16px; border-radius: 8px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted); line-height: 1.6">连上的工具里没有找到说明文件。可以直接下一步，以后在「记忆」页右上角的「＋」里导入文字或文件。</div>
 </sc-if>
-</div>
-
-<div style="margin-top: 10px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
-<button type="button" class="o-row" onClick="{{toggleFiles}}" aria-expanded="{{filesExpanded}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg>
-<span style="flex: 1">直接读取说明文件</span>
-<span style="font-size: 12px; font-weight: 400; color: var(--muted)">不用 AI，按标题和列表拆，类别可能要你改</span>
-</button>
-<sc-if value="{{showFiles}}" hint-placeholder-val="{{ false }}">
-<div style="padding: 0 0 8px">
-<sc-for list="{{files}}" as="f" hint-placeholder-count="2">
-<label class="o-row" style="display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 40px; cursor: pointer">
-<input type="checkbox" checked="{{f.on}}" onChange="{{f.toggle}}" aria-label="读取 {{f.path}}">
-<span style="flex: 1; min-width: 0; font-family: 'Cascadia Mono', Consolas, monospace; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.path}}</span>
-<span style="font-size: 12px; color: var(--muted); white-space: nowrap">{{f.from}} · {{f.n}} 条</span>
-</label>
-</sc-for>
-<div style="padding: 2px 14px 4px 40px; font-size: 12px; color: var(--muted)">只读一次，不改动原文件。</div>
-</div>
-</sc-if>
-</div>
-
-<div style="margin-top: 10px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
-<button type="button" class="o-row" onClick="{{toggleMove}}" aria-expanded="{{moveExpanded}}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h12M12 6l6 6-6 6"></path></svg>
-<span style="flex: 1">从 ChatGPT、Kimi、豆包搬过来</span>
-<span style="font-size: 12px; font-weight: 400; color: var(--muted)">复制一句话 → 粘回答回来</span>
-</button>
-<sc-if value="{{showMove}}" hint-placeholder-val="{{ false }}">
-<div style="padding: 0 14px 14px 40px">
-<div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
-<span style="flex: 1">请把你记得的关于我的信息全部列出来：身份、目标、偏好、正在做的项目。每条一行，不要补充你推测的内容。</span>
-<button type="button" class="o-sec" style="flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制</button>
-</div>
-<label style="display: block; margin-top: 8px; font-size: 12px; color: var(--muted)">把它的回答粘贴到这里
-<textarea rows="2" placeholder="粘贴回答…" style="display: block; width: 100%; box-sizing: border-box; margin-top: 6px; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--stroke); background: var(--card); color: var(--text); font-family: inherit; font-size: 13px; resize: none"></textarea>
-</label>
-</div>
-</sc-if>
-</div>
-
-<div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 8px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted)">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"></path></svg>
-也可以把 TXT、Markdown 文件直接拖进这个窗口
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
 <div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
-<div style="font-size: 12px; color: var(--muted)">第 3 步 · 共 4 步</div>
-<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
-<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">收到 {{total}} 条，看看哪些要记住</h1>
-<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12.5px">
-<span style="padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--stroke)">新增 {{newCount}}</span>
-<span style="padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--stroke)">重复的已合并 {{merged}}</span>
-<span style="padding: 3px 10px; border-radius: 999px; {{conflictPillSt}}">{{conflictPill}}</span>
-<sc-if value="{{stillComing}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent)"><span class="o-live" style="width: 6px; height: 6px; border-radius: 999px; background: var(--accent)"></span>{{comingLabel}}</span></sc-if>
-</div>
-
-<div class="o-scroll" style="flex-grow: 1; min-height: 0; overflow-y: auto; margin-top: 14px; padding-bottom: 12px">
-<div style="padding: 12px 14px; border-radius: 8px; background: var(--warn-soft); margin-bottom: 12px">
-<div style="font-size: 13px; font-weight: 600">这两条很像，留哪条？</div>
-<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px">
-<sc-for list="{{conflict}}" as="o" hint-placeholder-count="3">
-<label style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; font-size: 13.5px; cursor: pointer; {{o.st}}">
-<input type="radio" name="dup" checked="{{o.on}}" onChange="{{o.pick}}">
-<span style="flex: 1">{{o.text}}</span>
-<span style="font-size: 12px; color: var(--muted)">{{o.from}}</span>
-</label>
-</sc-for>
-</div>
-</div>
-<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
-<div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 4px 4px">
-<span style="font-size: 12px; font-weight: 600; color: var(--muted)">{{g.title}} {{g.count}}</span>
-<button type="button" class="o-link" onClick="{{g.flipAll}}" style="border: 0; background: transparent; padding: 0; font-size: 12px; color: var(--muted); cursor: pointer">{{g.flipLabel}}</button>
-</div>
-<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
-<div>
-<div class="o-row" style="display: flex; align-items: center; gap: 12px; padding: 6px 8px; border-radius: 6px">
-<input type="checkbox" checked="{{r.on}}" onChange="{{r.toggle}}" aria-label="记住：{{r.text}}">
-<span style="flex: 1; min-width: 0; font-size: 14px; line-height: 1.5; {{r.st}}">{{r.text}}</span>
-<button type="button" class="o-chip" onClick="{{r.openCat}}" aria-expanded="{{r.catExpanded}}" aria-label="类别：{{r.catName}}，点按修改" style="height: 24px; padding: 0 8px; border: 1px solid var(--stroke); border-radius: 999px; background: transparent; color: var(--muted); font-size: 11.5px; cursor: pointer; white-space: nowrap">{{r.catName}} ▾</button>
-<span style="width: 92px; text-align: right; font-size: 11.5px; color: var(--muted); white-space: nowrap">{{r.from}}</span>
-</div>
-<sc-if value="{{r.catOpen}}" hint-placeholder-val="{{ false }}">
-<div role="group" aria-label="选择类别" style="display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 8px 36px">
-<sc-for list="{{r.cats}}" as="k" hint-placeholder-count="6">
-<button type="button" class="o-chip" onClick="{{k.pick}}" aria-pressed="{{k.pressed}}" style="height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; cursor: pointer; {{k.st}}">{{k.name}}</button>
-</sc-for>
-</div>
-</sc-if>
-</div>
-</sc-for>
-</sc-for>
-<sc-if value="{{hasSplit}}" hint-placeholder-val="{{ true }}"><div style="padding: 10px 8px 0; font-size: 12px; color: var(--muted)">标「按结构拆」的是直接读文件拆出来的，类别是按标题猜的，点类别可以改。</div></sc-if>
-</div>
-</sc-if>
-<sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
-<h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">还没有要确认的内容</h1>
-<p style="margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6">没关系。以后 AI 工具提的建议、你导入的内容，都会出现在托盘小窗和「记忆 › 待确认」里。</p>
-</sc-if>
-</div>
-</sc-if>
-
-<sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
-<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 28px 64px 0">
-<div style="font-size: 12px; color: var(--muted)">第 4 步 · 共 4 步</div>
+<div style="font-size: 12px; color: var(--muted)">第 3 步 · 共 3 步</div>
 <h1 style="margin: 8px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em">这是 AI 现在眼中的你</h1>
 <div style="margin-top: 20px; padding: 22px 24px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
 <div style="display: flex; align-items: baseline; gap: 14px">
@@ -238,7 +127,7 @@ body{margin:0}
 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 18px">
 <div>
 <div style="font-size: 12px; font-weight: 600; color: var(--muted)">偏好</div>
-<div style="font-size: 13.5px; line-height: 1.9; margin-top: 6px">先给结论，不要客套<br>用 pnpm，测试用 Vitest<br>提交信息写中文，不要自动 push</div>
+<div style="font-size: 13.5px; line-height: 1.9; margin-top: 6px">先给结论，不要客套<br>用 pnpm，测试用 Vitest<br>没有同意不要 git push</div>
 </div>
 <div>
 <div style="font-size: 12px; font-weight: 600; color: var(--muted)">项目</div>
@@ -247,7 +136,7 @@ body{margin:0}
 </div>
 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--stroke); font-size: 12.5px; color: var(--muted)">Claude Code 和 OpenCode 现在能读到其中的「偏好」和「目标」，身份信息默认不给。</div>
 </div>
-<div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--accent-soft)">
+<div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
 <span style="flex: 1; font-size: 13px; line-height: 1.6">去 Claude Code 里试一句：<b style="font-weight: 600">「给纸鸢加一个导出功能」</b>，它会用 pnpm、按你的习惯写提交信息。</span>
 <button type="button" class="o-sec" style="flex-shrink: 0; height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制这句</button>
 </div>
@@ -265,29 +154,13 @@ body{margin:0}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["1","2","3","4"],"default":"1"},"$preview":{"width":880,"height":600}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["1","2","3"],"default":"1"},"$preview":{"width":880,"height":600}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = {
-      step: null,
-      cl: { cc: true, oc: true, wb: false },
-      org: { cc: 'idle', oc: 'idle' },
-      got: { cc: 0, oc: 0 },
-      copied: {},
-      slow: {},
-      fl: { f1: false, f2: false },
-      showFiles: false,
-      move: false,
-      off: [],
-      cat: {},
-      catOpen: null,
-      dup: null
-    };
-    // The step-2 and step-3 boards open mid-flow so each shows a meaningful moment.
-    const start = String(props.step ?? '1');
-    if (start === '2') Object.assign(this.state, { org: { cc: 'consent', oc: 'waiting' }, got: { cc: 0, oc: 2 }, copied: { oc: true } });
-    if (start === '3') Object.assign(this.state, { org: { cc: 'done', oc: 'waiting' }, got: { cc: 9, oc: 3 }, copied: { cc: true, oc: true }, fl: { f1: true, f2: false } });
+    this.state = { step: null, cl: { cc: true, oc: true, wb: false }, org: { cc: 'idle', oc: 'idle' }, got: { cc: 0, oc: 0 }, copied: {}, off: [] };
+    // The step-2 board opens mid-flow: Claude Code has sent five suggestions.
+    if (String(props.step ?? '1') === '2') Object.assign(this.state, { org: { cc: 'waiting', oc: 'idle' }, got: { cc: 5, oc: 0 }, copied: { cc: true } });
     this.timers = [];
   }
   componentWillUnmount() {
@@ -298,162 +171,94 @@ class Component extends DCLogic {
     const timer = setInterval(() => {
       const got = Object.assign({}, this.state.got);
       got[id] = Math.min(target, got[id] + 1);
-      const org = Object.assign({}, this.state.org);
-      if (got[id] >= target) { org[id] = 'done'; clearInterval(timer); }
-      this.setState({ got, org });
-    }, 650);
+      if (got[id] >= target) clearInterval(timer);
+      this.setState({ got });
+    }, 700);
     this.timers.push(timer);
   }
   renderVals() {
     const st = this.state;
     const step = st.step ?? Number(this.props.step ?? 1);
-    const go = (n) => () => this.setState({ step: n, catOpen: null });
+    const go = (n) => () => this.setState({ step: n });
     const flip = (key, id) => () => { const o = Object.assign({}, st[key]); o[id] = !o[id]; this.setState({ [key]: o }); };
-    const setOrg = (id, value) => { const org = Object.assign({}, st.org); org[id] = value; this.setState({ org }); };
 
     const clientDefs = [
-      { id: 'cc', name: 'Claude Code', mono: 'CC', color: '#A3532A', note: '已安装 · 2.4.1', file: '~/.claude/CLAUDE.md', canPropose: false, target: 9 },
-      { id: 'oc', name: 'OpenCode', mono: 'OC', color: '#2B2B2A', note: '已安装 · 1.18.33', file: '~/.config/opencode/AGENTS.md', canPropose: true, target: 4 },
-      { id: 'wb', name: 'WorkBuddy', mono: 'WB', color: '#3B6CA3', note: '已安装', file: '', canPropose: false, target: 0 }
+      { id: 'cc', name: 'Claude Code', mono: 'CC', color: '#A3532A', note: '已安装', file: '~/.claude/CLAUDE.md' },
+      { id: 'oc', name: 'OpenCode', mono: 'OC', color: '#2B2B2A', note: '已安装', file: '~/.config/opencode/AGENTS.md' },
+      { id: 'wb', name: 'WorkBuddy', mono: 'WB', color: '#3B6CA3', note: '已安装', file: '' }
     ];
+    const itemDefs = {
+      cc: [
+        { id: 'c1', text: '先给结论，再讲原因，不需要客套', cat: '偏好' },
+        { id: 'c2', text: '包管理用 pnpm，不用 npm', cat: '偏好' },
+        { id: 'c3', text: '测试框架用 Vitest，不用 Jest', cat: '偏好' },
+        { id: 'c4', text: '回答先说结论，别客套', cat: '偏好', held: true },
+        { id: 'c5', text: '在做本地优先的笔记应用「纸鸢」', cat: '项目' },
+        { id: 'c6', text: '在学 Rust，打算用它重写同步模块', cat: '目标' },
+        { id: 'c7', text: '没有我同意，不要 git push', cat: '偏好' }
+      ],
+      oc: [
+        { id: 'o1', text: '代码里不要加自动生成的注释', cat: '偏好' },
+        { id: 'o2', text: '记账小程序准备从 Taro 迁回原生', cat: '项目' },
+        { id: 'o3', text: '主力语言是 TypeScript 和 Python', cat: '身份' }
+      ]
+    };
     const clients = clientDefs.map((c) => ({ name: c.name, mono: c.mono, color: c.color, note: c.note, hasFiles: !!c.file, on: !!st.cl[c.id], toggle: flip('cl', c.id) }));
     const nClients = clientDefs.filter((c) => st.cl[c.id]).length;
+    const isOn = (id) => st.off.indexOf(id) < 0;
 
     const organizers = clientDefs.filter((c) => c.file && st.cl[c.id]).map((c) => {
-      const phase = st.org[c.id];
-      const waiting = phase === 'waiting';
+      const arrived = itemDefs[c.id].slice(0, st.got[c.id]);
+      const shown = arrived.filter((it) => !it.held);
+      const waiting = st.org[c.id] === 'waiting';
       return {
-        name: c.name, mono: c.mono, color: c.color, file: c.file, got: st.got[c.id],
-        isIdle: phase === 'idle', isConsent: phase === 'consent', isWaiting: waiting, isDone: phase === 'done',
-        isSlow: waiting && !!st.slow[c.id],
-        showPrompt: waiting || phase === 'done',
-        waitLabel: st.got[c.id] ? ('已收到 ' + st.got[c.id] + ' 条…') : '等它提交…',
+        name: c.name, mono: c.mono, color: c.color, file: c.file,
+        isIdle: !waiting, isWaiting: waiting,
+        waitLabel: arrived.length ? ('已收到 ' + arrived.length + ' 条…') : '等它提交…',
         copyLabel: st.copied[c.id] ? '已复制' : '复制',
-        start: () => setOrg(c.id, c.canPropose ? 'waiting' : 'consent'),
-        allow: () => setOrg(c.id, 'waiting'),
-        cancel: () => setOrg(c.id, 'idle'),
+        start: () => { const org = Object.assign({}, st.org); org[c.id] = 'waiting'; this.setState({ org }); },
         copy: () => {
           const copied = Object.assign({}, st.copied); copied[c.id] = true;
           this.setState({ copied });
-          if (!st.copied[c.id]) this.arrive(c.id, c.target);
-        }
+          if (!st.copied[c.id]) this.arrive(c.id, itemDefs[c.id].length);
+        },
+        hasItems: shown.length > 0,
+        items: shown.map((it) => ({
+          text: it.text, cat: it.cat, on: isOn(it.id),
+          st: isOn(it.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
+          toggle: () => this.setState({ off: isOn(it.id) ? st.off.concat(it.id) : st.off.filter((x) => x !== it.id) })
+        })),
+        hasHeld: arrived.length > shown.length,
+        held: arrived.length - shown.length
       };
     });
-
-    const fileDefs = [
-      { id: 'f1', path: '~/.claude/CLAUDE.md', from: 'Claude Code', n: 11 },
-      { id: 'f2', path: '~/.config/opencode/AGENTS.md', from: 'OpenCode', n: 5 }
-    ];
-    const files = fileDefs.map((f) => ({ path: f.path, from: f.from, n: f.n, on: !!st.fl[f.id], toggle: flip('fl', f.id) }));
-
-    const CATS = [['preference', '偏好'], ['project', '项目'], ['goal', '目标'], ['identity', '身份'], ['event', '事件'], ['other', '其他']];
-    const catName = (id) => (CATS.find((c) => c[0] === id) || CATS[5])[1];
-    const rowDefs = [
-      { id: 'r1', src: 'cc', cat: 'preference', text: '先给结论，再讲原因，不需要客套' },
-      { id: 'r2', src: 'cc', cat: 'preference', text: '包管理用 pnpm，不用 npm' },
-      { id: 'r3', src: 'cc', cat: 'preference', text: '测试框架用 Vitest，不用 Jest' },
-      { id: 'r4', src: 'cc', cat: 'preference', text: '没有我同意，不要 git push' },
-      { id: 'r5', src: 'cc', cat: 'project', text: '在做本地优先的笔记应用「纸鸢」' },
-      { id: 'r6', src: 'cc', cat: 'goal', text: '在学 Rust，打算用它重写同步模块' },
-      { id: 'r7', src: 'cc', cat: 'identity', text: '独立开发者，一个人运营一家小公司' },
-      { id: 'r8', src: 'oc', cat: 'preference', text: '代码里不要加自动生成的注释' },
-      { id: 'r9', src: 'oc', cat: 'project', text: '记账小程序准备从 Taro 迁回原生' },
-      { id: 'r10', src: 'f1', cat: 'other', text: '改动超过 50 行，先给方案再动手' },
-      { id: 'r11', src: 'f2', cat: 'preference', text: '主力语言是 TypeScript 和 Python' }
-    ];
-    const srcName = { cc: 'Claude Code 整理', oc: 'OpenCode 整理', f1: '按结构拆', f2: '按结构拆' };
-    const active = (src) => (src === 'cc' || src === 'oc') ? st.got[src] > 0 : !!st.fl[src];
-    const rows = rowDefs.filter((r) => active(r.src));
-    const isOn = (id) => st.off.indexOf(id) < 0;
-    const catOf = (r) => st.cat[r.id] || r.cat;
-    const groups = CATS.map((c) => {
-      const inGroup = rows.filter((r) => catOf(r) === c[0]);
-      const allOn = inGroup.every((r) => isOn(r.id));
-      return {
-        title: c[1],
-        count: inGroup.length,
-        flipLabel: allOn ? '全不选' : '全选',
-        flipAll: () => {
-          const ids = inGroup.map((r) => r.id);
-          this.setState({ off: allOn ? Array.from(new Set(st.off.concat(ids))) : st.off.filter((x) => ids.indexOf(x) < 0) });
-        },
-        rows: inGroup.map((r) => ({
-          text: r.text, from: srcName[r.src], on: isOn(r.id), catName: catName(catOf(r)),
-          st: isOn(r.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
-          toggle: () => this.setState({ off: isOn(r.id) ? st.off.concat(r.id) : st.off.filter((x) => x !== r.id) }),
-          catOpen: st.catOpen === r.id,
-          catExpanded: st.catOpen === r.id ? 'true' : 'false',
-          openCat: () => this.setState({ catOpen: st.catOpen === r.id ? null : r.id }),
-          cats: CATS.map((k) => ({
-            name: k[1],
-            pressed: catOf(r) === k[0] ? 'true' : 'false',
-            st: catOf(r) === k[0] ? 'border: 1px solid var(--text); background: var(--text); color: var(--card);' : 'border: 1px solid var(--stroke); background: var(--card); color: var(--text);',
-            pick: () => { const cat = Object.assign({}, st.cat); cat[r.id] = k[0]; this.setState({ cat, catOpen: null }); }
-          }))
-        }))
-      };
-    }).filter((g) => g.rows.length);
-    const checked = rows.filter((r) => isOn(r.id)).length;
-    const hasRows = rows.length > 0;
-
-    const conflictDefs = [
-      { id: 'a', text: 'git 提交信息用中文，动词开头', from: 'Claude Code 整理' },
-      { id: 'b', text: '提交信息写中文', from: 'OpenCode 整理' },
-      { id: 'both', text: '两条都留', from: '' }
-    ];
-    const conflict = conflictDefs.map((o) => ({
-      text: o.text, from: o.from, on: st.dup === o.id,
-      st: st.dup === o.id ? 'background: var(--card);' : '',
-      pick: () => this.setState({ dup: o.id })
-    }));
-    const resolved = !!st.dup;
-    const keep = checked + (resolved ? (st.dup === 'both' ? 2 : 1) : 0);
-    const coming = clientDefs.filter((c) => st.org[c.id] === 'waiting');
-
-    const got = (st.got.cc || 0) + (st.got.oc || 0) + fileDefs.filter((f) => st.fl[f.id]).reduce((s, f) => s + f.n, 0);
+    const picked = clientDefs.reduce((sum, c) => sum + (itemDefs[c.id] || []).slice(0, st.got[c.id] || 0).filter((it) => !it.held && isOn(it.id)).length, 0);
     const anyWaiting = organizers.some((a) => a.isWaiting);
-    const dots = [1, 2, 3, 4].map((n) => ({ st: n === step ? 'width: 22px; background: var(--text);' : (n < step ? 'width: 6px; background: var(--text); opacity: .5;' : 'width: 6px; background: var(--stroke);') }));
+    const dots = [1, 2, 3].map((n) => ({ st: n === step ? 'width: 22px; background: var(--text);' : (n < step ? 'width: 6px; background: var(--text); opacity: .5;' : 'width: 6px; background: var(--stroke);') }));
 
-    let primaryLabel = '';
+    let primaryLabel = '下一步';
     let primary = go(step + 1);
     let primaryOk = true;
     let footNote = '';
     if (step === 1) { primaryLabel = nClients ? ('连接 ' + nClients + ' 个') : '至少选一个'; primaryOk = nClients > 0; footNote = '大约 1 分钟'; }
     if (step === 2) {
-      primaryLabel = got ? ('下一步 · 已收到 ' + got + ' 条') : '下一步';
-      footNote = anyWaiting ? '它还在提交也可以先往下走，新收到的会自动加进来' : '只读你选的文件，不会上传到任何地方';
+      primaryLabel = picked ? ('记住 ' + picked + ' 条') : '下一步';
+      footNote = anyWaiting ? '它还在提交也可以先往下走，后到的会进待确认' : '可以跳过，以后在「Agent」页也能让它整理';
     }
-    if (step === 3) {
-      if (!hasRows) { primaryLabel = '下一步'; footNote = ''; }
-      else { primaryLabel = resolved ? ('记住 ' + keep + ' 条') : '还有 1 处要你选'; primaryOk = resolved; footNote = '记住之后，可以整批撤销这次导入'; }
-    }
-    if (step === 4) { primaryLabel = '完成，收进托盘'; primary = () => this.setState({ step: 1, org: { cc: 'idle', oc: 'idle' }, got: { cc: 0, oc: 0 }, copied: {}, fl: { f1: false, f2: false }, off: [], cat: {}, dup: null }); footNote = 'OMNA 会在托盘里安静运行，有建议时再叫你'; }
+    if (step === 3) { primaryLabel = '完成，收进托盘'; primary = () => this.setState({ step: 1, org: { cc: 'idle', oc: 'idle' }, got: { cc: 0, oc: 0 }, copied: {}, off: [] }); footNote = 'OMNA 会在托盘里安静运行，有建议时再叫你'; }
     if (!primaryOk) primary = () => {};
 
     return {
-      s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4,
-      progressLabel: '第 ' + step + ' 步，共 4 步',
+      s1: step === 1, s2: step === 2, s3: step === 3,
+      progressLabel: '第 ' + step + ' 步，共 3 步',
       dots, clients, organizers,
       noOrganizer: organizers.length === 0,
-      files, showFiles: st.showFiles, filesExpanded: st.showFiles ? 'true' : 'false',
-      toggleFiles: () => this.setState({ showFiles: !st.showFiles }),
-      showMove: st.move, moveExpanded: st.move ? 'true' : 'false',
-      toggleMove: () => this.setState({ move: !st.move }),
-      groups, conflict, hasRows, noRows: !hasRows,
-      hasSplit: rows.some((r) => r.src === 'f1' || r.src === 'f2'),
-      total: rows.length + 2 + 2,
-      newCount: rows.length + 1,
-      merged: 2,
-      stillComing: coming.length > 0,
-      comingLabel: coming.map((c) => c.name).join('、') + ' 还在提交',
-      conflictPill: resolved ? '已选好' : '很像的要你选 1',
-      conflictPillSt: resolved ? 'background: var(--accent-soft); color: var(--accent);' : 'background: var(--warn-soft); color: var(--warn); font-weight: 600;',
-      hasBack: step > 1 && step < 4,
-      back: go(step - 1),
-      hasSkip: step === 2 || (step === 3 && hasRows),
+      hasBack: step === 2,
+      back: go(1),
+      hasSkip: step < 3,
       skip: go(step + 1),
       primary, primaryLabel, footNote,
-      primarySt: primaryOk ? 'background: var(--accent); color: var(--accent-ink);' : 'background: var(--sel); color: var(--muted); cursor: default;'
+      primarySt: primaryOk ? 'background: var(--text); color: #FFFFFF;' : 'background: var(--sel); color: var(--muted); cursor: default;'
     };
   }
 }

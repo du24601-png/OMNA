@@ -18,11 +18,11 @@ body{margin:0}
 .c-tab:hover{color:var(--text);background:var(--hover)}
 .c-win:hover{background:var(--hover);color:var(--text)}
 .c-close:hover{background:#C42B1C;color:#FFFFFF}
-.c-pri:hover{opacity:.88}
+.c-pri:hover{opacity:.82}
 .c-sec:hover{background:var(--sel)}
 .c-link:hover{color:var(--text)}
-.c-row:hover{background:var(--hover)}
-.ci input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#2E7656;flex-shrink:0;cursor:pointer}
+.ci input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:#1B1B1B;flex-shrink:0;cursor:pointer}
+.ci input[type=checkbox]:disabled{cursor:default}
 @keyframes c-breath{0%,100%{opacity:1}50%{opacity:.3}}
 .c-live{animation:c-breath 1.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.c-live{animation:none}}
@@ -31,7 +31,7 @@ body{margin:0}
 <div class="ci" style="width: 1040px; height: 680px; display: flex; flex-direction: column; overflow: hidden">
 
 <div style="height: 44px; flex-shrink: 0; display: flex; align-items: center; padding-left: 16px">
-<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="3.2" fill="currentColor"></circle></svg>
+<svg width="16" height="14.5" viewBox="40 18 348 316" aria-hidden="true"><path d="M 172,38 C 184,30 196,39 196,51 L 196,72 C 196,91 190,101 179,113 L 146,147 C 129,164 129,186 146,205 L 179,240 C 191,253 196,264 196,280 L 196,303 C 196,316 185,323 172,316 L 83,261 C 67,251 59,238 59,220 L 59,135 C 59,116 66,105 83,95 Z" fill="currentColor"></path><path d="M 172,38 C 184,30 196,39 196,51 L 196,72 C 196,91 190,101 179,113 L 146,147 C 129,164 129,186 146,205 L 179,240 C 191,253 196,264 196,280 L 196,303 C 196,316 185,323 172,316 L 83,261 C 67,251 59,238 59,220 L 59,135 C 59,116 66,105 83,95 Z" transform="translate(428 0) scale(-1 1)" fill="currentColor"></path><circle cx="214" cy="176" r="40.75" fill="currentColor"></circle></svg>
 <span style="margin-left: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.22em">OMNA</span>
 <nav aria-label="主导航" style="display: flex; gap: 2px; margin-left: 24px">
 <button type="button" class="c-tab" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">记忆</button>
@@ -47,10 +47,10 @@ body{margin:0}
 <div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr)">
 
 <div style="min-height: 0; display: flex; flex-direction: column; padding: 8px 12px 16px 16px">
-<div style="padding: 6px 8px 10px; font-size: 12px; color: var(--muted)">2 个已验证 · 1 个等待第一次读取</div>
+<div style="padding: 6px 8px 10px; font-size: 12px; color: var(--muted)">{{listSummary}}</div>
 <button type="button" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border: 0; border-radius: 6px; background: var(--sel); color: var(--text); text-align: left; cursor: pointer">
-<span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #4B4F8C; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CX<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; background: #C2861A; border: 2px solid var(--mica)"></span></span>
-<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13.5px; font-weight: 600">Codex</span><span style="display: block; font-size: 12px; color: var(--muted)">刚连接 · 等待第一次读取</span></span>
+<span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #4B4F8C; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CX<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; border: 2px solid var(--mica); {{dotSt}}"></span></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13.5px; font-weight: 600">Codex</span><span style="display: block; font-size: 12px; color: var(--muted)">{{codexState}}</span></span>
 </button>
 <button type="button" class="c-row" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); text-align: left; cursor: pointer">
 <span style="position: relative; width: 30px; height: 30px; border-radius: 7px; background: #2B2B2A; color: #FFFFFF; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">OC<span style="position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 999px; background: var(--accent); border: 2px solid var(--mica)"></span></span>
@@ -70,125 +70,92 @@ body{margin:0}
 <span style="width: 44px; height: 44px; border-radius: 10px; background: #4B4F8C; color: #FFFFFF; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">CX</span>
 <div style="flex: 1">
 <div style="font-size: 18px; font-weight: 600">Codex</div>
-<div style="font-size: 12.5px; color: var(--muted); margin-top: 2px">只读 · 可以读「偏好」「目标」 · <button type="button" class="c-link" style="border: 0; background: transparent; padding: 0; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">改权限</button></div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 2px">{{permLine}} · <button type="button" class="c-link" style="border: 0; background: transparent; padding: 0; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">改权限</button></div>
 </div>
 <label style="display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); cursor: pointer">允许访问
-<span aria-hidden="true" style="width: 40px; height: 22px; border-radius: 999px; background: var(--accent); position: relative; display: inline-block"><span style="position: absolute; right: 3px; top: 3px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF"></span></span>
+<span aria-hidden="true" style="width: 40px; height: 22px; border-radius: 999px; background: var(--text); position: relative; display: inline-block"><span style="position: absolute; right: 3px; top: 3px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF"></span></span>
 </label>
-</div>
-
-<div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
-<span style="width: 26px; height: 26px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
-<span style="flex: 1; font-size: 13px; line-height: 1.6">已写入 Codex 的配置。重启它，再发一句<b style="font-weight: 600">「请查一下我的偏好」</b>，第一次读取成功后就算连好了。</span>
-<button type="button" class="c-sec" style="flex-shrink: 0; height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制这句</button>
 </div>
 
 <sc-if value="{{offer}}" hint-placeholder-val="{{ true }}">
-<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
+<div style="margin-top: 20px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
 <div style="display: flex; align-items: flex-start; gap: 12px">
-<span style="width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg></span>
+<span style="width: 32px; height: 32px; border-radius: 8px; background: var(--sel); color: var(--text); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg></span>
 <div style="flex: 1; min-width: 0">
-<div style="font-size: 15px; font-weight: 600">Codex 里有一份你写过的说明</div>
-<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.6">让 Codex 自己读一遍，挑出关于你的内容交给 OMNA。它用自己的模型，你不用配置；提的每一条都要你确认才生效。</div>
+<div style="font-size: 15px; font-weight: 600">让 Codex 读一遍你写给它的说明</div>
+<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.6">它挑出关于你的内容交给 OMNA，你勾选后才记住。需要允许它「提议修改」，读取范围不变。</div>
 <div style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted); margin-top: 6px">~/.codex/AGENTS.md</div>
 </div>
+<div style="position: relative">
+<button type="button" class="c-sec" onClick="{{toggleMenu}}" aria-label="更多" aria-expanded="{{menuExpanded}}" style="width: 30px; height: 30px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+<sc-if value="{{menu}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; right: 0; top: 34px; z-index: 2; width: 220px; padding: 4px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 8px 24px rgba(0,0,0,.12)">
+<button type="button" class="c-row" onClick="{{direct}}" style="display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font-size: 13px; text-align: left; cursor: pointer">直接读取文件（不用 AI）</button>
 </div>
-<sc-if value="{{needConsent}}" hint-placeholder-val="{{ true }}">
-<div style="margin: 14px 0 0 44px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 12.5px; line-height: 1.6">Codex 现在是「只读」。整理需要允许它<b style="font-weight: 600">提议修改</b>；读取范围不变，以后可以在「改权限」里收回。</div>
 </sc-if>
-<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-left: 44px">
-<button type="button" class="c-link" onClick="{{direct}}" style="border: 0; background: transparent; padding: 0; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">直接读取文件（不用 AI）</button>
-<div style="display: flex; gap: 8px">
-<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">不用了</button>
-<button type="button" class="c-pri" onClick="{{start}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">{{startLabel}}</button>
 </div>
+</div>
+<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px">
+<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">不用了</button>
+<button type="button" class="c-pri" onClick="{{start}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--text); color: #FFFFFF; font-size: 13px; font-weight: 600; cursor: pointer">允许并开始</button>
 </div>
 </div>
 </sc-if>
 
-<sc-if value="{{waiting}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<sc-if value="{{live}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 20px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
 <div style="display: flex; align-items: center; gap: 10px">
 <span class="c-live" style="width: 8px; height: 8px; border-radius: 999px; background: var(--accent); flex-shrink: 0"></span>
-<span style="flex: 1; font-size: 15px; font-weight: 600">{{waitTitle}}</span>
-<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12.5px; cursor: pointer">取消</button>
+<span style="flex: 1; font-size: 15px; font-weight: 600">{{liveTitle}}</span>
+<button type="button" class="c-sec" onClick="{{dismiss}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12.5px; cursor: pointer">停止</button>
 </div>
-<div style="margin: 12px 0 0 18px; font-size: 12.5px; color: var(--muted)">复制这句话，到 Codex 里发送：</div>
-<div style="display: flex; align-items: flex-start; gap: 10px; margin: 6px 0 0 18px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
-<span style="flex: 1">请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。</span>
+<div style="display: flex; align-items: flex-start; gap: 10px; margin: 12px 0 0 18px; padding: 10px 12px; border-radius: 6px; background: var(--mica); font-size: 13px; line-height: 1.6">
+<span style="flex: 1">请先查一下 OMNA 里我的偏好，再读一下你的全局说明文件，把其中关于我本人的内容整理成记忆，逐条提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。</span>
 <button type="button" class="c-sec" onClick="{{copy}}" style="flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">{{copyLabel}}</button>
 </div>
-<div style="margin: 10px 0 0 18px; font-size: 12px; color: var(--muted)">Codex 提交的建议会一条条出现在下面；不用一直等，关掉这页也会继续收。</div>
-<div style="margin: 8px 0 0 18px; display: flex; flex-direction: column; gap: 2px">
-<sc-for list="{{arrived}}" as="it" hint-placeholder-count="2">
-<div style="display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13.5px">
-<span style="width: 4px; height: 4px; border-radius: 999px; background: var(--muted); flex-shrink: 0"></span>
-<span style="flex: 1">{{it.text}}</span>
-<span style="font-size: 11.5px; color: var(--muted)">{{it.cat}}</span>
-</div>
-</sc-for>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{received}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)">
-<div style="font-size: 15px; font-weight: 600">Codex 提了 5 条</div>
-<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px">4 条是新的；有 1 条和你已有的很像，放进待确认让你挑。取消勾选的就不记。</div>
-<div style="margin-top: 12px; display: flex; flex-direction: column; gap: 2px">
-<sc-for list="{{items}}" as="it" hint-placeholder-count="5">
-<label class="c-row" style="display: flex; align-items: center; gap: 10px; padding: 5px 6px; border-radius: 6px; font-size: 13.5px; cursor: pointer">
-<input type="checkbox" checked="{{it.on}}" disabled="{{it.conflict}}" onChange="{{it.toggle}}" aria-label="记住：{{it.text}}">
+<sc-if value="{{hasArrived}}" hint-placeholder-val="{{ false }}">
+<div style="margin: 10px 0 0 18px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{arrived}}" as="it" hint-placeholder-count="4">
+<label class="c-row" style="display: flex; align-items: center; gap: 10px; padding: 5px 6px; margin-left: -6px; border-radius: 6px; font-size: 13.5px; cursor: pointer">
+<input type="checkbox" checked="{{it.on}}" disabled="{{it.held}}" onChange="{{it.toggle}}" aria-label="记住：{{it.text}}">
 <span style="flex: 1; {{it.st}}">{{it.text}}</span>
-<sc-if value="{{it.conflict}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11.5px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 999px">和「中文回答…」很像，放进待确认</span></sc-if>
+<sc-if value="{{it.held}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11.5px; color: var(--warn)">和已有的很像，留在待确认</span></sc-if>
 <span style="font-size: 11.5px; color: var(--muted)">{{it.cat}}</span>
 </label>
 </sc-for>
 </div>
-<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px">
-<button type="button" class="c-sec" onClick="{{later}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">先放进待确认</button>
-<button type="button" class="c-pri" onClick="{{remember}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">记住 {{keep}} 条</button>
+</sc-if>
+<div style="display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-left: 18px">
+<span style="flex: 1; font-size: 12px; color: var(--muted)">关掉这页也会继续收；没勾的不会记住。</span>
+<button type="button" class="c-pri" onClick="{{remember}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; {{rememberSt}}">{{rememberLabel}}</button>
 </div>
 </div>
 </sc-if>
 
-<sc-if value="{{directOffer}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; padding: 18px 20px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
-<div style="font-size: 15px; font-weight: 600">按标题和列表拆出 11 条</div>
-<div style="font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.6">其中 6 条已经在你的记忆里。剩下 5 条放进待确认：没用 AI 判断，类别是按标题猜的，确认时可以改。</div>
-<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px">
-<span style="font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11.5px; color: var(--muted)">~/.codex/AGENTS.md · 只读，不改动</span>
-<div style="display: flex; gap: 8px">
-<button type="button" class="c-sec" onClick="{{reset}}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer">返回</button>
-<button type="button" class="c-pri" onClick="{{later}}" style="height: 32px; padding: 0 16px; border: 0; border-radius: 5px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; cursor: pointer">放进待确认 5 条</button>
-</div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{remembered}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--accent-soft)">
-<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">已记住 {{keep}} 条</b>，很像的 1 条在待确认里等你挑。Claude Code 和 OpenCode 下次也会用上。</span>
-<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">撤销这次整理</button>
+<sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">已记住 {{keep}} 条。</b>Codex、Claude Code 和 OpenCode 下次都会用上。</span>
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font-size: 12.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">撤销</button>
 </div>
 </sc-if>
 
 <sc-if value="{{queued}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--accent-soft)">
-<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">5 条已放进待确认</b>，托盘小窗和「记忆 › 待确认」里都能处理，确认前不会生效。</span>
-<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer">去确认</button>
+<div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke)">
+<span style="flex: 1; font-size: 13.5px; line-height: 1.6"><b style="font-weight: 600">按标题拆出 5 条，已放进待确认。</b>确认前不会生效。</span>
+<button type="button" class="c-sec" onClick="{{reset}}" style="height: 30px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font-size: 12.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">去确认</button>
 </div>
 </sc-if>
 
-<sc-if value="{{dismissed}}" hint-placeholder-val="{{ false }}">
-<div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px dashed var(--stroke); font-size: 13px; color: var(--muted)">
-<span style="flex: 1">好的，不整理。以后想带上它的说明，在「记忆」页右上角的「＋」里。</span>
-<button type="button" class="c-sec" onClick="{{reset}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer">改主意了</button>
+<sc-if value="{{plain}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke)">
+<span style="flex: 1; font-size: 13px; line-height: 1.6">已写入 Codex 的配置。重启它，再发一句<b style="font-weight: 600">「请查一下我的偏好」</b>，第一次读取成功后就算连好了。</span>
+<button type="button" class="c-sec" style="flex-shrink: 0; height: 30px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 5px; background: var(--card); color: var(--text); font-size: 12px; cursor: pointer">复制这句</button>
 </div>
+<button type="button" class="c-link" onClick="{{reset}}" style="margin-top: 8px; border: 0; background: transparent; padding: 0; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer">还是让它整理说明文件</button>
 </sc-if>
 
 <div style="margin-top: 28px; font-size: 12px; font-weight: 600; color: var(--muted)">访问记录</div>
-<div style="margin-top: 10px; font-size: 13px; color: var(--muted)">还没有读取。它第一次来读时，托盘图标会亮一下。</div>
+<div style="margin-top: 10px; font-size: 13px; color: var(--muted)">{{accessNote}}</div>
 </div>
 </div>
 
@@ -198,7 +165,7 @@ body{margin:0}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { s: 'offer', allowed: false, copied: false, got: 0, off: [] };
+    this.state = { s: 'offer', menu: false, copied: false, got: 0, off: [] };
     this.timer = null;
   }
   componentWillUnmount() {
@@ -207,49 +174,57 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const all = [
-      { id: 'a', text: 'Python 项目用 uv 管理依赖', cat: '偏好', conflict: false },
-      { id: 'b', text: '依赖升级前先列出变更日志', cat: '偏好', conflict: false },
-      { id: 'c', text: '在做数据管道重构，月底上线', cat: '项目', conflict: false },
-      { id: 'd', text: 'SQL 关键字用大写', cat: '偏好', conflict: false },
-      { id: 'e', text: '回复用英文', cat: '偏好', conflict: true }
+      { id: 'a', text: 'Python 项目用 uv 管理依赖', cat: '偏好' },
+      { id: 'b', text: '依赖升级前先列出变更日志', cat: '偏好' },
+      { id: 'c', text: '回复用中文，技术名词保留英文', cat: '偏好', held: true },
+      { id: 'd', text: '在做数据管道重构，月底上线', cat: '项目' },
+      { id: 'e', text: 'SQL 关键字用大写', cat: '偏好' }
     ];
     const isOn = (id) => st.off.indexOf(id) < 0;
-    const items = all.map((it) => ({
-      text: it.text, cat: it.cat, conflict: it.conflict, on: it.conflict ? false : isOn(it.id),
-      st: it.conflict || isOn(it.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
-      toggle: () => this.setState({ off: isOn(it.id) ? st.off.concat(it.id) : st.off.filter((x) => x !== it.id) })
-    }));
-    const keep = all.filter((it) => !it.conflict && isOn(it.id)).length;
+    const came = all.slice(0, st.got);
+    const keep = came.filter((it) => !it.held && isOn(it.id)).length;
+    const verified = st.s === 'done' || (st.s === 'live' && st.got > 0);
     const trickle = () => {
-      // Prototype only: Codex's suggestions arrive one by one after the sentence is sent.
+      // Prototype only: Codex reads once, then its suggestions arrive one by one.
       clearInterval(this.timer);
       this.timer = setInterval(() => {
         const got = Math.min(all.length, this.state.got + 1);
-        this.setState(got >= all.length ? { got, s: 'received' } : { got });
+        this.setState({ got });
         if (got >= all.length) clearInterval(this.timer);
       }, 800);
     };
+    const stop = () => { clearInterval(this.timer); };
     return {
+      listSummary: verified ? '3 个已验证' : '2 个已验证 · 1 个等待第一次读取',
+      codexState: verified ? '已验证 · 刚刚读过' : '刚连接 · 等待第一次读取',
+      dotSt: verified ? 'background: var(--accent);' : 'background: #C2861A;',
+      permLine: st.s === 'live' || st.s === 'done' ? '可提议修改 · 可以读「偏好」「目标」' : '只读 · 可以读「偏好」「目标」',
+      accessNote: verified ? '刚刚读过一次「偏好」，提了 ' + st.got + ' 条建议。' : '还没有读取。它第一次来读时，托盘图标会亮一下。',
       offer: st.s === 'offer',
-      needConsent: !st.allowed,
-      startLabel: st.allowed ? '让 Codex 整理' : '允许提议，让它整理',
-      waiting: st.s === 'waiting',
-      waitTitle: st.got ? ('已收到 ' + st.got + ' 条，Codex 还在提交…') : (st.copied ? '等 Codex 提交…' : '发给 Codex 这句话'),
+      menu: st.menu,
+      menuExpanded: st.menu ? 'true' : 'false',
+      toggleMenu: () => this.setState({ menu: !st.menu }),
+      live: st.s === 'live',
+      liveTitle: st.got ? ('已收到 ' + st.got + ' 条，Codex 还在提交…') : (st.copied ? '等 Codex 读取和提交…' : '重启 Codex，把这句发给它'),
       copyLabel: st.copied ? '已复制' : '复制',
-      arrived: all.slice(0, st.got).map((it) => ({ text: it.text, cat: it.cat })),
-      received: st.s === 'received',
-      directOffer: st.s === 'direct',
-      remembered: st.s === 'done',
+      hasArrived: came.length > 0,
+      arrived: came.map((it) => ({
+        text: it.text, cat: it.cat, held: !!it.held, on: it.held ? false : isOn(it.id),
+        st: it.held || isOn(it.id) ? '' : 'color: var(--muted); text-decoration: line-through;',
+        toggle: () => this.setState({ off: isOn(it.id) ? st.off.concat(it.id) : st.off.filter((x) => x !== it.id) })
+      })),
+      keep,
+      rememberLabel: keep ? ('记住 ' + keep + ' 条') : '记住',
+      rememberSt: keep ? 'background: var(--text); color: #FFFFFF;' : 'background: var(--sel); color: var(--muted); cursor: default;',
+      remember: () => { if (keep) { stop(); this.setState({ s: 'done' }); } },
+      done: st.s === 'done',
       queued: st.s === 'queued',
-      dismissed: st.s === 'no',
-      items, keep,
-      start: () => this.setState({ s: 'waiting', allowed: true, got: 0, copied: false }),
+      plain: st.s === 'no',
+      start: () => this.setState({ s: 'live', menu: false, got: 0, copied: false, off: [] }),
       copy: () => { if (!st.copied) trickle(); this.setState({ copied: true }); },
-      remember: () => this.setState({ s: 'done' }),
-      later: () => this.setState({ s: 'queued' }),
-      direct: () => this.setState({ s: 'direct' }),
-      dismiss: () => { clearInterval(this.timer); this.setState({ s: 'no' }); },
-      reset: () => { clearInterval(this.timer); this.setState({ s: 'offer', got: 0, copied: false, off: [] }); }
+      direct: () => this.setState({ s: 'queued', menu: false }),
+      dismiss: () => { stop(); this.setState({ s: 'no', menu: false }); },
+      reset: () => { stop(); this.setState({ s: 'offer', got: 0, copied: false, off: [] }); }
     };
   }
 }

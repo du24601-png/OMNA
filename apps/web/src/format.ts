@@ -13,6 +13,10 @@ export function sourceAsset(id: string, dark = false) {
   return `/sources/${id}${dark ? "-dark" : ""}.svg`
 }
 
+export function joinNames(names: string[]) {
+  return names.length <= 1 ? names.join("") : `${names.slice(0, -1).join("、")} 和 ${names[names.length - 1]}`
+}
+
 export function categoryLabel(value: string) {
   return CATEGORIES.find(([id]) => id === value)?.[1] || value
 }

@@ -32,8 +32,10 @@ from zhiwo.services.split import SIMILAR_THRESHOLD, normalize, overlap
 SESSION_MINUTES = 60
 UNDO_PREFIX = "undo_batch:"
 MAX_CONTENT = 2000
+# It starts with a read so that one sentence also verifies a new connection:
+# only a delivered read marks a client verified, a proposal does not.
 ORGANIZE_PROMPT = (
-    "请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）"
+    "请先查一下 OMNA 里我的偏好，再读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）"
     "整理成记忆，逐条用 propose_memory 提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。"
 )
 _KEYS = uuid.UUID("2c1f8d4e-7a9b-4c3d-8e5f-0a1b2c3d4e5f")

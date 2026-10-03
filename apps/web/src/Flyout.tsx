@@ -3,6 +3,7 @@ import { api, explain, type Memory, type Proposal, type TrayStatus } from "./api
 import { categoryLabel } from "./format"
 import { classify } from "./Review"
 import { SourceMark } from "./ui"
+import { BrandMark } from "./Brand"
 
 const POLL_MS = 4000
 
@@ -114,7 +115,7 @@ export function Flyout() {
   const reads = status?.reads_today
   return <div className="flyout" role="dialog" aria-label="OMNA">
     <header className="flyout-head">
-      <span className="flyout-brand"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2.4"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg><b>OMNA</b></span>
+      <span className="flyout-brand"><BrandMark className="flyout-mark"/><b>OMNA</b></span>
       <span className={`flyout-state ${offline ? "off" : paused ? "paused" : ""}`}><i/>{offline ? "没连上本机服务" : paused ? "已暂停共享" : "运行中"}</span>
       <span className="flyout-fill"/>
       <button type="button" className="flyout-icon" onClick={togglePause} disabled={!status} aria-label={paused ? "恢复共享" : "暂停共享 1 小时"} title={paused ? "恢复共享" : "暂停共享 1 小时"}>{paused

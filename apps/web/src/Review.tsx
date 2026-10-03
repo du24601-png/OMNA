@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ApiError, api, explain, type Memory, type Proposal } from "./api"
+import { BatchBar } from "./BatchBar"
 import { categoryLabel } from "./format"
 import { canLeave, Empty, Icon, ResourceNotice, Skeleton, SourceMark, useResource, useUnsaved } from "./ui"
 
@@ -73,6 +74,7 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
     {notice && <div className="notice success inbox-note" role="status"><span>{notice.text}</span>{notice.id && <button className="text-button" onClick={() => onOpen(notice.id!)}>查看正式记忆</button>}</div>}
     <div className="inbox">
       <header className="inbox-head"><h1>待确认</h1>{resource.data && <span>{pending.length}</span>}</header>
+      <BatchBar proposals={pending} tick={tick} online={live} onChanged={() => { resource.reload(); onSaved() }} />
       {resource.data && !pending.length && !resource.error && <Empty title="当前没有待确认的记忆">导入或 Agent 提出的内容，会先出现在这里。</Empty>}
       {!!pending.length && <ol className="inbox-rows">
         {pending.map(item => <InboxRow key={item.id} proposal={item} library={library} libraryReady={libraryReady} focused={item.id === currentId} open={item.id === openId} online={live} command={command} onSelect={toggle => choose(item.id, toggle)} onDone={finish} />)}

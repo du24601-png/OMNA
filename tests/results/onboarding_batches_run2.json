@@ -1,0 +1,212 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "pass": true,
+  "checks": [
+    {
+      "name": "organize: agent starts read-only",
+      "ok": true,
+      "detail": [
+        "get_context",
+        "search_memory"
+      ]
+    },
+    {
+      "name": "organize: session prompt comes from the service",
+      "ok": true,
+      "detail": "请读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条用 propose_memory 提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。"
+    },
+    {
+      "name": "organize: four suggestions land in the batch",
+      "ok": true,
+      "detail": {
+        "Python 项目用 uv 管理依赖": "plain",
+        "SQL 关键字用大写": "plain",
+        "先给结论再讲原因，不需要客套": "similar",
+        "在做数据管道重构，月底上线": "plain"
+      }
+    },
+    {
+      "name": "organize: the one like an existing memory is held back",
+      "ok": true,
+      "detail": {
+        "Python 项目用 uv 管理依赖": "plain",
+        "SQL 关键字用大写": "plain",
+        "先给结论再讲原因，不需要客套": "similar",
+        "在做数据管道重构，月底上线": "plain"
+      }
+    },
+    {
+      "name": "organize: remembers exactly the two kept",
+      "ok": true,
+      "detail": {
+        "accepted": 2,
+        "rejected": 1,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "organize: library grew by 2",
+      "ok": true
+    },
+    {
+      "name": "organize: late arrival and the similar one stay pending",
+      "ok": true,
+      "detail": [
+        "先给结论再讲原因，不需要客套",
+        "周报习惯在周五下午写"
+      ]
+    },
+    {
+      "name": "organize: batch is undoable",
+      "ok": true,
+      "detail": {
+        "batch_id": "c3c3ea09-4e1d-4245-ae80-13bd329b1dfe",
+        "kind": "organize",
+        "agent_id": "1dc28f56-3962-49ef-949a-704117e2d727",
+        "pending": 2,
+        "pending_additions": 2,
+        "plain_additions": 2,
+        "remembered": 2,
+        "undoable": true,
+        "changed_since": 0
+      }
+    },
+    {
+      "name": "organize: undo deletes the 2",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "name": "organize: library back to before",
+      "ok": true
+    },
+    {
+      "name": "import: whitelisted CLAUDE.md is listed, not yet imported",
+      "ok": true,
+      "detail": [
+        {
+          "id": "claude-code",
+          "clients": [
+            {
+              "id": "claude-code",
+              "name": "Claude Code"
+            },
+            {
+              "id": "opencode",
+              "name": "OpenCode"
+            }
+          ],
+          "path": "~/.claude/CLAUDE.md",
+          "size": 312,
+          "modified_at": "2026-10-03T01:03:46.487926+00:00",
+          "empty": false,
+          "imported_at": null
+        }
+      ]
+    },
+    {
+      "name": "import: split without a model, one exact duplicate merged",
+      "ok": true,
+      "detail": {
+        "status": "extracted",
+        "method": "split",
+        "merged": 1
+      }
+    },
+    {
+      "name": "import: the two near-identical lines become one choice",
+      "ok": true,
+      "detail": [
+        [
+          "git 提交信息用中文，动词开头写",
+          "git 提交信息用中文，动词开头"
+        ]
+      ]
+    },
+    {
+      "name": "import: three plain additions",
+      "ok": true,
+      "detail": [
+        "独立开发者，主要写 TypeScript 和 Python",
+        "在做本地优先的笔记应用「纸鸢」",
+        "测试框架用 Vitest，不用 Jest"
+      ]
+    },
+    {
+      "name": "import: 2 kept + the picked one remembered, 2 rejected",
+      "ok": true,
+      "detail": {
+        "accepted": 3,
+        "rejected": 2,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "import: library grew by 3",
+      "ok": true
+    },
+    {
+      "name": "import: changed category is saved",
+      "ok": true,
+      "detail": [
+        "测试框架用 Vitest，不用 Jest"
+      ]
+    },
+    {
+      "name": "import: repeating the same plan publishes nothing new",
+      "ok": true,
+      "detail": {
+        "accepted": 2,
+        "rejected": 2,
+        "left": 0,
+        "errors": [],
+        "categories": {}
+      }
+    },
+    {
+      "name": "import: nothing of this import left pending",
+      "ok": true
+    },
+    {
+      "name": "import: undo deletes the 3",
+      "ok": true,
+      "detail": 3
+    },
+    {
+      "name": "import: library back to before",
+      "ok": true
+    },
+    {
+      "name": "import: after undo the file reads as not imported",
+      "ok": true,
+      "detail": {
+        "id": "claude-code",
+        "clients": [
+          {
+            "id": "claude-code",
+            "name": "Claude Code"
+          },
+          {
+            "id": "opencode",
+            "name": "OpenCode"
+          }
+        ],
+        "path": "~/.claude/CLAUDE.md",
+        "size": 312,
+        "modified_at": "2026-10-03T01:03:46.487926+00:00",
+        "empty": false,
+        "imported_at": null
+      }
+    },
+    {
+      "name": "instruction file not modified",
+      "ok": true
+    }
+  ],
+  "seconds": 8.7
+}

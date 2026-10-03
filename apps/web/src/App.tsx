@@ -6,6 +6,7 @@ import { AgentPage } from "./Agents"
 import { SettingsPage } from "./Settings"
 import { BrandMark } from "./Brand"
 import { canLeave, Notice } from "./ui"
+import { ONBOARDING_KEY, Onboarding, type OnboardingExit } from "./Onboarding"
 
 type Page = "memories" | "agents" | "settings"
 export type Service = { status: "checking" | "online" | "offline" | "error"; extractor: boolean | null; embeddings?: boolean; testMode: boolean; runtime?: { command: string[]; environment: Record<string, string> } }
@@ -18,6 +19,8 @@ function route(): { page: Page; filter?: Filter } {
   return { page: "memories" }
 }
 function hashOf(page: Page) { return page === "memories" ? "#/" : `#/${page}` }
+function onboarded() { try { return localStorage.getItem(ONBOARDING_KEY) === "done" } catch { return false } }
+function markOnboarded() { try { localStorage.setItem(ONBOARDING_KEY, "done") } catch { /* shown again next time; harmless */ } }
 
 export function App() {
   const [authed, setAuthed] = useState(Boolean(getCredential()))
@@ -26,6 +29,7 @@ export function App() {
   const [service, setService] = useState<Service>({ status: "checking", extractor: null, testMode: false })
   const [status, setStatus] = useState<TrayStatus | null>(null)
   const [composer, setComposer] = useState<"add" | "import" | null>(null)
+  const [onboarding, setOnboarding] = useState(() => rawHash() === "onboarding")
   const [tick, setTick] = useState(0)
   const [healthTick, setHealthTick] = useState(0)
   const [resumeError, setResumeError] = useState("")
@@ -34,6 +38,7 @@ export function App() {
   const refresh = () => setTick(n => n + 1)
   useEffect(() => {
     const onHash = () => {
+      if (rawHash() === "onboarding") { setOnboarding(true); return }
       const next = route()
       if (canLeave()) { setPage(next.page); if (next.filter) setFilter(next.filter) }
       else history.replaceState(null, "", hashOf(page))
@@ -88,6 +93,27 @@ export function App() {
     window.addEventListener("zhiwo:unavailable", unavailable)
     return () => { alive = false; clearInterval(timer); window.removeEventListener("zhiwo:unavailable", unavailable) }
   }, [authed, healthTick])
+  // First run: nothing remembered, nothing connected, nothing waiting. An
+  // existing library never gets the guide, and it is marked as seen.
+  useEffect(() => {
+    if (!authed || onboarding || onboarded()) return
+    let alive = true
+    Promise.all([api.memories({ state: "all", limit: 1 }), api.agents(), api.proposals()]).then(([memories, agents, proposals]) => {
+      if (!alive) return
+      if ((memories.total ?? memories.items.length) === 0 && !agents.agents.length && !proposals.proposals.length) setOnboarding(true)
+      else markOnboarded()
+    }).catch(() => undefined)
+    return () => { alive = false }
+  }, [authed])
+  function finishOnboarding(to: OnboardingExit) {
+    markOnboarded()
+    setOnboarding(false)
+    const target: Page = to === "agents" ? "agents" : "memories"
+    setPage(target)
+    history.replaceState(null, "", hashOf(target))
+    refresh()
+    if (to === "tray") window.omna?.windowAction?.("close")
+  }
   function navigate(next: Page) {
     if (next === page) return
     if (!canLeave()) return
@@ -104,6 +130,7 @@ export function App() {
   const online = service.status === "online"
   const paused = !!status?.sharing.paused
   if (!authed) return <div className="app-shell"><TitleBar/><Gate onReady={() => setAuthed(true)}/></div>
+  if (onboarding) return <div className="app-shell"><Onboarding service={service} controls={<WindowControls/>} onExit={finishOnboarding}/></div>
   return <div className="app-shell">
     <TitleBar>
       <nav className="tabs" aria-label="主导航">{NAV.map(([id, label]) => <button key={id} type="button" className="tab" aria-current={page === id ? "page" : undefined} onClick={() => navigate(id)}>{label}</button>)}</nav>
@@ -115,7 +142,7 @@ export function App() {
     {paused && <div className="global-notice pause" role="status">已暂停共享，所有 Agent 现在都读不到、也不能提议{status?.sharing.paused_until ? ` · ${minutesLeft(status.sharing.paused_until)} 分钟后自动恢复` : ""}<button className="text-button" onClick={resume}>现在恢复</button>{resumeError && <span>{resumeError}</span>}</div>}
     <main className="app-main" id="main-content">
       {page === "memories" && <MemoriesPage tick={tick} online={online} paused={paused} filter={filter} onFilter={next => { setFilter(next); history.replaceState(null, "", next === "pending" ? "#/review" : "#/") }} onCompose={compose} onSaved={refresh}/>}
-      {page === "agents" && <div className="page-scroll"><AgentPage tick={tick} online={online} runtime={service.runtime}/></div>}
+      {page === "agents" && <div className="page-scroll"><AgentPage tick={tick} online={online} runtime={service.runtime} extractor={service.extractor}/></div>}
       {page === "settings" && <SettingsPage onChanged={retry}/>}
     </main>
     {composer && <Composer kind={composer} service={service} onClose={() => setComposer(null)} onRefresh={refresh} onSaved={() => { setComposer(null); refresh() }} onReview={() => { setComposer(null); setFilter("pending"); navigate("memories"); refresh() }}/>}

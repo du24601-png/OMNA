@@ -42,6 +42,8 @@ export type Proposal = {
   evidence: { text?: string; source_id?: string }
   source: { id: string; kind: string; name: string | null }
   requester?: { client: string; name: string }
+  created_at?: string
+  batch_id?: string | null
   demo: boolean
 }
 
@@ -119,6 +121,22 @@ export type ImportJob = {
   merged_duplicates?: number
   proposals: { id: string; status: string; payload: { content: string } }[]
 }
+
+export type AgentFile = {
+  id: string
+  clients: { id: string; name: string }[]
+  path: string
+  size: number
+  modified_at: string
+  empty: boolean
+  imported_at: string | null
+}
+
+export type OrganizeSession = { batch_id: string; started_at: string; expires_at: string; agent_id: string; prompt: string }
+
+export type BatchSummary = { batch_id: string; kind: "import" | "organize"; agent_id: string | null; pending: number; pending_additions: number; plain_additions: number; remembered: number; undoable: boolean; changed_since: number }
+
+export type BatchAccept = { batch_id: string; accepted: number; skipped: number; failed: number; results: { proposal_id: string; status: "accepted" | "skipped" | "failed"; reason?: string; memory_id?: string; code?: string; message?: string }[] }
 
 declare global {
   interface Window {
@@ -279,6 +297,21 @@ export const api = {
       headers: { "Idempotency-Key": key },
       body: JSON.stringify(body),
     }) as Promise<ImportJob>
+  },
+  agentFiles() {
+    return request("/api/v1/agent-files") as Promise<{ files: AgentFile[] }>
+  },
+  organize(agentId: string) {
+    return request(`/api/v1/agents/${encodeURIComponent(agentId)}/organize`, { method: "POST" }) as Promise<OrganizeSession>
+  },
+  batch(id: string) {
+    return request(`/api/v1/batches/${encodeURIComponent(id)}`) as Promise<BatchSummary>
+  },
+  acceptAdditions(id: string, exclude: string[]) {
+    return request(`/api/v1/batches/${encodeURIComponent(id)}/accept-additions`, { method: "POST", body: JSON.stringify({ exclude }) }) as Promise<BatchAccept>
+  },
+  undoBatch(id: string) {
+    return request(`/api/v1/batches/${encodeURIComponent(id)}/undo`, { method: "POST", body: JSON.stringify({ confirm: true }) }) as Promise<{ batch_id: string; deleted: number; memory_ids: string[] }>
   },
   retryImport(jobId: string) {
     return request(`/api/v1/imports/${jobId}/retry`, { method: "POST", body: "{}" }) as Promise<ImportJob>

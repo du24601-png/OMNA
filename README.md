@@ -90,6 +90,8 @@ OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读
 
 ## 当前版本的限制
 
+- v2 新手引导（3 屏）和连接导入卡按设计稿第 16–20 版重写后，网页流程还要重新检查；托盘、完成后收进托盘、引导标题栏的窗口按钮仍须由负责人在桌面版验收。未配置提取模型时，按结构拆分可能把仓库操作规则误分为个人信息，例如把「运行 pnpm test 前先 pnpm build」分到身份；请逐条核对并取消不应记住的内容。此次只报告该服务端分类问题，未修改拆分器。
+- 连接导入卡尚未读到配置、配置读取失败或服务断连时，「直接读取文件」不可用；恢复后按实际配置显示模型或按结构拆分的说明，保留已选内容。配置状态的网页检查使用合成健康响应，未调用真实提取模型。
 - 只提供 Windows x64 版本，安装包未签名。
 - 本地端口固定为 8765，被其他程序占用时 OMNA 会提示并停止启动，不会连到别人的服务。
 - 真实客户端的端到端调用目前只在 OpenCode 上验证过；其他客户端验证了配置写入。
@@ -156,6 +158,8 @@ pnpm --filter @zhiwo/desktop dist
 server\.venv\Scripts\python.exe tests\test_client_connect.py
 server\.venv\Scripts\python.exe tests\test_embedding_probe.py
 ```
+
+`tests/onboarding_model_state.py` 验证引导和连接导入卡的配置未知、读取错误、已配置、断连、恢复和未配置状态。运行前设置 `OMNA_PLAYWRIGHT_MODULE` 为仓库外已安装的 Playwright 模块目录、`OMNA_UI_EVIDENCE_DIR` 为仓库外截图目录，以及本机模型缓存 `ZHIWO_FASTEMBED_CACHE_DIR`；可用 `ZHIWO_PYTHON`、`OMNA_NODE` 指定解释器。脚本使用独立临时库、假客户端目录和非 8765 随机端口，结束时清理进程和临时数据；健康响应和网络故障是仅限浏览器的测试夹具，不代表真实提取模型验收。当前使用本机 Microsoft Edge，无需改项目依赖。
 
 涉及真实客户端的测试需要本机装好 OpenCode，可以用 `OPENCODE_BIN` 指定可执行文件。`test_p2_4_client.py` 缺少 OpenCode 时直接失败；`test_p3_2_desktop.py` 需要先打出安装包，找不到 OpenCode 时把这一项记为 `NOT_RUN`。
 

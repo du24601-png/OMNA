@@ -1,0 +1,372 @@
+{
+  "task": "OMNA v2 onboarding and connect-import QA",
+  "client_date": "2026-10-02",
+  "status": "AUTHORIZED_WEB_QA_COMPLETE_WITH_REPORTED_SERVER_LIMITATION",
+  "worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-onboarding-import-600939",
+  "branch": "claude/omna-v2-onboarding-import-600939",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13",
+    "browser": "Playwright with installed Microsoft Edge, headless",
+    "browser_plugin": "not available",
+    "url": "http://127.0.0.1:5173/",
+    "api": "http://127.0.0.1:8786",
+    "viewports": [
+      [
+        960,
+        600
+      ],
+      [
+        1440,
+        900
+      ]
+    ],
+    "synthetic_data_only": true,
+    "real_client_invocation": false
+  },
+  "validation": {
+    "typescript_noEmit": "PASS, exit 0",
+    "vite_build": "PASS, exit 0; existing >500 kB warning",
+    "git_diff_check": "PASS, exit 0; CRLF warnings only",
+    "original_batch_runs": [
+      {
+        "run": 1,
+        "pass": 23,
+        "total": 23,
+        "seconds": 8.8,
+        "evidence": "initial tool command stdout"
+      },
+      {
+        "run": 2,
+        "pass": 23,
+        "total": 23,
+        "seconds": 8.7,
+        "evidence": "tests/results/onboarding_batches_run2.json"
+      },
+      {
+        "run": 3,
+        "pass": 23,
+        "total": 23,
+        "seconds": 9.0,
+        "evidence": "tests/results/onboarding_batches_run3.json"
+      }
+    ],
+    "expanded_batch": {
+      "pass": 31,
+      "total": 31,
+      "evidence": "tests/results/onboarding_batches.json",
+      "covers": [
+        "first or both similar picks",
+        "all unchecked rejects only",
+        "response loss after real commit followed by retry with same request id",
+        "edited memory blocks whole-batch undo without any deletion"
+      ]
+    },
+    "server_regressions": {
+      "test_batches.py": {
+        "pass": true,
+        "evidence": "tests/results/batches_windows.json",
+        "note": "script CACHE variable overridden via runpy to main checkout cache; assertions unchanged"
+      },
+      "test_agent_files.py": {
+        "tests": 9,
+        "result": "OK",
+        "evidence": "tool stdout"
+      },
+      "test_sharing_pause.py": {
+        "tests": 5,
+        "result": "OK",
+        "evidence": "tool stdout",
+        "stub": "recall returns no rows; permission gate only"
+      },
+      "test_tray_status.py": {
+        "tests": 3,
+        "result": "OK",
+        "evidence": "tool stdout",
+        "stub": "synthetic control DB, no Kernel"
+      }
+    },
+    "browser_checks": {
+      "ui-results": [
+        {
+          "name": "1 empty library auto guide",
+          "ok": true
+        },
+        {
+          "name": "1 configs only fake home",
+          "ok": true
+        },
+        {
+          "name": "2 poll arrivals within 4 sec",
+          "ok": true
+        },
+        {
+          "name": "2 quiet completion",
+          "ok": true
+        },
+        {
+          "name": "3 no primary before similar selection",
+          "ok": true
+        },
+        {
+          "name": "3 back next does not import twice",
+          "ok": true,
+          "detail": 13
+        },
+        {
+          "name": "4 exact accepted count",
+          "ok": true,
+          "detail": {
+            "expected": 11,
+            "actual": 11
+          }
+        },
+        {
+          "name": "4 changed category and rejected unchecked",
+          "ok": true
+        },
+        {
+          "name": "review: onboarding polling stops step4",
+          "ok": true,
+          "detail": {
+            "polls": 0
+          }
+        },
+        {
+          "name": "5 undo library restored",
+          "ok": true
+        },
+        {
+          "name": "5 finish memories",
+          "ok": true
+        },
+        {
+          "name": "first guide not reopened",
+          "ok": true
+        },
+        {
+          "name": "console runtime errors",
+          "ok": true,
+          "detail": []
+        }
+      ],
+      "card-results": [
+        {
+          "name": "6 fresh connection import card",
+          "ok": true
+        },
+        {
+          "name": "7 waiting survives navigation",
+          "ok": true
+        },
+        {
+          "name": "7 waiting survives refresh",
+          "ok": true
+        },
+        {
+          "name": "6 similar candidate disabled",
+          "ok": true
+        },
+        {
+          "name": "6 exact two remembered",
+          "ok": true
+        },
+        {
+          "name": "6 repeated undo confirm sends once",
+          "ok": true,
+          "detail": {
+            "undoCalls": 1
+          }
+        },
+        {
+          "name": "6 undo only organized additions",
+          "ok": true
+        },
+        {
+          "name": "8 direct read requires confirmation",
+          "ok": true
+        },
+        {
+          "name": "8 direct read jumps review",
+          "ok": true
+        },
+        {
+          "name": "10 viewport no horizontal overflow 960",
+          "ok": true
+        },
+        {
+          "name": "10 viewport no horizontal overflow 1440",
+          "ok": true
+        },
+        {
+          "name": "10 keyboard focus reaches control",
+          "ok": true,
+          "detail": {
+            "tag": "BUTTON",
+            "label": null,
+            "text": "Claude未连接连接"
+          }
+        },
+        {
+          "name": "runtime no errors",
+          "ok": true,
+          "detail": []
+        }
+      ],
+      "outage-results": [
+        {
+          "name": "9 stopped service shows visible unavailable notice",
+          "ok": true
+        },
+        {
+          "name": "9 service restart resumes UI",
+          "ok": true
+        }
+      ],
+      "keyboard-after": [
+        {
+          "name": "10 file chooser keyboard accessible",
+          "ok": true,
+          "detail": {
+            "tag": "BUTTON",
+            "tabIndex": 0
+          }
+        },
+        {
+          "name": "10 keyboard Enter selects file",
+          "ok": true
+        }
+      ],
+      "expiry-results": [
+        {
+          "name": "expired zero-arrival stored session hides card",
+          "ok": true,
+          "detail": "synthetic expired local session timestamp; real API empty batch"
+        }
+      ],
+      "smoke-results": [
+        {
+          "name": "final identity and nonblank",
+          "ok": true,
+          "detail": {
+            "title": "OMNA",
+            "url": "http://127.0.0.1:5173/#/agents"
+          }
+        },
+        {
+          "name": "no Vite error overlay",
+          "ok": true
+        },
+        {
+          "name": "console health",
+          "ok": true,
+          "detail": []
+        },
+        {
+          "name": "configured-model copy does not claim no AI",
+          "ok": true,
+          "detail": "UI-only synthetic health override; no model configured or called"
+        },
+        {
+          "name": "model file disclosure visible",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "fixes": [
+    {
+      "file": "apps/web/src/batch.ts",
+      "issue": "Markdown normalization differs from split.normalize",
+      "before": "batch-before.json: normalize check FAIL",
+      "after": "expanded batch PASS"
+    },
+    {
+      "file": "apps/web/src/batch.ts",
+      "issue": "unmarked same-batch Agent additions not paired",
+      "before": "batch-before.json: unmarked pair check FAIL",
+      "after": "expanded batch PASS"
+    },
+    {
+      "file": "apps/web/src/Onboarding.tsx",
+      "issue": "polling persists after leaving steps 2/3",
+      "before": "ui-before.json: step 4 received 2 proposal requests in 8.5 seconds",
+      "after": "ui-results.json: 0 proposal requests"
+    },
+    {
+      "file": "apps/web/src/Agents.tsx",
+      "issue": "double-clicking undo confirmation sends two requests",
+      "before": "card-before.json: undoCalls=2",
+      "after": "card-results.json: undoCalls=1"
+    },
+    {
+      "file": "apps/web/src/Onboarding.tsx",
+      "issue": "file selector is an unfocusable label",
+      "before": "keyboard-before.json: LABEL, tabIndex=-1",
+      "after": "keyboard-after.json: BUTTON, Enter file chooser PASS"
+    },
+    {
+      "file": "apps/web/src/ConnectImport.tsx",
+      "issue": "copy promises future model use",
+      "before": "10-card-done.png: next time will use",
+      "after": "states only permission to read the categories; typecheck/build PASS"
+    }
+  ],
+  "review": {
+    "carryOut": "only closed imports use accept-additions; fresh excludes; changed category uses edit; keyFor signatures reused; organizing decisions cover only visible selections",
+    "onboarding": "content-signature import dedupe, accumulation of accepted results, empty-library auto entry verified; polling fixed",
+    "import_card": "fresh pending connection with instruction file, storage resume, zero-arrival expiry, confirmation then direct read, and protected undo verified",
+    "model_copy": "configured model disclosure verified using browser-only synthetic health override; no extractor configured or called"
+  },
+  "reported_unfixed": [
+    {
+      "owner": "server/zhiwo/services/split.py",
+      "issue": "synthetic repository operation rule classified as identity",
+      "example": "运行 pnpm test 前先 pnpm build",
+      "evidence": [
+        "03-review.png",
+        "04-portrait-960.png"
+      ],
+      "action": "reported only per scope; README warns owners to review structured fallback candidates"
+    },
+    {
+      "owner": "frontend loading state",
+      "issue": "before service health resolves, extractor=null briefly displays no-AI/no-upload copy",
+      "evidence": "initial model-copy screenshot observed before health loaded; configured online copy subsequently passed",
+      "risk": "transient copy; submission disabled until online"
+    }
+  ],
+  "not_run": [
+    "desktop tray",
+    "finish and minimize to tray",
+    "onboarding titlebar window controls",
+    "live extraction model calls or real external client invocation"
+  ],
+  "cleanup": {
+    "test_services_stopped": [
+      8786,
+      5173
+    ],
+    "runtime_data_and_fake_home_removed": true,
+    "initial_failed_temp_removed": true,
+    "evidence_retained_outside_repo": "C:\\Users\\Ryan D\\.codex\\visualizations\\2026\\10\\03\\01a0ff47-2c83-7633-81b6-f5bb9113ff24\\omna-qa",
+    "port_8765_untouched": true
+  },
+  "git": {
+    "committed": false,
+    "pushed": false,
+    "destructive_operations": false
+  },
+  "next": "owner desktop checks; decide whether to schedule structured splitter classification repair separately",
+  "commands": [
+    "apps/web: .\\node_modules\\.bin\\tsc --noEmit",
+    "apps/web: .\\node_modules\\.bin\\vite build",
+    "ZHIWO_PYTHON + ZHIWO_FASTEMBED_CACHE_DIR: python -X utf8 tests/onboarding_batches.py (3 original runs, then edge cases)",
+    "python -X utf8 tests/test_batches.py via runpy with CACHE override",
+    "python -X utf8 tests/test_agent_files.py",
+    "python -X utf8 tests/test_sharing_pause.py",
+    "python -X utf8 tests/test_tray_status.py",
+    "node ui.cjs / card.cjs / keyboard.cjs / outage.cjs / card-expiry.cjs / smoke.cjs in outside-repo evidence folder",
+    "git diff --check"
+  ]
+}

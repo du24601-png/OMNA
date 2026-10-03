@@ -4,15 +4,16 @@ import { Menu } from "@base-ui/react/menu"
 import { Switch } from "@base-ui/react/switch"
 import { BookOpen, PencilLine, Quote, Search, type LucideIcon } from "lucide-react"
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { api, explain, type AccessDetail, type AgentClient, type AgentConnection } from "./api"
+import { api, explain, type AccessDetail, type AgentClient, type AgentConnection, type AgentFile } from "./api"
 import { CATEGORIES, TOOLS, TOOL_DESCRIPTIONS, categoryLabel, dateLabel, deliveryLabel, groupAccess, listTime, outcomeLabel, toolLabel, type AccessGroup } from "./format"
 import { ClientMark, ConnectPanel, PresetChoice, presetOf, type Preset } from "./Clients"
-import { canLeave, Icon, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
+import { ConnectImport } from "./ConnectImport"
+import { canLeave, CopyButton, Icon, Notice, PageTitle, ResourceNotice, useResource, useUnsaved } from "./ui"
 import type { Service } from "./App"
 
 type State = "missing" | "idle" | "pending" | "verified" | "off"
 type Row = { key: string; name: string; client?: AgentClient; agent?: AgentConnection; state: State }
-type Confirm = { title: string; body: string; action: string; danger?: boolean; run: () => Promise<void> }
+export type Confirm = { title: string; body: string; action: string; danger?: boolean; run: () => Promise<void> }
 
 const STATE_LABEL: Record<State, string> = { missing: "未安装", idle: "未连接", pending: "待验证", verified: "已验证", off: "已停用" }
 const STATE_HINT: Record<State, string> = {
@@ -53,17 +54,12 @@ function Mark({ row, large = false }: { row: Row; large?: boolean }) {
   </span>
 }
 
-function CopyButton({ text, label = "复制" }: { text: string; label?: string }) {
-  const [state, setState] = useState<"idle" | "done" | "failed">("idle")
-  return <button type="button" className="copy-button" onClick={async () => {
-    try { await navigator.clipboard.writeText(text); setState("done") } catch { setState("failed") }
-  }}><Icon name={state === "done" ? "check" : "copy"} />{state === "done" ? "已复制" : state === "failed" ? "复制失败，请手动选中" : label}</button>
-}
-
-export function AgentPage({ tick, online, runtime }: { tick: number; online: boolean; runtime?: Service["runtime"] }) {
+export function AgentPage({ tick, online, runtime, extractor }: { tick: number; online: boolean; runtime?: Service["runtime"]; extractor: Service["extractor"] }) {
   const [localTick, setLocalTick] = useState(0)
   const agentsRes = useResource(() => api.agents(), [tick, localTick])
   const clientsRes = useResource(() => api.agentClients(), [tick, localTick])
+  // Only drives the import card; a failure just means no card.
+  const filesRes = useResource(() => api.agentFiles(), [tick, localTick])
   const [selected, setSelected] = useState<string | null>(null)
   const [issued, setIssued] = useState<AgentConnection | null>(null)
   const [busy, setBusy] = useState(false)
@@ -172,6 +168,11 @@ export function AgentPage({ tick, online, runtime }: { tick: number; online: boo
       tick={tick + localTick}
       issued={issued?.id === agent.id ? issued : null}
       runtime={runtime}
+      file={current.client ? filesRes.data?.files.find(file => !file.empty && file.clients.some(item => item.id === current.client!.id)) : undefined}
+      extractor={extractor}
+      agents={agents}
+      onChanged={refresh}
+      onConfirm={setConfirm}
       onHideIssued={() => setIssued(null)}
       onToggle={enabled => void toggle(agent, enabled)}
       onSave={body => save(agent, body)}
@@ -224,15 +225,24 @@ export function AgentPage({ tick, online, runtime }: { tick: number; online: boo
 }
 
 function ConfirmDialog({ request, busy, onClose }: { request: Confirm | null; busy: boolean; onClose: () => void }) {
-  return <AlertDialog.Root open={!!request} onOpenChange={open => { if (!open && !busy) onClose() }}>
+  const running = useRef(false)
+  const [submitting, setSubmitting] = useState(false)
+  const locked = busy || submitting
+  async function submit() {
+    if (!request || busy || running.current) return
+    running.current = true; setSubmitting(true)
+    try { await request.run(); onClose() }
+    finally { running.current = false; setSubmitting(false) }
+  }
+  return <AlertDialog.Root open={!!request} onOpenChange={open => { if (!open && !locked) onClose() }}>
     <AlertDialog.Portal>
       <AlertDialog.Backdrop className="dialog-backdrop detail-alert-backdrop" />
       <AlertDialog.Popup className="detail-alert material">
         <AlertDialog.Title className="detail-alert-title">{request?.title}</AlertDialog.Title>
         <AlertDialog.Description className="detail-alert-copy">{request?.body}</AlertDialog.Description>
         <div className="actions detail-alert-actions">
-          <AlertDialog.Close className="button secondary" disabled={busy}>取消</AlertDialog.Close>
-          <button className={`button ${request?.danger ? "danger" : "primary"}`} type="button" disabled={busy} onClick={async () => { await request?.run(); onClose() }}>{busy ? "处理中…" : request?.action}</button>
+          <AlertDialog.Close className="button secondary" disabled={locked}>取消</AlertDialog.Close>
+          <button className={`button ${request?.danger ? "danger" : "primary"}`} type="button" disabled={locked} onClick={() => void submit()}>{locked ? "处理中…" : request?.action}</button>
         </div>
       </AlertDialog.Popup>
     </AlertDialog.Portal>
@@ -301,7 +311,7 @@ function useVerifyWatch(agentId: string, active: boolean, onVerified: () => void
   return { waiting, restart: () => setRound(n => n + 1) }
 }
 
-function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIssued, onToggle, onSave, onReconnect, onRotate, onVerified }: {
+function AgentDetail({ row, agent, online, busy, tick, issued, runtime, file, extractor, agents, onChanged, onConfirm, onHideIssued, onToggle, onSave, onReconnect, onRotate, onVerified }: {
   row: Row
   agent: AgentConnection
   online: boolean
@@ -309,6 +319,11 @@ function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIs
   tick: number
   issued: AgentConnection | null
   runtime?: Service["runtime"]
+  file?: AgentFile
+  extractor: Service["extractor"]
+  agents: AgentConnection[]
+  onChanged: () => void
+  onConfirm: (request: Confirm) => void
   onHideIssued: () => void
   onToggle: (enabled: boolean) => void
   onSave: (body: Record<string, unknown>) => Promise<AgentConnection | null>
@@ -317,6 +332,7 @@ function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIs
   onVerified: () => void
 }) {
   const [tab, setTab] = useState<"permissions" | "access">("permissions")
+  const [covered, setCovered] = useState(false)
   const events = useResource(() => api.accessEvents(agent.id), [agent.id, tick])
   const count = events.data ? groupAccess(events.data.events).filter(group => !group.quiet).length : 0
   const watch = useVerifyWatch(agent.id, row.state === "pending", onVerified)
@@ -349,7 +365,8 @@ function AgentDetail({ row, agent, online, busy, tick, issued, runtime, onHideIs
       </Menu.Root>
     </header>
     {issued?.credential && <IssuedCredential agent={issued} runtime={runtime} onDone={onHideIssued} />}
-    {row.state === "pending" && <VerifyGuide row={row} agent={agent} waiting={watch.waiting} onRestart={watch.restart} onOpenPermissions={() => setTab("permissions")} />}
+    {row.state === "pending" && !(file && covered) && <VerifyGuide row={row} agent={agent} waiting={watch.waiting} onRestart={watch.restart} onOpenPermissions={() => setTab("permissions")} />}
+    {file && <ConnectImport name={row.name} agent={agent} file={file} fresh={row.state === "pending"} online={online} extractor={extractor} agents={agents} onChanged={onChanged} onConfirm={onConfirm} onCovering={setCovered} />}
     <div className="segmented detail-tabs" role="tablist" aria-label="连接详情">
       <button type="button" role="tab" aria-selected={tab === "permissions"} onClick={() => setTab("permissions")}>权限</button>
       <button type="button" role="tab" aria-selected={tab === "access"} onClick={() => setTab("access")}>访问记录{count ? <span className="tab-count">{count}</span> : null}</button>
