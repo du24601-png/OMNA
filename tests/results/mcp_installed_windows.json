@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "platform": "native Windows",
+  "library": "synthetic",
+  "embeddings_loaded": true,
+  "configuration_name": "omna",
+  "bridge": {
+    "server_name": "omna",
+    "tools": [
+      "explain_memory",
+      "get_context",
+      "propose_memory",
+      "search_memory"
+    ],
+    "empty_search": "PASS"
+  }
+}

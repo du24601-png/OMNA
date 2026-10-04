@@ -116,7 +116,7 @@ The MCP server name in clients is `omna`. Existing `zhiwo` connections are still
 
 ## Current limitations
 
-The 2.0.1 installer was rebuilt without user databases, demo data, or credentials. MCP name regression, bundled model loading, stdio initialization, and an empty-library search passed; see the [installer check record](tests/results/mcp_release_windows.json).
+The 2.0.1 installer was rebuilt without user databases, demo data, or credentials. MCP name regression, installed desktop startup, bundled model loading, stdio initialization, and an empty-library search passed; see the [installer check record](tests/results/mcp_release_windows.json).
 
 The source publication passed build, tray code regression, sharing-pause, and real-kernel batch acceptance/undo checks. See the [publication check record](tests/results/v2_publication_checks.json). These checks do not replace the full Windows and real-client acceptance below.
 

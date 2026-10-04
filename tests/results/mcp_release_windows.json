@@ -39,8 +39,19 @@
     "evidence": "mcp_packaged_windows.json",
     "status": "PASS"
   },
-  "installed_desktop": "PENDING",
+  "installed_desktop": {
+    "database_files_preserved": 4,
+    "evidence": "mcp_desktop_windows.json",
+    "installed_payload_matches_build": true,
+    "existing_database_preservation": "PASS",
+    "status": "PASS",
+    "installed_payload_data_scan": "PASS"
+  },
   "clean_machine": "NOT_RUN",
   "real_llm_client": "NOT_RUN",
-  "visual_inspection": "NOT_RUN"
+  "visual_inspection": "NOT_RUN",
+  "installed_mcp": {
+    "evidence": "mcp_installed_windows.json",
+    "status": "PASS"
+  }
 }

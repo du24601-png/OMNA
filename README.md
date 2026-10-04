@@ -116,7 +116,7 @@ OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读
 
 ## 当前版本的限制
 
-2.0.1 安装包已重新构建，包内不含用户库、演示数据或凭证；MCP 改名回归及随包模型、stdio 握手与空库搜索通过，见[安装包检查记录](tests/results/mcp_release_windows.json)。
+2.0.1 安装包已重新构建，包内不含用户库、演示数据或凭证；MCP 改名回归、实际安装后的桌面启动、随包模型、stdio 握手与空库搜索通过，见[安装包检查记录](tests/results/mcp_release_windows.json)。
 
 本次源码发布的构建、托盘代码回归、暂停共享、真实内核批量确认与撤销检查均通过，见[发布检查记录](tests/results/v2_publication_checks.json)。这些检查不替代下述完整 Windows 与真实客户端验收。
 
