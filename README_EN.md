@@ -7,7 +7,7 @@
 
 <p align="center"><b>Switch AI tools without introducing yourself all over again.</b></p>
 
-<p align="center">Windows desktop app · 2.0.0 · Your data stays on your device</p>
+<p align="center">Windows desktop app · 2.0.1 · Your data stays on your device</p>
 
 <p align="center"><a href="README.md"><img alt="简体中文" src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Read-687386?style=for-the-badge"></a> <a href="README_EN.md"><img alt="English" src="https://img.shields.io/badge/English-Current-252a32?style=for-the-badge"></a></p>
 
@@ -90,9 +90,9 @@ The following actions may send text to your chosen model service. If that servic
 
 **Requirements:** Windows 10 / 11 x64 and about 700 MB of disk space. Python, Node.js, and other runtimes do not need to be installed separately.
 
-As of October 4, 2026, no public installer is available on GitHub [Releases](https://github.com/du24601-png/OMNA/releases). Build from the 2.0 source using the instructions below to produce `OMNA-Setup-2.0.0.exe`. To install:
+Download `OMNA-Setup-2.0.1.exe` from [GitHub Releases](https://github.com/du24601-png/OMNA/releases/tag/v2.0.1).
 
-1. Run `OMNA-Setup-2.0.0.exe` built from source or supplied by the project owner.
+1. Run `OMNA-Setup-2.0.1.exe`.
 2. The installer is currently unsigned, so Windows SmartScreen may warn that it is an unrecognized app. If you trust the source, select **More info** → **Run anyway**.
 3. Install for the current user without administrator access. You can choose the install folder; shortcuts are added to the desktop and Start menu.
 4. The local model may take 20–30 seconds to load the first time. Later launches usually take a few seconds. Onboarding starts the first time OMNA opens with an empty memory library.
@@ -112,7 +112,11 @@ As of October 4, 2026, no public installer is available on GitHub [Releases](htt
 
 In **Access history**, you can see which tool each Agent called and which memories were returned.
 
+The MCP server name in clients is `omna`. Existing `zhiwo` connections are still detected. After updating the app, choose **Rewrite configuration** from the Agent's ⋯ menu and restart the client to replace the old entry with `omna`. For custom connections, copy the new configuration and replace the old client entry.
+
 ## Current limitations
+
+The 2.0.1 installer was rebuilt without user databases, demo data, or credentials. MCP name regression, bundled model loading, stdio initialization, and an empty-library search passed; see the [installer check record](tests/results/mcp_release_windows.json).
 
 The source publication passed build, tray code regression, sharing-pause, and real-kernel batch acceptance/undo checks. See the [publication check record](tests/results/v2_publication_checks.json). These checks do not replace the full Windows and real-client acceptance below.
 
@@ -177,7 +181,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File apps\desktop\scripts\prepare
 pnpm --filter @zhiwo/desktop dist
 ```
 
-`prepare-runtime` creates the bundled Python runtime, locked dependencies, frontend build, and model under `apps/desktop/runtime/`. `dist` outputs `apps/desktop/dist/OMNA-Setup-2.0.0.exe`. If GitHub downloads are slow, set `ELECTRON_MIRROR` and `ELECTRON_BUILDER_BINARIES_MIRROR` to your preferred mirrors.
+`prepare-runtime` creates the bundled Python runtime, locked dependencies, frontend build, and model under `apps/desktop/runtime/`. `dist` outputs `apps/desktop/dist/OMNA-Setup-2.0.1.exe`. If GitHub downloads are slow, set `ELECTRON_MIRROR` and `ELECTRON_BUILDER_BINARIES_MIRROR` to your preferred mirrors.
 
 ### Tests
 

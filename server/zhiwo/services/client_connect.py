@@ -1,7 +1,7 @@
 """Write one local stdio bridge entry into the known clients.
 
 The bridge and the four tools stay unchanged. This module only detects a
-fixed install and merges a single `zhiwo` server into that client's own
+fixed install and merges a single `omna` server into that client's own
 config. It never replaces the rest of the file, and it never returns the
 credential.
 
@@ -19,10 +19,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import secrets
 import shutil
 import sqlite3
 import sys
+import tomllib
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -38,6 +40,7 @@ from zhiwo.services.commit_gate import commit_lock
 READ_CATEGORIES = ("preference", "goal")
 READ_TOOLS = ("get_context", "search_memory")
 PROPOSE_TOOLS = (*READ_TOOLS, "propose_memory")
+_MCP_NAMES = ("omna", "zhiwo")  # Accept old configs; rewrites publish only omna.
 # Reads stay narrow. A connection that may propose can suggest any category,
 # because every proposal waits for the owner's review before it counts.
 _PRESETS = {
@@ -293,7 +296,8 @@ def _json_text(path: Path, client_id: str, launch: dict, env: dict) -> str:
     data = _load_json(path)
     if client_id == "opencode":
         mcp = _object(data, "mcp")
-        mcp["zhiwo"] = {
+        mcp.pop("zhiwo", None)
+        mcp["omna"] = {
             "type": "local",
             "command": [launch["command"], *launch["args"]],
             "environment": env,
@@ -301,13 +305,16 @@ def _json_text(path: Path, client_id: str, launch: dict, env: dict) -> str:
     elif client_id == "zcode":
         mcp = _object(data, "mcp")
         servers = _object(mcp, "servers")
-        servers["zhiwo"] = {"command": launch["command"], "args": list(launch["args"]), "env": env}
+        servers.pop("zhiwo", None)
+        servers["omna"] = {"command": launch["command"], "args": list(launch["args"]), "env": env}
     elif client_id == "claude-code":
         servers = _object(data, "mcpServers")
-        servers["zhiwo"] = {"type": "stdio", "command": launch["command"], "args": list(launch["args"]), "env": env}
+        servers.pop("zhiwo", None)
+        servers["omna"] = {"type": "stdio", "command": launch["command"], "args": list(launch["args"]), "env": env}
     else:
         servers = _object(data, "mcpServers")
-        servers["zhiwo"] = {"command": launch["command"], "args": list(launch["args"]), "env": env}
+        servers.pop("zhiwo", None)
+        servers["omna"] = {"command": launch["command"], "args": list(launch["args"]), "env": env}
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -315,16 +322,16 @@ def _codex_text(path: Path, launch: dict, env: dict) -> str:
     current = ""
     if path.is_file():
         current = path.read_text(encoding="utf-8")
-    kept = _strip_codex_zhiwo(current).rstrip()
+    kept = _strip_codex_memory_servers(current).rstrip()
     args = ", ".join(_toml_string(item) for item in launch["args"])
     env_lines = "\n".join(f"{key} = {_toml_string(env[key])}" for key in sorted(env))
     block = (
-        "[mcp_servers.zhiwo]\n"
+        "[mcp_servers.omna]\n"
         f"command = {_toml_string(launch['command'])}\n"
         f"args = [{args}]\n"
         "enabled = true\n"
         "\n"
-        "[mcp_servers.zhiwo.env]\n"
+        "[mcp_servers.omna.env]\n"
         f"{env_lines}\n"
     )
     if not kept:
@@ -332,14 +339,17 @@ def _codex_text(path: Path, launch: dict, env: dict) -> str:
     return kept + "\n\n" + block
 
 
-def _strip_codex_zhiwo(text: str) -> str:
+def _strip_codex_memory_servers(text: str) -> str:
     kept: list[str] = []
     skipping = False
     for line in text.splitlines(keepends=True):
         header = line.strip()
         if header.startswith("[") and header.endswith("]"):
-            name = header[1:-1].strip().strip('"')
-            skipping = name == "mcp_servers.zhiwo" or name.startswith("mcp_servers.zhiwo.")
+            name = header[1:-1].strip()
+            skipping = re.fullmatch(
+                r'''mcp_servers\s*\.\s*(?:omna|zhiwo|"omna"|"zhiwo"|'omna'|'zhiwo')(?:\s*\..+)?''',
+                name,
+            ) is not None
         if not skipping:
             kept.append(line)
     return "".join(kept)
@@ -544,24 +554,25 @@ def _configured(home: Path, profile: ClientProfile) -> bool:
         return False
     try:
         if profile.id == "codex":
-            return any(
-                line.strip() in {"[mcp_servers.zhiwo]", '[mcp_servers."zhiwo"]'}
-                for line in path.read_text(encoding="utf-8").splitlines()
-            )
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
+            data = tomllib.loads(path.read_text(encoding="utf-8"))
+        else:
+            data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError, tomllib.TOMLDecodeError):
         return False
     if not isinstance(data, dict):
         return False
+    if profile.id == "codex":
+        servers = data.get("mcp_servers")
+        return isinstance(servers, dict) and any(isinstance(servers.get(name), dict) for name in _MCP_NAMES)
     if profile.id == "opencode":
         mcp = data.get("mcp")
-        return isinstance(mcp, dict) and isinstance(mcp.get("zhiwo"), dict)
+        return isinstance(mcp, dict) and any(isinstance(mcp.get(name), dict) for name in _MCP_NAMES)
     if profile.id == "zcode":
         mcp = data.get("mcp")
         servers = mcp.get("servers") if isinstance(mcp, dict) else None
-        return isinstance(servers, dict) and isinstance(servers.get("zhiwo"), dict)
+        return isinstance(servers, dict) and any(isinstance(servers.get(name), dict) for name in _MCP_NAMES)
     servers = data.get("mcpServers")
-    return isinstance(servers, dict) and isinstance(servers.get("zhiwo"), dict)
+    return isinstance(servers, dict) and any(isinstance(servers.get(name), dict) for name in _MCP_NAMES)
 
 
 def _agent_exists(db_path: Path, agent_id: str) -> bool:

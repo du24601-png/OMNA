@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-04",
+  "platform": "native Windows",
+  "scope": "MCP server name zhiwo -> omna",
+  "configuration_and_migration": {
+    "status": "PASS",
+    "clients": [
+      "workbuddy",
+      "zcode",
+      "opencode",
+      "codex",
+      "claude",
+      "claude-code"
+    ],
+    "checks": [
+      "legacy detection",
+      "legacy entry replacement",
+      "other server preservation",
+      "quoted Codex tables",
+      "repeat rewrite"
+    ]
+  },
+  "stdio_handshake": {
+    "status": "PASS",
+    "client": "official Python MCP SDK",
+    "server_name": "omna",
+    "tools": [
+      "get_context",
+      "search_memory",
+      "propose_memory",
+      "explain_memory"
+    ],
+    "tool_invocations": "NOT_RUN"
+  },
+  "regression_tests": {
+    "status": "PASS",
+    "tests": 17,
+    "commands": [
+      "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p test_mcp_name.py -v",
+      "D:\\zhiwo\\server\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p test_client_connect.py -v"
+    ],
+    "logs": [
+      ".cache/mcp-name.log",
+      ".cache/client-connect.log"
+    ]
+  },
+  "frontend_build": {
+    "status": "PASS",
+    "command": "prepare-runtime.ps1: npm run build --silent",
+    "log": ".cache/runtime-build.log",
+    "warning": "Vite bundle size exceeds 500 kB"
+  },
+  "installer_rebuild": "PASS",
+  "real_desktop_client_display": "NOT_RUN",
+  "isolation": "Temporary client homes, synthetic credentials; no real memory database or client configuration accessed.",
+  "version": "2.0.1"
+}

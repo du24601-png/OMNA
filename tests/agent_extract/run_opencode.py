@@ -168,7 +168,7 @@ def run(name: str, opencode: Path) -> dict:
             status, connected = call(base, "POST", "/api/v1/agent-clients/opencode/connect", owner, body, idem=True)
             assert status == 200, connected
             written = json.loads((home / ".config" / "opencode" / "opencode.json").read_text(encoding="utf-8"))
-            entry = written["mcp"]["zhiwo"]
+            entry = written["mcp"]["omna"]
             secret = entry["environment"]["ZHIWO_AGENT_CREDENTIAL"]
             _, agents = call(base, "GET", "/api/v1/agents", owner)
             granted = {"tools": agents["agents"][0]["allowed_tools"], "categories": agents["agents"][0]["allowed_categories"]}
@@ -178,7 +178,7 @@ def run(name: str, opencode: Path) -> dict:
             config = {
                 "$schema": "https://opencode.ai/config.json",
                 "model": MODEL,
-                "mcp": {"zhiwo": {**entry, "enabled": True}},
+                "mcp": {"omna": {**entry, "enabled": True}},
                 "permission": {"edit": "deny", "bash": "deny", "webfetch": "deny"},
             }
             (work / "opencode.json").write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")

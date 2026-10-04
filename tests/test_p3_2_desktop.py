@@ -28,7 +28,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_p2_4_client import OPENCODE, OPENCODE_MODEL, _collect_tools, _parse_payload, _request, _tool_text  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
-INSTALLER = REPO / "apps" / "desktop" / "dist" / "OMNA-Setup-1.0.0.exe"
+VERSION = json.loads((REPO / "apps/desktop/package.json").read_text(encoding="utf-8"))["version"]
+INSTALLER = REPO / "apps" / "desktop" / "dist" / f"OMNA-Setup-{VERSION}.exe"
 RESULT_PATH = REPO / "tests" / "results" / "p3_2_windows.json"
 ORIGIN = "http://127.0.0.1:8765"
 SYSTEM32 = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
@@ -148,10 +149,10 @@ def _opencode(run: Path, command: list[str], environment: dict[str, str]) -> dic
     config = {
         "$schema": "https://opencode.ai/config.json",
         "model": OPENCODE_MODEL,
-        "mcp": {"zhiwo": {"type": "local", "command": command, "enabled": True, "environment": environment}},
+        "mcp": {"omna": {"type": "local", "command": command, "enabled": True, "environment": environment}},
     }
     (run / "opencode.json").write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
-    prompt = f"请调用 zhiwo 的 search_memory 工具，query 使用这句话：{QUERY}\nlimit 为 5。不要编造工具没有返回的个人记忆。"
+    prompt = f"请调用 omna 的 search_memory 工具，query 使用这句话：{QUERY}\nlimit 为 5。不要编造工具没有返回的个人记忆。"
     completed = subprocess.run(
         [str(OPENCODE), "run", prompt, "--dir", str(run), "--model", OPENCODE_MODEL, "--format", "json", "--auto", "--pure"],
         check=False, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=240, cwd=str(run),
