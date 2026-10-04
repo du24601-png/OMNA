@@ -1,6 +1,6 @@
 # 知我 · ARCHITECTURE
 
-> V2.0 基线｜2026-10-02（V1.0 启动基线 2026-09-26）  
+> V2.0 基线｜2026-10-02（V1.0 启动基线 2026-09-26）
 > 范围以 [PRODUCT.md](PRODUCT.md) 为准。以下是知我的设计契约；底层实际接口、版本及平台兼容性的早期验证证据见 `experiments/kernel_spike/results/`；当前使用限制见 [README.md](README.md)。
 
 ## 1. 架构决策
