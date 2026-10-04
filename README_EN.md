@@ -13,7 +13,7 @@
 
 OMNA (知我) is a local personal memory tool that keeps your background, preferences, and project context in one place for use across AI tools. AI helps organize your memories; you decide what to keep and share, and can review or correct every item.
 
-See the [US go-to-market strategy deck (PPTX, 25 slides, Chinese)](docs/gtm/OMNA_US_GTM_Strategy_v1.pptx) for the proposed marketing approach and execution plan.
+US go-to-market strategy: [View online (PDF, 23 pages, Chinese)](docs/gtm/OMNA_US_GTM_Strategy_v1.pdf) · [Download the original PPTX](docs/gtm/OMNA_US_GTM_Strategy_v1.pptx).
 
 ## Video demo
 

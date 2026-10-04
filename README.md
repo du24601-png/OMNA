@@ -15,7 +15,7 @@ OMNA（知我）是一款本地个人记忆工具，把你的背景、偏好和�
 
 想了解它与现有 AI 记忆产品的区别，可阅读[竞品分析报告](docs/competitive-analysis.md)。
 
-美国市场的推广思路与执行规划，见 [GTM 策划方案（PPTX，25 页）](docs/gtm/OMNA_US_GTM_Strategy_v1.pptx)。
+美国市场的推广思路与执行规划：[在线浏览 GTM 方案（PDF，23 页）](docs/gtm/OMNA_US_GTM_Strategy_v1.pdf) · [下载原始 PPT](docs/gtm/OMNA_US_GTM_Strategy_v1.pptx)。
 
 ## 视频 Demo
 
