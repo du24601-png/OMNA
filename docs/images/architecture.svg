@@ -49,7 +49,7 @@
 <!-- Model capability is optional and may be remote -->
 <rect x="56" y="439" width="242" height="114" rx="14" fill="#fff" stroke="#b7c0cb" stroke-dasharray="5 4"/>
 <text x="76" y="470" font-size="20" font-weight="650">你配置的 AI 模型</text>
-<text x="76" y="499" class="small">提取候选 · 生成摘要</text>
+<text x="76" y="499" class="small">从导入文本提取候选</text>
 <text x="76" y="529" class="meta">按需调用，可使用远程服务</text>
 <path d="M410 315H357V496H306" class="line" stroke-dasharray="5 4"/>
 <text x="952" y="400" class="small">读取按权限过滤</text>

@@ -15,6 +15,31 @@ OMNA (知我) is a local personal memory tool. It keeps your background, prefere
 
 To see how it differs from existing AI memory products, read the [competitive analysis](docs/competitive-analysis.md) (Chinese).
 
+US go-to-market strategy: [View online (PDF, 23 pages, Chinese)](docs/gtm/OMNA_US_GTM_Strategy_v1.pdf) · [Download the original PPTX](docs/gtm/OMNA_US_GTM_Strategy_v1.pptx).
+
+## Screenshots
+
+**One place for your memories, with clear access controls.** Search your background, goals, preferences, and projects. Select a memory to see its source, which Agents can read it, and its read count over the past seven days. Edit it or stop sharing at any time.
+
+![OMNA 2.0 Memories: categories, permitted Agents, sources, and read counts](docs/images/v2-memories.png)
+
+<sub>All screenshots show the 2.0 Chinese interface with synthetic demo data. Connection states and read counts illustrate the UI, not real-world usage results.</sub>
+
+**AI suggests. You decide what stays.** Pending suggestions now live inside Memories. Edit, approve, or dismiss each one; unapproved content is never shared with other Agents.
+
+![OMNA 2.0 pending suggestions: edit, dismiss, or approve proposals from Claude Code and WorkBuddy](docs/images/v2-review.png)
+
+**Separate permissions for every Agent.** Choose read-only access or allow suggestions, with separate categories for each. Access history shows the memories actually returned and their delivery status.
+
+![OMNA 2.0 Agents: client connections, verification prompt, capabilities, and category permissions](docs/images/v2-agents.png)
+
+<details>
+<summary>View Settings: appearance, notifications and shortcuts, optional extraction model, and local data</summary>
+
+![OMNA 2.0 Settings: theme controls and settings categories](docs/images/v2-settings.png)
+
+</details>
+
 ## What's new in 2.0
 
 1.x was a memory dashboard you opened to look at. 2.0 runs quietly in the system tray and only asks for your attention when there is a decision to make.
@@ -22,12 +47,12 @@ To see how it differs from existing AI memory products, read the [competitive an
 - **Tray icon and flyout:** the icon shows five states (normal, an Agent is reading, suggestions waiting, sharing paused, something is wrong). Left-click opens a flyout with today's reads and new suggestions, which you can accept or dismiss with ✓ / ✕ or the Y / N keys.
 - **Notifications:** a regular Windows notification appears when an Agent suggests a memory. Notifications within 30 seconds are combined, clicking one opens the flyout at that suggestion, and they can be turned off in Settings.
 - **Three-step onboarding:** connect the AI tools on this computer; let each one turn what its instruction file (`CLAUDE.md`, `AGENTS.md`) says about you into suggestions you tick to keep; then see what AI now knows about you.
-- **Batches:** plain additions from one import or one organizing session can be kept in one click and undone as a batch. Updates, near duplicates, and suggestions without evidence are still reviewed one by one.
+- **Batches:** select plain additions from one import or organizing session and keep them together. Undo permanently deletes those additions after confirmation; a batch containing memories edited since import cannot be undone directly. Updates, near duplicates, overlong suggestions, and suggestions without evidence are reviewed individually.
 - **Pause sharing for an hour:** every Agent is refused until it ends, even after a restart.
 - **Global shortcut:** `Ctrl Shift M` opens the main window with search focused.
 - **A smaller main window:** Memories, Agents, Settings. The 1.x "About me" home page, read chart, and AI summary entry were removed.
 
-> Screenshots are being updated for 2.0.
+Get started in three steps: **connect an AI tool → select and approve its suggestions → review your confirmed profile**. Existing libraries open directly in the main window. Closing it keeps OMNA running in the tray.
 
 ## How it works
 
@@ -55,7 +80,7 @@ Supported clients: WorkBuddy, ZCode, OpenCode, ChatGPT (Codex), Claude Desktop, 
 - The local service listens only on `127.0.0.1:8765`. The desktop app generates the access credential on first launch, so you do not need to enter it.
 - No telemetry, cloud sync, or background collection.
 
-There are three cases where data leaves your device:
+The following actions may send text to your chosen model service. If that service is cloud-hosted, the text leaves your device:
 
 1. When you import text and have configured an extraction model in Settings, that text is sent to the model service. Without one, text with headings or lists is split into suggestions by its structure, and other text is only saved as a source.
 2. When you let a connected AI tool organize its instruction file, that tool reads the file and makes suggestions with its own model, so the file travels with the tool's normal requests to its model service.
@@ -65,16 +90,18 @@ There are three cases where data leaves your device:
 
 **Requirements:** Windows 10 / 11 x64 and about 700 MB of disk space. Python, Node.js, and other runtimes do not need to be installed separately.
 
-1. Download `OMNA-Setup-2.0.0.exe` (about 210 MB) from [Releases](../../releases).
+As of October 4, 2026, no public installer is available on GitHub [Releases](https://github.com/du24601-png/OMNA/releases). Build from the 2.0 source using the instructions below to produce `OMNA-Setup-2.0.0.exe`. To install:
+
+1. Run `OMNA-Setup-2.0.0.exe` built from source or supplied by the project owner.
 2. The installer is currently unsigned, so Windows SmartScreen may warn that it is an unrecognized app. If you trust the source, select **More info** → **Run anyway**.
 3. Install for the current user without administrator access. You can choose the install folder; shortcuts are added to the desktop and Start menu.
 4. The local model may take 20–30 seconds to load the first time. Later launches usually take a few seconds. Onboarding starts the first time OMNA opens with an empty memory library.
 
-**Upgrading from 1.x:** install the new version over the old one. Your library stays in `%APPDATA%\OMNA`. On first launch OMNA migrates the database once (adding a separate "categories it can suggest" setting for Agents; existing connections keep their read categories), and your memories are unchanged. A library that already has data does not show onboarding. Making a backup first in **Settings → Local data** is recommended.
+**Upgrading from 1.x:** save a backup in **Settings → Backup** first. OMNA reuses the data directory in `%APPDATA%\OMNA` and migrates the database when needed. Existing libraries skip onboarding. Installer upgrade acceptance is still incomplete; see the limitations below.
 
 **While running:** closing the window minimizes OMNA to the system tray, leaving the Agent service available. Left-click the tray icon for the flyout; the right-click menu opens the main window, opens the log folder, restarts the service, or quits. The service log is at `%APPDATA%\OMNA\logs\service.log`.
 
-**Uninstalling:** uninstall from Windows Settings or the Start menu. Your memories in `%APPDATA%\OMNA` are kept. To remove them, first use **Settings → Clear data**, or delete that folder manually after uninstalling.
+**Uninstalling:** uninstall from Windows Settings or the Start menu. Your memories in `%APPDATA%\OMNA` are kept. To remove them, confirm the action under **Settings → Clear**, or delete that folder manually after uninstalling.
 
 ## Connect an Agent
 
@@ -87,6 +114,8 @@ In **Access history**, you can see which tool each Agent called and which memori
 
 ## Current limitations
 
+The source publication passed build, tray code regression, sharing-pause, and real-kernel batch acceptance/undo checks. See the [publication check record](tests/results/v2_publication_checks.json). These checks do not replace the full Windows and real-client acceptance below.
+
 - Windows x64 only; the installer is unsigned.
 - The local service uses port 8765. If another program occupies it, OMNA reports the problem and stops instead of connecting to that program.
 - Full Windows acceptance for 2.0 is not finished: clean-machine install, upgrade from 1.x, uninstall leftovers, the tray icon at different scales and on light and dark taskbars, and notification delivery and clicks are still `NOT_RUN`. Native checks and code regressions done so far are in the [native check record](tests/results/desktop_native_acceptance.json) and [`tests/results/`](tests/results/).
@@ -94,10 +123,6 @@ In **Access history**, you can see which tool each Agent called and which memori
 - Whether and when an Agent reads memories is up to the Agent. OMNA can show what was delivered, not whether it was used.
 - Without an extraction model, structure-based splitting may file repository rules as personal information, for example putting "run pnpm build before pnpm test" under Identity. Check each suggestion before keeping it.
 - Chinese retrieval achieved Hit@5 of 19/20 on 20 fixed synthetic queries (10/10 direct, 9/10 rewritten). This small sample is not a measure of real-world results; preferences unrelated to the wording of a task may not be retrieved. See the [query set](experiments/kernel_spike/fixtures/p0_3_queries.json) and [evaluation results](experiments/kernel_spike/results/p0_3_windows.json).
-
-## Roadmap
-
-Directions, not yet implemented: a small set of "core" memories always given to Agents, "this is outdated" suggestions, per-project memory spaces, exporting memories as text you can paste into ChatGPT or Claude memory import, and a macOS version.
 
 ## Build from source
 

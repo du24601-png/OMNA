@@ -49,7 +49,7 @@
 <!-- Model capability is optional and may be remote -->
 <rect x="56" y="439" width="242" height="114" rx="14" fill="#fff" stroke="#b7c0cb" stroke-dasharray="5 4"/>
 <text x="76" y="470" font-size="20" font-weight="650">Your AI model</text>
-<text x="76" y="499" class="small">Extract suggestions · summarize</text>
+<text x="76" y="499" class="small">Extract import suggestions</text>
 <text x="76" y="529" class="meta">On demand; may be remote</text>
 <path d="M410 315H357V496H306" class="line" stroke-dasharray="5 4"/>
 <text x="952" y="400" class="small">Reads are permission-filtered</text>
