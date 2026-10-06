@@ -1,0 +1,23 @@
+{
+  "dictionary_keys": 667,
+  "used_keys": 556,
+  "missing_keys": [],
+  "unwrapped_chinese": [
+    {
+      "file": "api.ts",
+      "line": 394,
+      "text": "恢复备份"
+    },
+    {
+      "file": "api.ts",
+      "line": 407,
+      "text": "清空数据"
+    },
+    {
+      "file": "Settings.tsx",
+      "line": 251,
+      "text": "简体中文"
+    }
+  ],
+  "static_translated_globals": []
+}

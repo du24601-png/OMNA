@@ -181,7 +181,16 @@ pnpm --filter @zhiwo/desktop dist
 
 ### 测试
 
-测试都在临时目录里用合成数据运行，不会碰真实记忆库，也不会使用 8765 端口。服务端测试逐个运行，例如：
+客户端首次打开默认 English；在 **Settings → Appearance → Language** 中可选择 **简体中文**，切回英文的位置是 **设置 → 外观 → 语言**。主窗口、托盘小窗和原生菜单跟随选择，重启保留。记忆正文、来源、Agent 名称、已有摘要和模型输出不自动翻译；后端审核、权限、导入及模型配置保持原有行为。
+
+2026-10-06 的 V2 语言专项：`node tests/v2_locale_ui.cjs`、`node tests/v2_locale_store.cjs`、`node tests/v2_locale_ipc.cjs`，分别通过 40/40、8/8、11/11；TypeScript 与前端构建通过。证据在 `tests/results/locale-v2/acceptance.json`，包含默认中文及产品整理指令遗漏的修复前失败。浏览器使用原始结构的合成 API 数据；IPC/preload 在隔离 VM 执行真实源码，不能替代打包后的双窗口或托盘验收。
+
+2026-10-06 的真实 V2 打包验收：构建来自本工作树的 `v2` 分支、2.0.0 源码（基线 `2420e035` 加未提交的语言改动），77 个源文件与包内内容核对无差异。安装包为 `apps/desktop/dist/english-20261006/OMNA-Setup-2.0.0-English-20261006.exe`。实际启动 `win-unpacked/OMNA.exe`，使用隔离数据目录及真实 Python/Mnemosyne，37/37 次功能检查通过，覆盖首次英文、三栏 V2 结构、十条合成记忆、主窗口/托盘小窗双向语言同步、中文及英文重启保留、退出释放 8765。主窗口截图为 `tests/results/desktop-locale-v2/omna-v2-memories-en.png`。
+
+证据为 `tests/results/desktop-locale-v2/build.json`、`native-acceptance.json` 及 `native-continuation.json`。额外隐藏托盘小窗截图曾超时，原始失败完整保留，未计为截图通过；真实小窗认证和同步已通过。安装包未签名；NSIS 安装/升级/卸载、干净机器、系统托盘点击/通知送达、第三方 MCP 客户端及模型请求仍是 `NOT_RUN`。
+
+
+服务端与浏览器专项测试在临时目录里使用合成数据，不碰真实记忆库，不占用 8765。打包后的原生客户端固定使用 8765，验收仅在端口空闲时用隔离用户目录运行，结束后退出释放端口。服务端测试逐个运行，例如：
 
 ```powershell
 server\.venv\Scripts\python.exe tests\test_batches.py

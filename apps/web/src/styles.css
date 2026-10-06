@@ -121,6 +121,7 @@ html.omna-desktop :is(.dock, .home-brand, button, a, input, textarea, select, la
 .settings-row-side { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .settings-row input:not([type=checkbox]):not([type=radio]):not([type=file]) { width:280px; max-width:48%; height:32px; margin:0; padding:0 10px; border-radius:8px; background:var(--set-field); border:1px solid var(--set-line); color:var(--set-text); font-size:13px; font-weight:400; }
 .settings-row input[type=file] { width:240px; max-width:48%; font-size:12px; color:var(--set-muted); }
+.settings-row select { width:180px; max-width:48%; height:32px; margin:0; padding:0 10px; border-radius:8px; background:var(--set-field); border:1px solid var(--set-line); color:var(--set-text); font-size:13px; }
 .settings-status { font-size:12px; line-height:1.4; color:var(--set-muted); background:var(--set-btn); border-radius:8px; padding:3px 8px; }
 .settings-status.ready { color:var(--muted); background:var(--secondary); }
 .settings-note { padding:12px 14px; }

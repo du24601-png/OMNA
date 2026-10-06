@@ -1,3 +1,4 @@
+import { t, useMessage } from "./i18n"
 import { AlertDialog } from "@base-ui/react/alert-dialog"
 import { Menu } from "@base-ui/react/menu"
 import { useEffect, useRef, useState } from "react"
@@ -81,8 +82,8 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
   const [onlySelf, setOnlySelf] = useState(false)
   const [category, setCategory] = useState("")
   const [expiry, setExpiry] = useState("")
-  const [error, setError] = useState("")
-  const [notice, setNotice] = useState("")
+  const [error, setError] = useMessage()
+  const [notice, setNotice] = useMessage()
   const [conflict, setConflict] = useState(false)
   const [busy, setBusy] = useState(false)
   const [preview, setPreview] = useState<Preview | null>(null)
@@ -142,16 +143,16 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
       setMemory(next)
       setConflict(false)
       setError("")
-      if (editingRef.current) setNotice("已载入最新版本。你的输入已保留，请比较后再保存。")
-      else { apply(next); setNotice("已载入最新版本。") }
-    } catch (err) { setError(explain(err)) } finally { setBusy(false) }
+      if (editingRef.current) setNotice(() => (t("已载入最新版本。你的输入已保留，请比较后再保存。")))
+      else { apply(next); setNotice(() => (t("已载入最新版本。"))) }
+    } catch (err) { setError(() => (explain(err))) } finally { setBusy(false) }
   }
   async function persist(next: Fields, keepDraft: boolean) {
     if (!memory || busyRef.current) return
     if (next.expiry.trim() && !Number.isFinite(new Date(next.expiry).getTime())) return
     const body = payload(memory, next)
     if (!body.content) {
-      setError("记忆内容不能为空。")
+      setError(() => (t("记忆内容不能为空。")))
       if (!keepDraft) apply(memory)
       return
     }
@@ -161,7 +162,7 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
     setBusy(true); setError(""); setNotice("")
     try {
       const saved = await api.updateMemory(memory.id, body, attempt.current.key) as { status?: string; revision?: number }
-      if (saved.status !== "accepted" || !saved.revision) throw new Error("服务未确认保存结果，请重试核对。")
+      if (saved.status !== "accepted" || !saved.revision) throw new Error(t("服务未确认保存结果，请重试核对。"))
       attempt.current = null
       editingRef.current = false
       setEditing(false)
@@ -172,11 +173,11 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
       setOnlySelf(!body.share_enabled)
       setCategory(body.category)
       setExpiry(toLocal(body.valid_until))
-      setNotice("已保存，记忆列表已同步更新。")
+      setNotice(() => (t("已保存，记忆列表已同步更新。")))
       onSaved()
       resource.reload()
     } catch (err) {
-      setError(explain(err))
+      setError(() => (explain(err)))
       setConflict(err instanceof ApiError && err.code === "CONFLICT")
       if (!keepDraft) apply(memory)
     } finally { busyRef.current = false; setBusy(false) }
@@ -212,7 +213,7 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
     if (!memory || busy || editing) return
     setBusy(true); setError(""); setNotice("")
     try { setPreview(await api.deletionPreview(memory.id)) }
-    catch (err) { setError(explain(err)) }
+    catch (err) { setError(() => (explain(err))) }
     finally { setBusy(false) }
   }
   async function confirmDelete() {
@@ -220,11 +221,11 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
     setBusy(true); setError("")
     try {
       const result = await api.deleteMemory(memory.id, crypto.randomUUID())
-      if (result.status !== "deleted") throw new Error("服务未确认删除结果，请重试核对。")
+      if (result.status !== "deleted") throw new Error(t("服务未确认删除结果，请重试核对。"))
       setPreview(null)
       onSaved()
       onDeleted()
-    } catch (err) { setError(explain(err)); setBusy(false) }
+    } catch (err) { setError(() => (explain(err))); setBusy(false) }
   }
   const actions = useRef({ edit() {}, share() {} })
   actions.current.edit = () => beginEdit("content")
@@ -240,9 +241,9 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
   const shownCategory = category || memory?.category || ""
   const locked = !online || busy || conflict || !!resource.error
   const readers = memory ? readerList({ ...memory, share_enabled: !onlySelf }, agents, clients) : []
-  const by = origin && origin.client !== "omna" ? `${origin.name} 提议 · 你在 ${dateLabel(memory?.created_at)} 确认` : `你在 ${dateLabel(memory?.created_at)} 添加`
+  const by = origin && origin.client !== "omna" ? t("{0} 提议 · 你在 {1} 确认", [origin.name, dateLabel(memory?.created_at)]) : t("你在 {0} 添加", [dateLabel(memory?.created_at)])
   return <>
-  <aside className="mem-detail" aria-label="记忆详情">
+  <aside className="mem-detail" aria-label={t("记忆详情")}>
     <div className="mem-detail-scroll">
       <div className="mem-detail-meta">
         {memory && <Menu.Root>
@@ -251,63 +252,63 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
             <Menu.Positioner className="detail-positioner" side="bottom" align="start" sideOffset={6}>
               <Menu.Popup className="select-popup">
                 <Menu.RadioGroup value={shownCategory} onValueChange={onCategory}>
-                  {CATEGORIES.map(([id, label]) => <Menu.RadioItem key={id} className="tool-option" value={id} closeOnClick>{label}</Menu.RadioItem>)}
+                  {CATEGORIES().map(([id, label]) => <Menu.RadioItem key={id} className="tool-option" value={id} closeOnClick>{label}</Menu.RadioItem>)}
                 </Menu.RadioGroup>
               </Menu.Popup>
             </Menu.Positioner>
           </Menu.Portal>
         </Menu.Root>}
         {memory?.scope && <span>· {memory.scope}</span>}
-        {memory && memory.revision > 1 && <span>· 版本 {memory.revision}</span>}
+        {memory && memory.revision > 1 && <span>{t("· 版本")} {memory.revision}</span>}
       </div>
       <ResourceNotice resource={resource}/>
-      {!online && <Notice tone="warning">本地服务不可用。正在展示上次加载的数据；你的修改会保留。</Notice>}
-      {error && !preview && <Notice tone="error"><div>{error}{conflict && <button className="button secondary" type="button" onClick={latest} disabled={busy || !online}>查看最新版本并保留输入</button>}</div></Notice>}
+      {!online && <Notice tone="warning">{t("本地服务不可用。正在展示上次加载的数据；你的修改会保留。")}</Notice>}
+      {error && !preview && <Notice tone="error"><div>{error}{conflict && <button className="button secondary" type="button" onClick={latest} disabled={busy || !online}>{t("查看最新版本并保留输入")}</button>}</div></Notice>}
       {notice && <Notice tone="success">{notice}</Notice>}
-      {!editing && memory && <p className={`mem-detail-text${long ? " long" : ""}`}>{copy || "正文暂时无法读取。"}</p>}
+      {!editing && memory && <p className={`mem-detail-text${long ? " long" : ""}`}>{copy || t("正文暂时无法读取。")}</p>}
       {editing && <div className="detail-editor">
-        <textarea ref={contentRef} aria-label="纠正后的内容" value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={long ? 7 : 4}/>
-        <label className="field">适用场景 <input ref={scopeRef} aria-label="适用场景" value={scope} onChange={event => setScope(event.target.value)} placeholder="例如：正式报告"/></label>
-        <div className="actions"><button className="button primary" type="button" disabled={busy || !draft.trim() || !online || conflict || !dirty} onClick={() => void persist(fields, true)}>{busy ? "保存中…" : "保存修改"}</button><button className="button" type="button" disabled={busy} onClick={cancelEdit}>取消</button></div>
-        {conflict && <details className="disclosure" open><summary>正在比较的当前版本 {memory?.revision}</summary><p className="prose">{memory?.content}</p></details>}
+        <textarea ref={contentRef} aria-label={t("纠正后的内容")} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={long ? 7 : 4}/>
+        <label className="field">{t("适用场景")} <input ref={scopeRef} aria-label={t("适用场景")} value={scope} onChange={event => setScope(event.target.value)} placeholder={t("例如：正式报告")}/></label>
+        <div className="actions"><button className="button primary" type="button" disabled={busy || !draft.trim() || !online || conflict || !dirty} onClick={() => void persist(fields, true)}>{busy ? t("保存中…") : t("保存修改")}</button><button className="button" type="button" disabled={busy} onClick={cancelEdit}>{t("取消")}</button></div>
+        {conflict && <details className="disclosure" open><summary>{t("正在比较的当前版本")} {memory?.revision}</summary><p className="prose">{memory?.content}</p></details>}
       </div>}
       {memory && <>
         <section className="mem-detail-section">
-          <h3>谁能读到</h3>
-          {onlySelf ? <p className="helper">仅自己可见，所有 Agent 都读不到。</p>
-            : paused ? <p className="helper mem-warn">已暂停共享，现在所有 Agent 都读不到。</p>
-            : !readers.length ? <p className="helper">还没有可用的 Agent 连接。</p> : null}
-          {!onlySelf && !!readers.length && <ul className="reader-list">{readers.map(reader => <li key={reader.id}><SourceMark origin={reader.origin}/><span className={reader.canRead && !paused ? "reader-yes" : "reader-no"}>{reader.canRead ? (paused ? "暂停中" : "能读到") : "读不到"}</span></li>)}</ul>}
+          <h3>{t("谁能读到")}</h3>
+          {onlySelf ? <p className="helper">{t("仅自己可见，所有 Agent 都读不到。")}</p>
+            : paused ? <p className="helper mem-warn">{t("已暂停共享，现在所有 Agent 都读不到。")}</p>
+            : !readers.length ? <p className="helper">{t("还没有可用的 Agent 连接。")}</p> : null}
+          {!onlySelf && !!readers.length && <ul className="reader-list">{readers.map(reader => <li key={reader.id}><SourceMark origin={reader.origin}/><span className={reader.canRead && !paused ? "reader-yes" : "reader-no"}>{reader.canRead ? (paused ? t("暂停中") : t("能读到")) : t("读不到")}</span></li>)}</ul>}
         </section>
         <section className="mem-detail-section">
-          <h3>来源</h3>
+          <h3>{t("来源")}</h3>
           <p className="mem-detail-line">{by}</p>
           {memory.evidence && <blockquote className="mem-evidence">「{memory.evidence}」</blockquote>}
           {(memory.source_ids || []).map(id => <SourceLine key={id} id={id} time={memory.created_at}/>)}
         </section>
         <section className="mem-detail-section">
-          <h3>使用</h3>
-          <p className="mem-detail-line">近 7 天被读取 {memory.reads_7d ?? 0} 次</p>
+          <h3>{t("使用")}</h3>
+          <p className="mem-detail-line">{t("近 7 天被读取")} {memory.reads_7d ?? 0} {t("次")}</p>
         </section>
-        {versions.length > 1 && <section className="mem-detail-section"><h3>历史版本 <span className="count">{versions.length}</span></h3><p className="helper">旧版本仅供回看，不作为当前记忆提供给 Agent。</p>{versions.map(version => <details className="version-item" key={version.revision}><summary>版本 {version.revision}<span>{lifecycleLabel(version.lifecycle)}</span></summary><p className="prose">{version.content || "正文暂时无法读取。"}</p>{version.scope && <p className="helper">适用场景：{version.scope}</p>}</details>)}</section>}
+        {versions.length > 1 && <section className="mem-detail-section"><h3>{t("历史版本")} <span className="count">{versions.length}</span></h3><p className="helper">{t("旧版本仅供回看，不作为当前记忆提供给 Agent。")}</p>{versions.map(version => <details className="version-item" key={version.revision}><summary>{t("版本")} {version.revision}<span>{lifecycleLabel(version.lifecycle)}</span></summary><p className="prose">{version.content || t("正文暂时无法读取。")}</p>{version.scope && <p className="helper">{t("适用场景：")}{version.scope}</p>}</details>)}</section>}
         <section className="mem-detail-section detail-extra">
           <details>
-            <summary>有效期</summary>
-            <label className="field">有效期至<input type="datetime-local" aria-label="有效期" value={expiry} disabled={locked} onChange={event => setExpiry(event.target.value)} onBlur={commitExpiry}/></label>
-            <p className="helper">留空为不限。{(expiry || memory.valid_until) && <button type="button" className="text-button" disabled={locked} onMouseDown={event => event.preventDefault()} onClick={clearExpiry}>清除有效期</button>}</p>
+            <summary>{t("有效期")}</summary>
+            <label className="field">{t("有效期至")}<input type="datetime-local" aria-label={t("有效期")} value={expiry} disabled={locked} onChange={event => setExpiry(event.target.value)} onBlur={commitExpiry}/></label>
+            <p className="helper">{t("留空为不限。")}{(expiry || memory.valid_until) && <button type="button" className="text-button" disabled={locked} onMouseDown={event => event.preventDefault()} onClick={clearExpiry}>{t("清除有效期")}</button>}</p>
           </details>
         </section>
       </>}
     </div>
     {memory && !editing && <footer className="mem-detail-actions">
-      <button className="button" type="button" disabled={locked} onClick={() => beginEdit("content")}>编辑</button>
-      <button className="button" type="button" disabled={locked} onClick={() => onShare(onlySelf)}>{onlySelf ? "恢复共享" : "停止共享"}</button>
+      <button className="button" type="button" disabled={locked} onClick={() => beginEdit("content")}>{t("编辑")}</button>
+      <button className="button" type="button" disabled={locked} onClick={() => onShare(onlySelf)}>{onlySelf ? t("恢复共享") : t("停止共享")}</button>
       <Menu.Root>
-        <Menu.Trigger className="button icon-only" aria-label="更多操作" disabled={!online || busy}><Icon name="more"/></Menu.Trigger>
+        <Menu.Trigger className="button icon-only" aria-label={t("更多操作")} disabled={!online || busy}><Icon name="more"/></Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner className="detail-positioner" side="top" align="end" sideOffset={6}>
             <Menu.Popup className="select-popup">
-              <Menu.Item className="tool-option danger" onClick={() => void openDelete()}>永久删除…</Menu.Item>
+              <Menu.Item className="tool-option danger" onClick={() => void openDelete()}>{t("永久删除…")}</Menu.Item>
             </Menu.Popup>
           </Menu.Positioner>
         </Menu.Portal>
@@ -318,13 +319,13 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
       <AlertDialog.Portal>
         <AlertDialog.Backdrop className="dialog-backdrop detail-alert-backdrop"/>
         <AlertDialog.Popup className="detail-alert material">
-          <AlertDialog.Title className="detail-alert-title">永久删除这条记忆</AlertDialog.Title>
-          {preview && <AlertDialog.Description className="detail-alert-copy">删除后无法从 OMNA 里恢复这条记忆。若来源仍包含这段内容，确认后会整份删除这些来源；其他记忆会保留，并显示来源已删除。将删除 {preview.version_count} 个版本。</AlertDialog.Description>}
-          {preview && (preview.sources.length ? <ul className="detail-alert-list">{preview.sources.map(item => <li key={item.id}>{sourceLabel(item.kind)}{item.name ? ` · ${item.name}` : ""}</li>)}</ul> : <p className="helper">没有仍包含这段内容的来源。</p>)}
+          <AlertDialog.Title className="detail-alert-title">{t("永久删除这条记忆")}</AlertDialog.Title>
+          {preview && <AlertDialog.Description className="detail-alert-copy">{t("删除后无法从 OMNA 里恢复这条记忆。若来源仍包含这段内容，确认后会整份删除这些来源；其他记忆会保留，并显示来源已删除。将删除")} {preview.version_count} {t("个版本。")}</AlertDialog.Description>}
+          {preview && (preview.sources.length ? <ul className="detail-alert-list">{preview.sources.map(item => <li key={item.id}>{sourceLabel(item.kind)}{item.name ? ` · ${item.name}` : ""}</li>)}</ul> : <p className="helper">{t("没有仍包含这段内容的来源。")}</p>)}
           {error && <Notice tone="error">{error}</Notice>}
           <div className="actions detail-alert-actions">
-            <AlertDialog.Close className="button secondary" disabled={busy}>取消</AlertDialog.Close>
-            <button className="button danger" type="button" disabled={busy || !online} onClick={confirmDelete}>{busy ? "删除中…" : "确认永久删除"}</button>
+            <AlertDialog.Close className="button secondary" disabled={busy}>{t("取消")}</AlertDialog.Close>
+            <button className="button danger" type="button" disabled={busy || !online} onClick={confirmDelete}>{busy ? t("删除中…") : t("确认永久删除")}</button>
           </div>
         </AlertDialog.Popup>
       </AlertDialog.Portal>
@@ -333,13 +334,13 @@ export function Detail({ memoryId, origin, online, agents, clients, paused, comm
 }
 
 function originFromSource(source: Source) {
-  if (source.kind === "agent_claim") return { client: "agent", name: source.name || "Agent 提案" }
+  if (source.kind === "agent_claim") return { client: "agent", name: source.name || t("Agent 提案") }
   return { client: "omna", name: "OMNA" }
 }
 
 function SourceLine({ id, origin, time }: { id: string; origin?: { client: string; name: string }; time?: string }) {
   const source = useResource<Source>(() => api.source(id), [id])
-  if (source.error === "source not found") return <p className="helper">来源已删除</p>
+  if (source.error === "source not found") return <p className="helper">{t("来源已删除")}</p>
   const data = source.data
   const mark = origin || (data ? originFromSource(data) : undefined)
   return <div className="source-block detail-source"><ResourceNotice resource={source}/>{data && <details className="disclosure"><summary>{mark && <SourceMark origin={mark}/>}<time>{dateLabel(time || data.imported_at)}</time></summary><p className="prose">{data.content}</p></details>}</div>
@@ -347,6 +348,6 @@ function SourceLine({ id, origin, time }: { id: string; origin?: { client: strin
 
 export function SourceContent({ id }: { id: string }) {
   const source = useResource<Source>(() => api.source(id), [id])
-  if (source.error === "source not found") return <p className="helper">来源已删除</p>
-  return <div className="source-block"><ResourceNotice resource={source}/>{source.data && <details className="disclosure"><summary>{sourceLabel(source.data.kind)}{source.data.name ? ` · ${source.data.name}` : " · 查看来源文本"}</summary><p className="prose">{source.data.content}</p><p className="helper">{dateLabel(source.data.imported_at)}</p></details>}</div>
+  if (source.error === "source not found") return <p className="helper">{t("来源已删除")}</p>
+  return <div className="source-block"><ResourceNotice resource={source}/>{source.data && <details className="disclosure"><summary>{sourceLabel(source.data.kind)}{source.data.name ? ` · ${source.data.name}` : t(" · 查看来源文本")}</summary><p className="prose">{source.data.content}</p><p className="helper">{dateLabel(source.data.imported_at)}</p></details>}</div>
 }

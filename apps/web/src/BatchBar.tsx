@@ -1,3 +1,4 @@
+import { t, useMessage } from "./i18n"
 // Top of the pending list: a batch (one import, or one agent organizing its
 // instruction file) with two or more plain additions can be remembered in
 // one go; right after, the same place offers to undo that batch.
@@ -12,14 +13,14 @@ type Done = { batch: string; label: string; count: number }
 let recent: Done[] = []
 
 function labelOf(proposal: Proposal) {
-  if (proposal.source.kind === "agent_claim") return `${proposal.requester?.name || "Agent"} 整理的`
-  return proposal.source.name ? `「${proposal.source.name}」里的` : "这次导入的"
+  if (proposal.source.kind === "agent_claim") return t("{0} 整理的", [proposal.requester?.name || "Agent"])
+  return proposal.source.name ? t("「{0}」里的", [proposal.source.name]) : t("这次导入的")
 }
 
 export function BatchBar({ proposals, tick, online, onChanged }: { proposals: Proposal[]; tick: number; online: boolean; onChanged: () => void }) {
   const [library, setLibrary] = useState<Memory[] | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
-  const [error, setError] = useState("")
+  const [error, setError] = useMessage()
   const [done, setDone] = useState<Done[]>(recent)
   const [confirm, setConfirm] = useState<Done | null>(null)
   const keys = useRef(new Map<string, string>())
@@ -44,9 +45,9 @@ export function BatchBar({ proposals, tick, online, onChanged }: { proposals: Pr
       // Only the suggestions on screen; an agent may still be adding more.
       const outcome = await carryOut({ keep: group.plain, drop: [], categories: {}, choices: [], closed: group.closed ? new Set([group.id]) : new Set() }, keyFor)
       if (outcome.accepted) update([{ batch: group.id, label: group.label, count: outcome.accepted }, ...done.filter(item => item.batch !== group.id)])
-      if (outcome.errors.length) setError(`${outcome.errors.length} 条没有完成：${outcome.errors[0]} 再点一次会接着做，不会重复记住。`)
+      if (outcome.errors.length) setError(() => (t("{0} 条没有完成：{1} 再点一次会接着做，不会重复记住。", [outcome.errors.length, outcome.errors[0]])))
       onChanged()
-    } catch (err) { setError(explain(err)) }
+    } catch (err) { setError(() => (explain(err))) }
     finally { setBusy(null) }
   }
   async function undo(item: Done) {
@@ -56,31 +57,31 @@ export function BatchBar({ proposals, tick, online, onChanged }: { proposals: Pr
       update(done.filter(other => other.batch !== item.batch))
       setConfirm(null)
       onChanged()
-    } catch (err) { setError(explain(err)); setConfirm(null) }
+    } catch (err) { setError(() => (explain(err))); setConfirm(null) }
     finally { setBusy(null) }
   }
 
   if (!groups.length && !done.length && !error) return null
   return <div className="batch-bars">
     {groups.map(group => <div key={group.id} className="batch-bar">
-      <span className="batch-grow">{group.label} {group.plain.length} 条新增可以一起记住，很像的和修改仍要逐条看。</span>
-      <button type="button" className="button primary" disabled={!online || !!busy} onClick={() => void rememberAll(group)}>{busy === group.id ? "正在记住…" : `记住 ${group.plain.length} 条`}</button>
+      <span className="batch-grow">{group.label} {group.plain.length} {t("条新增可以一起记住，很像的和修改仍要逐条看。")}</span>
+      <button type="button" className="button primary" disabled={!online || !!busy} onClick={() => void rememberAll(group)}>{busy === group.id ? t("正在记住…") : t("记住 {0} 条", [group.plain.length])}</button>
     </div>)}
     {done.map(item => <div key={item.batch} className="batch-bar quiet">
-      <span className="batch-grow">已记住{item.label} {item.count} 条。</span>
-      <button type="button" className="text-button" disabled={!online || !!busy} onClick={() => setConfirm(item)}>撤销这次导入</button>
-      <button type="button" className="text-button batch-dismiss" onClick={() => update(done.filter(other => other.batch !== item.batch))}>知道了</button>
+      <span className="batch-grow">{t("已记住")}{item.label} {item.count} {t("条。")}</span>
+      <button type="button" className="text-button" disabled={!online || !!busy} onClick={() => setConfirm(item)}>{t("撤销这次导入")}</button>
+      <button type="button" className="text-button batch-dismiss" onClick={() => update(done.filter(other => other.batch !== item.batch))}>{t("知道了")}</button>
     </div>)}
     {error && <p className="inbox-error" role="alert">{error}</p>}
     <AlertDialog.Root open={!!confirm} onOpenChange={open => { if (!open && !busy) setConfirm(null) }}>
       <AlertDialog.Portal>
         <AlertDialog.Backdrop className="dialog-backdrop detail-alert-backdrop"/>
         <AlertDialog.Popup className="detail-alert material">
-          <AlertDialog.Title className="detail-alert-title">撤销这次导入</AlertDialog.Title>
-          <AlertDialog.Description className="detail-alert-copy">会永久删除这批记住的 {confirm?.count} 条记忆，删除后不能恢复。导入的原文和这批还没处理的建议也会一起删除。其中有之后又改过的，整批撤销会被拒绝，不会删一半。</AlertDialog.Description>
+          <AlertDialog.Title className="detail-alert-title">{t("撤销这次导入")}</AlertDialog.Title>
+          <AlertDialog.Description className="detail-alert-copy">{t("会永久删除这批记住的")} {confirm?.count} {t("条记忆，删除后不能恢复。导入的原文和这批还没处理的建议也会一起删除。其中有之后又改过的，整批撤销会被拒绝，不会删一半。")}</AlertDialog.Description>
           <div className="actions detail-alert-actions">
-            <AlertDialog.Close className="button secondary" disabled={!!busy}>取消</AlertDialog.Close>
-            <button type="button" className="button danger" disabled={!!busy} onClick={() => confirm && void undo(confirm)}>{busy ? "正在撤销…" : `删除这 ${confirm?.count} 条`}</button>
+            <AlertDialog.Close className="button secondary" disabled={!!busy}>{t("取消")}</AlertDialog.Close>
+            <button type="button" className="button danger" disabled={!!busy} onClick={() => confirm && void undo(confirm)}>{busy ? t("正在撤销…") : t("删除这 {0} 条", [confirm?.count])}</button>
           </div>
         </AlertDialog.Popup>
       </AlertDialog.Portal>

@@ -1,0 +1,32 @@
+// Execute actual V2 trust functions, IPC callbacks and preload in isolated VMs.
+// Does not launch Electron, use a real credential, contact any URL or create client config.
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync(path.join(__dirname,'../apps/desktop/src/main.cjs'),'utf8');
+const helper=name=>{const m=src.match(new RegExp('  function '+name+'\\([^]*?\\n  \\}'));assert.ok(m,name);return m[0];};
+const callback=channel=>{const m=src.match(new RegExp('ipcMain\\.on\\("'+channel+'", ([^]*?\\n  \\})\\)'));assert.ok(m,channel);return m[1];};
+const mainFrame={url:'http://127.0.0.1:8765/'},flyFrame={url:'http://127.0.0.1:8765/#/flyout'};
+const sends=[],mainContents={mainFrame,send:(...x)=>sends.push(['main',...x])},flyContents={mainFrame:flyFrame,send:(...x)=>sends.push(['flyout',...x])};
+let locale='en',writes=0,updates=0;
+const ctx={ready:true,URL,ORIGIN:'http://127.0.0.1:8765',credential:'synthetic-only',win:{webContents:mainContents,isDestroyed:()=>false},flyout:{webContents:flyContents,isDestroyed:()=>false},tray:null,localeStore:{get:()=>locale,set:n=>{if(!['en','zh-CN'].includes(n))return false;locale=n;writes++;return true;}},updateTrayMenu:()=>updates++,pollStatus:()=>{}};
+vm.createContext(ctx);vm.runInContext(['isTrustedRenderer','isTrustedMain','isTrustedFrame'].map(helper).join('\n'),ctx);
+const loc=vm.runInContext('('+callback('omna:locale')+')',ctx),owner=vm.runInContext('('+callback('omna:owner')+')',ctx);
+const results=[],check=(name,fn)=>{try{fn();results.push({name,status:'PASS'});}catch(e){results.push({name,status:'FAIL',error:String(e)});}};
+const event=(sender=mainContents,frame=sender.mainFrame)=>({sender,senderFrame:frame});
+const run=(handler,e,n)=>{handler(e,n);return e.returnValue;};
+check('trusted main and flyout read locale and owner credential',()=>{for(const sender of [mainContents,flyContents]){assert.equal(run(loc,event(sender)),'en');assert.equal(run(owner,event(sender)),'synthetic-only');}});
+check('foreign sender cannot read owner or update language',()=>{const other={mainFrame};assert.equal(run(owner,event(other)),'');assert.equal(run(loc,event(other),'zh-CN'),false);assert.equal(writes,0);});
+check('child frame denied owner/getter/setter',()=>{const child={url:mainFrame.url};assert.equal(run(owner,event(mainContents,child)),'');assert.equal(run(loc,event(mainContents,child)),'en');assert.equal(run(loc,event(mainContents,child),'zh-CN'),false);assert.equal(writes,0);});
+check('unready service denied',()=>{ctx.ready=false;assert.equal(run(owner,event()),'');assert.equal(run(loc,event(),'zh-CN'),false);ctx.ready=true;});
+check('foreign and lookalike origins denied',()=>{for(const url of ['https://example.invalid/','http://127.0.0.1:8765.evil.invalid/','http://127.0.0.1:8766/']){mainFrame.url=url;assert.equal(run(owner,event()),'');assert.equal(run(loc,event(),'zh-CN'),false);}mainFrame.url='http://127.0.0.1:8765/';});
+check('flyout setter denied even when main frame trusted',()=>{assert.equal(run(loc,event(flyContents),'zh-CN'),false);assert.equal(writes,0);});
+check('invalid main locale denied without broadcast',()=>{assert.equal(run(loc,event(),'fr'),false);assert.equal(locale,'en');assert.equal(sends.length,0);});
+check('main setter persists and broadcasts exact locale to both windows',()=>{assert.equal(run(loc,event(),'zh-CN'),true);assert.equal(locale,'zh-CN');assert.equal(writes,1);assert.equal(updates,1);assert.deepEqual(sends,[['main','omna:locale-changed','zh-CN'],['flyout','omna:locale-changed','zh-CN']]);assert.equal(run(loc,event(flyContents)),'zh-CN');});
+const preload=fs.readFileSync(path.join(__dirname,'../apps/desktop/src/preload.cjs'),'utf8');
+let exposed,subscriptions=new Map(),syncCalls=[];
+const ipc={sendSync:(channel,next)=>{syncCalls.push([channel,next]);return channel==='omna:owner'?'synthetic-only':next===undefined?'zh-CN':true;},on:(channel,cb)=>subscriptions.set(channel,cb),removeListener:(channel,cb)=>{if(subscriptions.get(channel)===cb)subscriptions.delete(channel);},send:()=>{},invoke:()=>Promise.resolve(null)};
+vm.runInNewContext(preload,{require:name=>{assert.equal(name,'electron');return {ipcRenderer:ipc,contextBridge:{exposeInMainWorld:(name,value)=>{assert.equal(name,'omna');exposed=value;}}};}});
+check('preload exposes validated locale and owner credential',()=>{assert.equal(exposed.locale,'zh-CN');assert.equal(exposed.ownerCredential,'synthetic-only');assert.ok(Object.isFrozen(exposed));});
+check('preload rejects invalid locale before IPC',()=>{const count=syncCalls.length;assert.equal(exposed.setLocale('fr'),false);assert.equal(syncCalls.length,count);assert.equal(exposed.setLocale('en'),true);});
+check('preload locale subscription strips event and validates payload',()=>{let values=[];const stop=exposed.onLocaleChange((...args)=>values.push(args));const listener=subscriptions.get('omna:locale-changed');listener({secret:'not exposed'},'zh-CN');listener({},'bad');listener({},'en');assert.deepEqual(values,[['zh-CN'],['en']]);stop();assert.equal(subscriptions.has('omna:locale-changed'),false);});
+const result={version:'V2',platform:process.platform,mode:'real V2 source extracted callbacks and actual preload in isolated VM; no native startup',status:results.every(r=>r.status==='PASS')?'PASS':'FAIL',checks:results};
+fs.writeFileSync(path.join(__dirname,'results/locale-v2/ipc.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));process.exitCode=result.status==='PASS'?0:1;

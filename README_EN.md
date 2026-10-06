@@ -181,7 +181,16 @@ pnpm --filter @zhiwo/desktop dist
 
 ### Tests
 
-Tests use synthetic data in temporary folders, never touch a real memory library, and never use port 8765. Run service tests one at a time, for example:
+The client defaults to English on first launch. Choose **Settings → Appearance → Language → 简体中文** for Chinese; choose **设置 → 外观 → 语言 → English** to switch back. The main window, tray flyout, and native menus follow the preference, which persists across restarts. Memory content, sources, Agent names, existing summaries, and model output are not translated. Review, permissions, import behavior, and model configuration retain their existing contracts.
+
+V2 locale checks on 2026-10-06: `node tests/v2_locale_ui.cjs`, `node tests/v2_locale_store.cjs`, and `node tests/v2_locale_ipc.cjs` passed 40/40, 8/8, and 11/11 respectively; TypeScript and the frontend build passed. Evidence is in `tests/results/locale-v2/acceptance.json`, including the reproduced initial Chinese UI and untranslated product instruction failures. Browser checks use synthetic raw-schema API fixtures; IPC/preload checks run actual source in isolated VMs and do not establish packaged dual-window or tray acceptance.
+
+Actual V2 package acceptance on 2026-10-06: this worktree's `v2` branch, version 2.0.0 (base `2420e035` plus uncommitted locale changes), produced `apps/desktop/dist/english-20261006/OMNA-Setup-2.0.0-English-20261006.exe`. All 77 source files matched packaged content. The actual `win-unpacked/OMNA.exe` ran with isolated synthetic data and real bundled Python/Mnemosyne; 37/37 functional checks passed, including initial English, the three-tab V2 layout, ten saved memories, main/flyout language synchronization, Chinese and English persistence across actual restarts, and release of port 8765. The real main-window image is `tests/results/desktop-locale-v2/omna-v2-memories-en.png`.
+
+Evidence: `tests/results/desktop-locale-v2/build.json`, `native-acceptance.json`, and `native-continuation.json`. An optional screenshot of the hidden flyout timed out; its original failure is retained and no successful flyout screenshot is claimed. Actual flyout authentication and synchronization passed. The installer is unsigned. NSIS install/upgrade/uninstall, clean-machine checks, OS tray clicks and notification delivery, real third-party MCP clients, and model requests remain `NOT_RUN`.
+
+
+Service and browser checks use synthetic data in temporary folders, do not touch real memories, and avoid port 8765. The packaged native client uses fixed port 8765; acceptance runs only when it is free, with an isolated user directory, and exits afterward to release it. Run service tests one at a time, for example:
 
 ```powershell
 server\.venv\Scripts\python.exe tests\test_batches.py

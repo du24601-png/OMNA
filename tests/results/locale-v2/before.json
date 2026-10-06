@@ -1,0 +1,18 @@
+{
+  "version": "V2",
+  "platform": "win32",
+  "port": 57603,
+  "mode": "isolated frontend synthetic API mocks; no real databases or clients",
+  "checks": [
+    {
+      "name": "V2 fresh session defaults English",
+      "status": "FAIL",
+      "visible": "OMNA\n欢迎回到 OMNA\n\n用本机凭证打开你的个人记忆。凭证仅保存在当前浏览器会话。\n\n本机凭证\n进入我的空间"
+    }
+  ],
+  "errors": [],
+  "notRun": [
+    "Final V2 locale workflow acceptance awaits implementation-ready notice"
+  ],
+  "status": "FAIL"
+}

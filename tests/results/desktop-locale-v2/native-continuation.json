@@ -1,0 +1,86 @@
+{
+  "platform": "win32",
+  "mode": "Actual V2 packaged Electron executable; real bundled Python/Mnemosyne; ten synthetic English memories; no API mocks",
+  "capture": "CDP screenshot of actual Electron webContents at native default window size, not an OS desktop screenshot",
+  "checks": [
+    {
+      "name": "V2 2.0.0 source identity",
+      "status": "PASS"
+    },
+    {
+      "name": "8765 initially free",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual main and native flyout loaded English",
+      "status": "PASS"
+    },
+    {
+      "name": "Flyout authenticates to actual backend",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese instantly applies to both existing windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese persisted in native locale JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Quit before Chinese restart releases service",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual restart retains Chinese in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "English instantly restored to both existing windows",
+      "status": "PASS"
+    },
+    {
+      "name": "English persisted in native locale JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Quit before English restart releases service",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual app restart retains English in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Restart preserves ten real backend memories",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual V2 inline sidebar still shows unchanged memory",
+      "status": "PASS"
+    },
+    {
+      "name": "Final native app and service quit releases 8765",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [],
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "OS tray menu click and notification delivery",
+    "Real third-party MCP client/model"
+  ],
+  "started_at": "2026-10-06T13:12:38.253Z",
+  "source_worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98",
+  "branch": "v2",
+  "head": "2420e03502423c6d6ff8849eaed80a3519212c99",
+  "package_version": "2.0.0",
+  "exe": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\apps\\desktop\\dist\\english-20261006\\win-unpacked\\OMNA.exe",
+  "user_data": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\.cache\\desktop-locale-v2\\1791274515120\\user-data",
+  "client_home": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\.cache\\desktop-locale-v2\\1791274515120\\home",
+  "prior_evidence": "third-run-hidden-flyout-screenshot-failure.json",
+  "last_pid": 12696,
+  "finished_at": "2026-10-06T13:12:59.407Z",
+  "status": "PASS"
+}

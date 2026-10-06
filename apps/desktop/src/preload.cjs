@@ -3,13 +3,25 @@
 const { contextBridge, ipcRenderer } = require("electron")
 
 function subscribe(channel, listener, map) {
-  const wrapped = (_event, value) => listener(map(value))
+  const wrapped = (_event, value) => {
+    const mapped = map(value)
+    if (mapped !== null) listener(mapped)
+  }
   ipcRenderer.on(channel, wrapped)
   return () => ipcRenderer.removeListener(channel, wrapped)
 }
 
 const ownerCredential = ipcRenderer.sendSync("omna:owner")
+const locale = ipcRenderer.sendSync("omna:locale")
 contextBridge.exposeInMainWorld("omna", Object.freeze({
+  locale: locale === "zh-CN" ? "zh-CN" : "en",
+  setLocale(next) {
+    if (next !== "en" && next !== "zh-CN") return false
+    return ipcRenderer.sendSync("omna:locale", next) === true
+  },
+  onLocaleChange(listener) {
+    return subscribe("omna:locale-changed", listener, value => value === "zh-CN" ? "zh-CN" : value === "en" ? "en" : null)
+  },
   ownerCredential: typeof ownerCredential === "string" ? ownerCredential : "",
   windowAction(action) {
     ipcRenderer.send("omna:window", action)

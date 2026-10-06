@@ -1,3 +1,4 @@
+import { t, useMessage } from "./i18n"
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react"
 import { explain } from "./api"
 import { sourceAsset } from "./format"
@@ -6,7 +7,7 @@ export function useResource<T>(load: () => Promise<T>, keys: unknown[]) {
   const key = JSON.stringify(keys)
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const [error, setError] = useMessage()
   const [retry, setRetry] = useState(0)
   const [seen, setSeen] = useState(key)
   const sequence = useRef(0)
@@ -19,7 +20,7 @@ export function useResource<T>(load: () => Promise<T>, keys: unknown[]) {
     const current = ++sequence.current
     setLoading(true); setError("")
     load().then(value => { if (current === sequence.current) setData(value) })
-      .catch(err => { if (current === sequence.current) setError(explain(err)) })
+      .catch(err => { if (current === sequence.current) setError(() => (explain(err))) })
       .finally(() => { if (current === sequence.current) setLoading(false) })
     return () => { sequence.current++ }
   }, [key, retry])
@@ -30,8 +31,8 @@ export function Skeleton({ className = "", style }: { className?: string; style?
 }
 export function ResourceNotice({ resource, pending = true }: { resource: { data: unknown; loading: boolean; error: string; reload: () => void }; pending?: boolean }) {
   const { data, loading, error, reload } = resource
-  if (error) return <div className="notice error" role="alert"><div><strong>加载未完成</strong><p>{error}</p>{data !== null && <p>以下为上次加载的数据，操作前请重试。</p>}</div><button className="button secondary" onClick={reload}>重试加载</button></div>
-  if (loading && (data !== null || pending)) return <div className="loading-line" role="status"><span className="spinner" />{data === null ? "正在加载…" : "正在更新，暂时展示上次加载的数据。"}</div>
+  if (error) return <div className="notice error" role="alert"><div><strong>{t("加载未完成")}</strong><p>{error}</p>{data !== null && <p>{t("以下为上次加载的数据，操作前请重试。")}</p>}</div><button className="button secondary" onClick={reload}>{t("重试加载")}</button></div>
+  if (loading && (data !== null || pending)) return <div className="loading-line" role="status"><span className="spinner" />{data === null ? t("正在加载…") : t("正在更新，暂时展示上次加载的数据。")}</div>
   return null
 }
 export function Notice({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "error" | "success" | "warning" }) {
@@ -43,16 +44,16 @@ export function Empty({ title, children, action }: { title: string; children?: R
 export function PageTitle({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
   return <div className="page-heading"><div><h1>{title}</h1>{description && <p>{description}</p>}</div>{children}</div>
 }
-export function CopyButton({ text, label = "复制", className = "copy-button", onCopied }: { text: string; label?: string; className?: string; onCopied?: () => void }) {
+export function CopyButton({ text, label = t("复制"), className = "copy-button", onCopied }: { text: string; label?: string; className?: string; onCopied?: () => void }) {
   const [state, setState] = useState<"idle" | "done" | "failed">("idle")
   return <button type="button" className={className} onClick={async () => {
     try { await navigator.clipboard.writeText(text); setState("done"); onCopied?.() } catch { setState("failed") }
-  }}><Icon name={state === "done" ? "check" : "copy"} />{state === "done" ? "已复制" : state === "failed" ? "复制失败，请手动选中" : label}</button>
+  }}><Icon name={state === "done" ? "check" : "copy"} />{state === "done" ? t("已复制") : state === "failed" ? t("复制失败，请手动选中") : label}</button>
 }
 export function canLeave() { return window.dispatchEvent(new Event("zhiwo:leave", { cancelable: true })) }
 export function useUnsaved(dirty: boolean, busy = false) {
   useEffect(() => {
-    const check = (event: Event) => { if (busy || (dirty && !window.confirm("有尚未保存的修改。离开将放弃这些修改，确定离开吗？"))) event.preventDefault() }
+    const check = (event: Event) => { if (busy || (dirty && !window.confirm(t("有尚未保存的修改。离开将放弃这些修改，确定离开吗？")))) event.preventDefault() }
     const unload = (event: BeforeUnloadEvent) => { if (dirty || busy) { event.preventDefault(); event.returnValue = "" } }
     window.addEventListener("zhiwo:leave", check); window.addEventListener("beforeunload", unload)
     return () => { window.removeEventListener("zhiwo:leave", check); window.removeEventListener("beforeunload", unload) }
@@ -115,11 +116,11 @@ const SOURCE_DUAL = new Set(["omna", "opencode", "zcode", "codex"])
 export function SourceMark({ origin, compact = false }: { origin?: { client: string; name: string }; compact?: boolean }) {
   const client = origin?.client || "omna"
   const name = origin?.name || "OMNA"
-  if (compact && client === "omna") return <span className="memo-source compact" title="你自己添加或导入"><span className="source-you" aria-label="你">你</span></span>
+  if (compact && client === "omna") return <span className="memo-source compact" title={t("你自己添加或导入")}><span className="source-you" aria-label={t("你")}>{t("你")}</span></span>
   const label = compact ? null : <span>{name}</span>
   const title = compact ? name : undefined
   if (!SOURCE_CLIENTS.has(client)) {
-    const mark = name === "Agent 提案" ? "" : Array.from(name)[0]
+    const mark = name === t("Agent 提案") ? "" : Array.from(name)[0]
     return <span className={`memo-source${compact ? " compact" : ""}`} title={title}><span className="source-fallback" aria-hidden={!compact}>{mark}</span>{label}</span>
   }
   const dual = SOURCE_DUAL.has(client)

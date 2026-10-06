@@ -20,6 +20,8 @@
 
 ## 2. 运行结构
 
+客户端静态界面文案由 `apps/web/src/i18n.ts` 和 `messages.en.json` 管理，默认 `en`，可选 `zh-CN`；用户正文不进入翻译函数。React 订阅语言变化而不重挂载业务界面，保留编辑草稿。开发浏览器按来源保存语言；Electron 通过受限 IPC 将语言保存在用户数据目录独立的 `locale.json`，不写入记忆库、模型配置或备份。原生进程校验可信窗口、主 frame、本地源及语言值，持久化成功后通知主窗口和托盘小窗同步语言；失败显示可定位提示。
+
 ```mermaid
 flowchart TD
   UI["React 界面 / Electron"] -->|"Owner API"| S["知我本地服务"]

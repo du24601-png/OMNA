@@ -1,0 +1,52 @@
+{
+  "version": "V2",
+  "platform": "win32",
+  "mode": "real V2 source extracted callbacks and actual preload in isolated VM; no native startup",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "trusted main and flyout read locale and owner credential",
+      "status": "PASS"
+    },
+    {
+      "name": "foreign sender cannot read owner or update language",
+      "status": "PASS"
+    },
+    {
+      "name": "child frame denied owner/getter/setter",
+      "status": "PASS"
+    },
+    {
+      "name": "unready service denied",
+      "status": "PASS"
+    },
+    {
+      "name": "foreign and lookalike origins denied",
+      "status": "PASS"
+    },
+    {
+      "name": "flyout setter denied even when main frame trusted",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid main locale denied without broadcast",
+      "status": "PASS"
+    },
+    {
+      "name": "main setter persists and broadcasts exact locale to both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "preload exposes validated locale and owner credential",
+      "status": "PASS"
+    },
+    {
+      "name": "preload rejects invalid locale before IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "preload locale subscription strips event and validates payload",
+      "status": "PASS"
+    }
+  ]
+}

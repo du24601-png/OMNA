@@ -9,6 +9,7 @@ const net = require("node:net")
 const os = require("node:os")
 const path = require("node:path")
 const trayIcons = require("./tray-icons.cjs")
+const { createLocaleStore } = require("./locale.cjs")
 
 // A development run may use another port so it does not collide with an installed OMNA.
 const DEV_PORT = app.isPackaged ? 0 : Number(app.commandLine.getSwitchValue("omna-port")) || 0
@@ -17,7 +18,10 @@ const APP_ID = "app.omna.desktop"
 const POLL_MS = 4000
 const NOTE_GAP_MS = 30000
 const DEFAULT_SHORTCUT = "CommandOrControl+Shift+M"
-const CATEGORY_NAMES = { identity: "身份", goal: "目标", preference: "偏好", project: "项目", event: "事件", other: "其他" }
+const CATEGORY_NAMES = {
+  identity: ["身份", "Identity"], goal: ["目标", "Goal"], preference: ["偏好", "Preference"],
+  project: ["项目", "Project"], event: ["事件", "Event"], other: ["其他", "Other"],
+}
 const ORIGIN = `http://127.0.0.1:${PORT}`
 const START_TIMEOUT_MS = 180000
 const LOG_LIMIT = 5 * 1024 * 1024
@@ -58,6 +62,8 @@ function main() {
     icon: path.join(runtime, "icon.png"),
   }
   const userData = app.getPath("userData")
+  const localeStore = createLocaleStore(path.join(userData, "locale.json"))
+  const l = localeStore.text
   const dataDir = path.join(userData, "data")
   const logDir = path.join(userData, "logs")
   const logFile = path.join(logDir, "service.log")
@@ -105,8 +111,20 @@ function main() {
     })
   })
   ipcMain.on("omna:owner", event => {
-    const url = event.senderFrame ? event.senderFrame.url : ""
-    event.returnValue = ready && url.startsWith(`${ORIGIN}/`) ? credential : ""
+    event.returnValue = isTrustedRenderer(event) ? credential : ""
+  })
+  ipcMain.on("omna:locale", (event, next) => {
+    if (next === undefined) { event.returnValue = isTrustedRenderer(event) ? localeStore.get() : "en"; return }
+    if (!isTrustedMain(event)) { event.returnValue = false; return }
+    const saved = localeStore.set(next)
+    if (saved) {
+      updateTrayMenu()
+      if (tray) pollStatus()
+      for (const browser of [win, flyout]) {
+        if (browser && !browser.isDestroyed()) browser.webContents.send("omna:locale-changed", localeStore.get())
+      }
+    }
+    event.returnValue = saved
   })
   ipcMain.on("omna:window", (event, action) => {
     if (!win || win.isDestroyed() || event.sender !== win.webContents) return
@@ -149,12 +167,12 @@ function main() {
     powerMonitor.on("unlock-screen", () => { locked = false; pollStatus() })
     nativeTheme.on("updated", () => paintTray(trayState || "idle", trayTip, true))
     startPolling()
-    showStatus("正在启动 OMNA…", "第一次打开要载入本地模型，可能需要半分钟。")
+    showStatus(l("正在启动 OMNA…", "Starting OMNA…"), l("第一次打开要载入本地模型，可能需要半分钟。", "The first launch loads the local model and may take about 30 seconds."))
     try {
       fs.mkdirSync(dataDir, { recursive: true })
       fs.mkdirSync(logDir, { recursive: true })
       for (const required of [paths.python, path.join(paths.web, "index.html"), paths.model]) {
-        if (!fs.existsSync(required)) throw new Failure("安装不完整", `缺少 ${required}。请重新安装 OMNA。`)
+        if (!fs.existsSync(required)) throw new Failure(l("安装不完整", "Installation incomplete"), l(`缺少 ${required}。请重新安装 OMNA。`, `A required file is missing: ${required}. Reinstall OMNA.`))
       }
       credential = ownerCredential()
       await claimPort()
@@ -186,7 +204,7 @@ function main() {
     if (await portFree()) return
     // A service that accepts this data directory's credential is ours, left over from a crash.
     if ((await ownerHealth()) !== 200) {
-      throw new Failure(`端口 ${PORT} 被占用`, `另一个程序正在使用 127.0.0.1:${PORT}，OMNA 没有连到它。关闭那个程序后，再从开始菜单打开 OMNA。`)
+      throw new Failure(l(`端口 ${PORT} 被占用`, `Port ${PORT} is in use`), l(`另一个程序正在使用 127.0.0.1:${PORT}，OMNA 没有连到它。关闭那个程序后，再从开始菜单打开 OMNA。`, `Another program is using 127.0.0.1:${PORT}. OMNA did not connect to it. Close that program, then reopen OMNA from the Start menu.`))
     }
     const pid = await listenerPid()
     if (pid) await killTree(pid)
@@ -194,7 +212,7 @@ function main() {
       if (await portFree()) return
       await sleep(500)
     }
-    throw new Failure(`端口 ${PORT} 没有释放`, "上一次的本地服务还没退出。稍等片刻，再重新打开 OMNA。")
+    throw new Failure(l(`端口 ${PORT} 没有释放`, `Port ${PORT} did not become available`), l("上一次的本地服务还没退出。稍等片刻，再重新打开 OMNA。", "The previous local service is still shutting down. Wait a moment, then reopen OMNA."))
   }
 
   function startService() {
@@ -209,18 +227,18 @@ function main() {
         if (child) killTree(child.pid)
         reject(error)
       }
-      const timer = setTimeout(() => fail(new Failure("本地服务没有按时启动", `等了 ${START_TIMEOUT_MS / 1000} 秒还没有就绪。`)), START_TIMEOUT_MS)
+      const timer = setTimeout(() => fail(new Failure(l("本地服务没有按时启动", "The local service did not start in time"), l(`等了 ${START_TIMEOUT_MS / 1000} 秒还没有就绪。`, `It did not become ready within ${START_TIMEOUT_MS / 1000} seconds.`))), START_TIMEOUT_MS)
       child = spawn(paths.python, args, { cwd: dataDir, env: serviceEnv(), windowsHide: true, stdio: ["ignore", "pipe", "pipe"] })
       child.stdout.pipe(log, { end: false })
       child.stderr.pipe(log, { end: false })
-      child.once("error", error => fail(new Failure("本地服务无法启动", error.message)))
+      child.once("error", error => fail(new Failure(l("本地服务无法启动", "Could not start the local service"), error.message)))
       child.once("exit", code => {
         child = null
         log.write(`[${new Date().toISOString()}] service exited code=${code}\n`)
-        if (!settled) fail(new Failure("本地服务启动后退出了", `退出码 ${code}。`))
+        if (!settled) fail(new Failure(l("本地服务启动后退出了", "The local service stopped during startup"), l(`退出码 ${code}。`, `Exit code: ${code}.`)))
         else if (!quitting) {
           ready = false
-          showFailure(new Failure("本地服务停止了", "已连接的 Agent 暂时读不到记忆。可以从托盘菜单重新启动 OMNA。"), false)
+          showFailure(new Failure(l("本地服务停止了", "The local service stopped"), l("已连接的 Agent 暂时读不到记忆。可以从托盘菜单重新启动 OMNA。", "Connected agents cannot read memories for now. Restart OMNA from the tray menu.")), false)
         }
       })
       const poll = async () => {
@@ -233,7 +251,7 @@ function main() {
               clearTimeout(timer)
               resolve()
             } else {
-              fail(new Failure("本地服务没有认出这个窗口", `校验返回 ${status}。`))
+              fail(new Failure(l("本地服务没有认出这个窗口", "The local service did not recognize this window"), l(`校验返回 ${status}。`, `Health check returned ${status}.`)))
             }
             return
           }
@@ -334,25 +352,30 @@ function main() {
       win.hide()
       if (!hintShown && tray) {
         hintShown = true
-        tray.displayBalloon({ iconType: "info", title: "OMNA 还在运行", content: "已连接的 Agent 仍能读取记忆。要停止，请在托盘图标的菜单里选择退出。" })
+        tray.displayBalloon({ iconType: "info", title: l("OMNA 还在运行", "OMNA is still running"), content: l("已连接的 Agent 仍能读取记忆。要停止，请在托盘图标的菜单里选择退出。", "Connected agents can still read memories. To stop OMNA, choose Quit from the tray menu.") })
       }
     })
   }
 
   function createTray() {
     tray = new Tray(trayImage("idle", 1))
-    paintTray("idle", "OMNA 正在启动")
-    tray.setContextMenu(Menu.buildFromTemplate([
-      { label: "打开 OMNA", click: show },
-      { label: "打开日志文件夹", click: () => shell.openPath(logDir) },
-      { label: "重新启动 OMNA", click: () => { app.relaunch(); quit() } },
-      { type: "separator" },
-      { label: "退出 OMNA", click: quit },
-    ]))
+    paintTray("idle", l("OMNA 正在启动", "OMNA is starting"))
+    updateTrayMenu()
     tray.on("click", () => {
       if (!ready || trayState === "problem") return show()
       toggleFlyout()
     })
+  }
+
+  function updateTrayMenu() {
+    if (!tray) return
+    tray.setContextMenu(Menu.buildFromTemplate([
+      { label: l("打开 OMNA", "Open OMNA"), click: show },
+      { label: l("打开日志文件夹", "Open log folder"), click: () => shell.openPath(logDir) },
+      { label: l("重新启动 OMNA", "Restart OMNA"), click: () => { app.relaunch(); quit() } },
+      { type: "separator" },
+      { label: l("退出 OMNA", "Quit OMNA"), click: quit },
+    ]))
   }
 
   // ── Tray flyout ────────────────────────────────────────────────────────────
@@ -463,16 +486,16 @@ function main() {
     try {
       if (!ready) {
         if (!credential || !win || child) return
-        return paintTray("problem", "本机服务没在运行 · 点击查看原因")
+        return paintTray("problem", l("本机服务没在运行 · 点击查看原因", "Local service is unavailable · click to see why"))
       }
       const offset = new Date().getTimezoneOffset()
       const { status, body } = await request(`/api/v1/status?utc_offset_minutes=${offset}`, { Authorization: `Bearer ${credential}` })
-      if (status !== 200) return paintTray("problem", "本机服务没在运行 · 点击查看原因")
+      if (status !== 200) return paintTray("problem", l("本机服务没在运行 · 点击查看原因", "Local service is unavailable · click to see why"))
       let data
       try {
         data = JSON.parse(body)
       } catch {
-        return paintTray("problem", "本机服务回应异常 · 点击查看原因")
+        return paintTray("problem", l("本机服务回应异常 · 点击查看原因", "Unexpected response from local service · click to see why"))
       }
       const latest = data.recent_reads && data.recent_reads[0]
       if (latest && lastReadId !== null && latest.event_id !== lastReadId) startReading(latest, data)
@@ -485,15 +508,17 @@ function main() {
   }
 
   function baseState(data) {
-    if (!data.service || data.service.embeddings_loaded === false) return ["problem", "本地向量模型没有加载 · 点击查看原因"]
-    if (data.sharing && data.sharing.paused) return ["paused", `已暂停共享 · ${minutesLeft(data.sharing.paused_until)} 分钟后恢复`]
-    if (data.pending && data.pending.count > 0) return ["pending", `${data.pending.count} 条建议等你确认`]
-    return ["idle", "OMNA 运行中"]
+    if (!data.service || data.service.embeddings_loaded === false) return ["problem", l("本地向量模型没有加载 · 点击查看原因", "Local embedding model is not loaded · click to see why")]
+    if (data.sharing && data.sharing.paused) return ["paused", l(`已暂停共享 · ${minutesLeft(data.sharing.paused_until)} 分钟后恢复`, `Sharing paused · resumes in ${minutesLeft(data.sharing.paused_until)} min`)]
+    if (data.pending && data.pending.count > 0) return ["pending", l(`${data.pending.count} 条建议等你确认`, `${data.pending.count} suggestion${data.pending.count === 1 ? "" : "s"} to review`)]
+    return ["idle", l("OMNA 运行中", "OMNA is running")]
   }
 
   function startReading(read, data) {
-    const parts = Object.entries(read.categories || {}).map(([key, count]) => `${CATEGORY_NAMES[key] || key} ${count}`)
-    const tip = `${read.agent_name} 正在读取${parts.length ? ` · ${parts.join(" · ")}` : ""}`
+    const tip = () => {
+      const parts = Object.entries(read.categories || {}).map(([key, count]) => `${CATEGORY_NAMES[key] ? l(...CATEGORY_NAMES[key]) : key} ${count}`)
+      return l(`${read.agent_name} 正在读取${parts.length ? ` · ${parts.join(" · ")}` : ""}`, `${read.agent_name} is reading${parts.length ? ` · ${parts.join(" · ")}` : ""}`)
+    }
     const animate = systemPreferences.getAnimationSettings().shouldRenderRichAnimation
     const started = Date.now()
     clearInterval(readingTimer)
@@ -505,7 +530,7 @@ function main() {
         return paintTray(...baseState(data))
       }
       const phase = animate ? 0.5 + 0.5 * Math.cos((elapsed / 1600) * Math.PI * 2) : 1
-      paintTray("reading", tip, false, Math.round(phase * 4) / 4)
+      paintTray("reading", tip(), false, Math.round(phase * 4) / 4)
     }
     readingTimer = setInterval(frame, 100)
     frame()
@@ -582,11 +607,12 @@ function main() {
     lastNoteAt = Date.now()
     const first = items[0]
     const who = first.requester && first.requester.name ? first.requester.name : "Agent"
-    const verb = first.target_id ? "修改" : "新增"
-    const title = items.length === 1 ? `${who} 提议${verb}一条记忆` : `${items.length} 条新建议等你确认`
-    const lines = items.slice(0, 2).map(item => `${item.target_id ? "修改" : "新增"}：${clip(item.payload && item.payload.content)}`)
-    if (items.length === 1 && first.evidence && first.evidence.text) lines.push(`依据：${clip(first.evidence.text)}`)
-    if (items.length > 2) lines.push(`还有 ${items.length - 2} 条`)
+    const title = items.length === 1
+      ? l(`${who} 提议${first.target_id ? "修改" : "新增"}一条记忆`, `${who} suggested ${first.target_id ? "a memory change" : "a new memory"}`)
+      : l(`${items.length} 条新建议等你确认`, `${items.length} new suggestions to review`)
+    const lines = items.slice(0, 2).map(item => `${item.target_id ? l("修改", "Change") : l("新增", "Add")}: ${clip(item.payload && item.payload.content)}`)
+    if (items.length === 1 && first.evidence && first.evidence.text) lines.push(l(`依据：${clip(first.evidence.text)}`, `Evidence: ${clip(first.evidence.text)}`))
+    if (items.length > 2) lines.push(l(`还有 ${items.length - 2} 条`, `${items.length - 2} more`))
     const note = new Notification({ title, body: lines.join("\n") })
     note.on("click", () => toggleFlyout(first.id))
     note.show()
@@ -629,8 +655,21 @@ function main() {
   }
 
   function fromOurPage(event) {
-    const url = event.senderFrame ? event.senderFrame.url : ""
-    return ready && url.startsWith(`${ORIGIN}/`)
+    return isTrustedRenderer(event)
+  }
+
+  function isTrustedRenderer(event) {
+    if (!ready || !event.senderFrame || event.senderFrame !== event.sender.mainFrame) return false
+    if (event.sender !== (win && win.webContents) && event.sender !== (flyout && flyout.webContents)) return false
+    return isTrustedFrame(event, event.senderFrame.url)
+  }
+
+  function isTrustedMain(event) {
+    return isTrustedRenderer(event) && event.sender === win.webContents
+  }
+
+  function isTrustedFrame(_event, value) {
+    try { return new URL(value).origin === ORIGIN } catch { return false }
   }
 
   function show() {
@@ -650,10 +689,10 @@ function main() {
   }
 
   function showFailure(error, reveal = true) {
-    const title = error instanceof Failure ? error.title : "OMNA 没能打开"
+    const title = error instanceof Failure ? error.title : l("OMNA 没能打开", "OMNA could not open")
     const detail = error instanceof Failure ? error.detail : String(error && error.message ? error.message : error)
     if (win) {
-      win.loadURL(page(title, `${detail}\n日志：${logFile}`, true))
+      win.loadURL(page(title, l(`${detail}\n日志：${logFile}`, `${detail}\nLog: ${logFile}`), true))
       // Startup failures need attention; background failures wait for a tray click.
       if (reveal) show()
     }
@@ -661,7 +700,7 @@ function main() {
 
   function page(title, detail, failed) {
     const escape = text => String(text).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch])
-    const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>OMNA</title>
+    const html = `<!doctype html><html lang="${localeStore.get()}"><head><meta charset="utf-8"><title>OMNA</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <style>
 body{margin:0;height:100vh;display:grid;place-items:center;font:15px/1.7 "Segoe UI","Microsoft YaHei UI",sans-serif;background:#f6f6f7;color:#1d1d1f}
@@ -676,7 +715,7 @@ p{margin:0;color:#6e6e73;white-space:pre-wrap;word-break:break-all}
 .bar i{display:block;width:30%;height:100%;background:#1d1d1f;animation:m 1.4s ease-in-out infinite}
 @keyframes m{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
 @media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
-</style></head><body><div class="chrome"><button type="button" aria-label="最小化" onclick="omna.windowAction('minimize')">&#8211;</button><button type="button" aria-label="最大化" onclick="omna.windowAction('maximize')">&#9633;</button><button type="button" class="close" aria-label="关闭" onclick="omna.windowAction('close')">&#10005;</button></div><main role="${failed ? "alert" : "status"}"><h1>${escape(title)}</h1><p>${escape(detail)}</p>${failed ? "" : '<div class="bar"><i></i></div>'}</main></body></html>`
+</style></head><body><div class="chrome"><button type="button" aria-label="${escape(l("最小化", "Minimize"))}" onclick="omna.windowAction('minimize')">&#8211;</button><button type="button" aria-label="${escape(l("最大化", "Maximize"))}" onclick="omna.windowAction('maximize')">&#9633;</button><button type="button" class="close" aria-label="${escape(l("关闭", "Close"))}" onclick="omna.windowAction('close')">&#10005;</button></div><main role="${failed ? "alert" : "status"}"><h1>${escape(title)}</h1><p>${escape(detail)}</p>${failed ? "" : '<div class="bar"><i></i></div>'}</main></body></html>`
     return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
   }
 

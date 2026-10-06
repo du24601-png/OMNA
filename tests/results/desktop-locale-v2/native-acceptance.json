@@ -1,0 +1,206 @@
+{
+  "status": "PASS",
+  "scope": "Requested V2 default English, settings switching, persistence, real main and flyout authentication, main screenshot and backend data retention. Optional hidden flyout screenshot is not claimed.",
+  "source_worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98",
+  "branch": "v2",
+  "head": "2420e03502423c6d6ff8849eaed80a3519212c99",
+  "package_version": "2.0.0",
+  "source_modified": true,
+  "checks": [
+    {
+      "name": "Actual source is V2 branch and 2.0.0 package",
+      "status": "PASS"
+    },
+    {
+      "name": "8765 initially free; no existing service stopped",
+      "status": "PASS"
+    },
+    {
+      "name": "Main window and native V2 flyout both loaded actual service UI",
+      "status": "PASS"
+    },
+    {
+      "name": "Native preload default English in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Real bundled embeddings ready; test mode off; extractor unconfigured",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 5",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 6",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 7",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 8",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 9",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 10",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 11",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 12",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 13",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 14",
+      "status": "PASS"
+    },
+    {
+      "name": "Real Mnemosyne-backed API lists exactly ten memories",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual V2 has exactly three text navigation tabs",
+      "status": "PASS",
+      "detail": [
+        "Memories",
+        "Agent",
+        "Settings"
+      ]
+    },
+    {
+      "name": "V2 has inline review filter within Memories",
+      "status": "PASS"
+    },
+    {
+      "name": "English preference details appear in right sidebar",
+      "status": "PASS",
+      "detail": {
+        "x": 680,
+        "y": 48,
+        "width": 348,
+        "height": 584
+      }
+    },
+    {
+      "name": "User memory text is unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "Main uses V2 default native dimensions",
+      "status": "PASS",
+      "detail": {
+        "width": 1040,
+        "height": 682,
+        "dpr": 1.5
+      }
+    },
+    {
+      "name": "Real flyout owner authentication and backend polling work",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 2.0.0 source identity",
+      "status": "PASS"
+    },
+    {
+      "name": "8765 initially free",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual main and native flyout loaded English",
+      "status": "PASS"
+    },
+    {
+      "name": "Flyout authenticates to actual backend",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese instantly applies to both existing windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese persisted in native locale JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Quit before Chinese restart releases service",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual restart retains Chinese in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "English instantly restored to both existing windows",
+      "status": "PASS"
+    },
+    {
+      "name": "English persisted in native locale JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Quit before English restart releases service",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual app restart retains English in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Restart preserves ten real backend memories",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual V2 inline sidebar still shows unchanged memory",
+      "status": "PASS"
+    },
+    {
+      "name": "Final native app and service quit releases 8765",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\tests\\results\\desktop-locale-v2\\omna-v2-memories-en.png",
+      "width": 1560,
+      "height": 1023,
+      "sha256": "547487d0a9c7d32b41b7047a38607b9ce90cf880dfba25f23ad884fc9f3fcbdb"
+    }
+  ],
+  "stages": [
+    {
+      "evidence": "third-run-hidden-flyout-screenshot-failure.json",
+      "status": "FAIL",
+      "functional_checks_passed": 22,
+      "note": "All main capture and preceding functional checks passed; optional hidden flyout page.screenshot timed out. Original failure retained."
+    },
+    {
+      "evidence": "native-continuation.json",
+      "status": "PASS",
+      "checks": 15,
+      "note": "Same isolated dataset; actual settings switching and actual restarts tested. No API mocks."
+    }
+  ],
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "OS tray menu click and notification delivery",
+    "Real third-party MCP client/model",
+    "Screenshot of hidden flyout webContents"
+  ],
+  "cleanup": "PASS: own Electron process exited; 8765 released",
+  "finished_at": "2026-10-06T13:12:59.407Z"
+}

@@ -1,3 +1,4 @@
+import { t } from "./i18n"
 export class ApiError extends Error {
   status: number
   code: string
@@ -141,6 +142,9 @@ export type BatchAccept = { batch_id: string; accepted: number; skipped: number;
 declare global {
   interface Window {
     omna?: {
+      locale?: "en" | "zh-CN"
+      setLocale?: (locale: "en" | "zh-CN") => boolean
+      onLocaleChange?: (listener: (locale: "en" | "zh-CN") => void) => () => void
       ownerCredential?: string
       windowAction?: (action: "minimize" | "maximize" | "close") => void
       maximized?: () => boolean
@@ -169,23 +173,23 @@ export function getCredential() {
   return credential
 }
 
-export const embeddingHelp = desktopCredential
-  ? "请从托盘菜单「打开日志文件夹」查看 service.log，或重新安装 OMNA。"
-  : "请查看本地服务日志。"
+export const embeddingHelp = () => desktopCredential
+  ? t("请从托盘菜单「打开日志文件夹」查看 service.log，或重新安装 OMNA。")
+  : t("请查看本地服务日志。")
 
 export function explain(error: unknown): string {
-  if (!(error instanceof ApiError)) return error instanceof Error ? error.message : "没有完成，请稍后重试。"
-  if (error.status === 0 || error.code === "UNAVAILABLE") return "本地服务未运行。刚才的内容还在，可以重试。"
-  if (error.code === "UNAUTHENTICATED") return desktopCredential ? "本地服务没有认出这个窗口，请从托盘退出后重新打开 OMNA。" : "本机凭证不正确。"
+  if (!(error instanceof ApiError)) return error instanceof Error ? t(error.message) : t("没有完成，请稍后重试。")
+  if (error.status === 0 || error.code === "UNAVAILABLE") return t("本地服务未运行。刚才的内容还在，可以重试。")
+  if (error.code === "UNAUTHENTICATED") return desktopCredential ? t("本地服务没有认出这个窗口，请从托盘退出后重新打开 OMNA。") : t("本机凭证不正确。")
   if (error.code === "MODEL_UNAVAILABLE" && error.message === "local embedding model is not ready") {
-    return `本地向量模型没有加载，这次没有保存。重试不会改变结果，${embeddingHelp}`
+    return t("本地向量模型没有加载，这次没有保存。重试不会改变结果，{0}", [embeddingHelp()])
   }
-  if (error.code === "MODEL_UNAVAILABLE") return "模型还没准备好，这次没有保存。"
+  if (error.code === "MODEL_UNAVAILABLE") return t("模型还没准备好，这次没有保存。")
   if (error.code === "CONFLICT" && error.message.includes("memory changed")) {
-    return "当前记忆已经更新，这条建议不能再改它。"
+    return t("当前记忆已经更新，这条建议不能再改它。")
   }
-  if (error.code === "CONFLICT" || error.code === "VALIDATION_ERROR") return error.message
-  return error.message || "没有完成，请查看原因后重试。"
+  if (error.code === "CONFLICT" || error.code === "VALIDATION_ERROR") return t(error.message)
+  return error.message ? t(error.message) : t("没有完成，请查看原因后重试。")
 }
 
 async function request(path: string, init: RequestInit = {}) {
@@ -197,7 +201,7 @@ async function request(path: string, init: RequestInit = {}) {
     response = await fetch(path, { ...init, headers })
   } catch {
     window.dispatchEvent(new Event("zhiwo:unavailable"))
-    throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
+    throw new ApiError(0, "UNAVAILABLE", t("本地服务未运行"), true)
   }
   if (response.status === 204) return null
   const text = await response.text()
@@ -206,18 +210,18 @@ async function request(path: string, init: RequestInit = {}) {
     try {
       body = JSON.parse(text)
     } catch {
-      throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
+      throw new ApiError(0, "UNAVAILABLE", t("本地服务未运行"), true)
     }
   }
   if (!response.ok) {
     const error = body?.error
     if (!error?.code && response.status >= 500) {
-      throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
+      throw new ApiError(0, "UNAVAILABLE", t("本地服务未运行"), true)
     }
     throw new ApiError(
       response.status,
       error?.code || "REQUEST_FAILED",
-      error?.message || "请求没有完成",
+      error?.message || t("请求没有完成"),
       Boolean(error?.retryable),
     )
   }
@@ -433,14 +437,14 @@ async function download(path: string, fallback: string) {
     response = await fetch(path, { method: "POST", headers })
   } catch {
     window.dispatchEvent(new Event("zhiwo:unavailable"))
-    throw new ApiError(0, "UNAVAILABLE", "本地服务未运行", true)
+    throw new ApiError(0, "UNAVAILABLE", t("本地服务未运行"), true)
   }
   if (!response.ok) {
     const text = await response.text()
     let body: { error?: { code?: string; message?: string; retryable?: boolean } } | null = null
     try { body = text ? JSON.parse(text) : null } catch { body = null }
     const error = body?.error
-    throw new ApiError(response.status, error?.code || "REQUEST_FAILED", error?.message || "下载没有完成", Boolean(error?.retryable))
+    throw new ApiError(response.status, error?.code || "REQUEST_FAILED", error?.message || t("下载没有完成"), Boolean(error?.retryable))
   }
   const blob = await response.blob()
   const match = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")
@@ -453,23 +457,23 @@ async function download(path: string, fallback: string) {
 }
 
 export function importMessage(job: ImportJob, demo: boolean) {
-  const prefix = demo ? "演示数据。" : ""
+  const prefix = demo ? t("演示数据。") : ""
   if (job.status === "extracted") {
     const count = job.proposals?.length || 0
-    const merged = job.merged_duplicates ? `，重复的 ${job.merged_duplicates} 条已合并` : ""
-    const how = job.method === "split" ? "按结构拆出" : "已放入待确认"
+    const merged = job.merged_duplicates ? t("，重复的 {0} 条已合并", [job.merged_duplicates]) : ""
+    const how = job.method === "split" ? t("按结构拆出") : t("已放入待确认")
     return count
-      ? `${prefix}${how} ${count} 条${merged}，确认后才进入正式记忆。`
-      : `${prefix}没有新的可审核内容${merged}。来源已保存。`
+      ? t("{0}{1} {2} 条{3}，确认后才进入正式记忆。", [prefix, how, count, merged])
+      : t("{0}没有新的可审核内容{1}。来源已保存。", [prefix, merged])
   }
   if (job.status === "extractor_unavailable") {
-    return "提取模型未配置。来源已保存，没有生成待确认内容。"
+    return t("提取模型未配置。来源已保存，没有生成待确认内容。")
   }
   if (job.error_code === "VALIDATION_ERROR") {
-    return "提取结果格式无效。来源仍在，可以重试。没有生成待确认内容。"
+    return t("提取结果格式无效。来源仍在，可以重试。没有生成待确认内容。")
   }
   if (job.error_code === "TIMEOUT") {
-    return "提取超时。来源仍在，可以重试。没有生成待确认内容。"
+    return t("提取超时。来源仍在，可以重试。没有生成待确认内容。")
   }
-  return "提取没有完成。来源仍在，可以重试。没有生成待确认内容。"
+  return t("提取没有完成。来源仍在，可以重试。没有生成待确认内容。")
 }

@@ -1,3 +1,4 @@
+import { t } from "./i18n"
 // Shared by onboarding step 3 and the connect-import card: sort one or more
 // batches' pending suggestions into plain additions, near duplicates and the
 // ones that need one-by-one review, then carry out what the owner picked.
@@ -115,7 +116,7 @@ export async function carryOut(plan: Plan, keyFor: (sig: string) => string): Pro
         if (!wanted.has(row.proposal_id)) continue
         if (row.status === "accepted") { outcome.accepted++; outcome.categories.add(items.find(item => item.proposal.id === row.proposal_id)!.proposal.payload.category) }
         else if (row.status === "skipped") outcome.left++
-        else outcome.errors.push(row.message || "有一条没有记住，可以重试。")
+        else outcome.errors.push(row.message || t("有一条没有记住，可以重试。"))
       }
     } catch (err) { outcome.errors.push(describe(err)) }
   }
@@ -137,8 +138,8 @@ export async function carryOut(plan: Plan, keyFor: (sig: string) => string): Pro
 }
 
 function describe(err: unknown) {
-  if (err instanceof ApiError && (err.status === 0 || err.code === "UNAVAILABLE")) return "本地服务未运行，没记住的还在，可以重试。"
-  return err instanceof Error && err.message ? err.message : "有一条没有完成，可以重试。"
+  if (err instanceof ApiError && (err.status === 0 || err.code === "UNAVAILABLE")) return t("本地服务未运行，没记住的还在，可以重试。")
+  return err instanceof Error && err.message ? err.message : t("有一条没有完成，可以重试。")
 }
 
 // Undo every batch that produced memories. Batches with nothing to undo are fine.

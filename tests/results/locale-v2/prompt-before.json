@@ -1,0 +1,170 @@
+{
+  "version": "V2",
+  "platform": "win32",
+  "port": 63872,
+  "mode": "isolated frontend synthetic API mocks; no real databases or clients",
+  "checks": [
+    {
+      "name": "V2 fresh session defaults English",
+      "status": "PASS",
+      "visible": "OMNA\nWelcome back to OMNA\n\nEnter your local credential to open your memories. It is stored only for this browser session.\n\nLocal credential\nOpen my workspace"
+    },
+    {
+      "name": "settings-en: no horizontal overflow 1440",
+      "status": "PASS"
+    },
+    {
+      "name": "settings-en: no horizontal overflow 1024",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 English Settings appearance",
+      "status": "PASS",
+      "detail": "Settings\nAppearance\nExtraction model\nLocal data\nBackup\nReset\nAppearance\n\nInterface\n\nTheme\nLanguage\nEnglish\n简体中文"
+    },
+    {
+      "name": "V2 Settings subsection 1 English",
+      "status": "PASS",
+      "detail": "Settings\nAppearance\nExtraction model\nLocal data\nBackup\nReset\nExtraction model\n\nConnections\n\nStatus\nNot ready to extract\nService URL\nModel name\nAPI key\nTest connection\nSave"
+    },
+    {
+      "name": "V2 Settings subsection 2 English",
+      "status": "PASS",
+      "detail": "Settings\nAppearance\nExtraction model\nLocal data\nBackup\nReset\nLocal data\n\nLocation\n\nsynthetic-only/data\nOpen\nChoose folder\n\nPrivacy\n\nMemories, sources, proposals, permissions, and access logs stay on this computer. Search runs locally by default. When you use a cloud extraction model, the text you submit is sent to that service. Memories shared with an authorized agent may leave this device. OMNA does not monitor your clipboard, chats, or system activity, or upload usage logs by default. Whether processing stays offline depends on your configuration. Backups are saved where you choose. Manage older backups and copies held by outside agents separately."
+    },
+    {
+      "name": "V2 Settings subsection 3 English",
+      "status": "PASS",
+      "detail": "Settings\nAppearance\nExtraction model\nLocal data\nBackup\nReset\nBackup\n\nExport\n\nExport memories\nExport\nDownload backup\nBackup\n\nRestore from backup\n\nBackup file\nType “Restore backup” to confirm\nRestore backup"
+    },
+    {
+      "name": "V2 Settings subsection 4 English",
+      "status": "PASS",
+      "detail": "Settings\nAppearance\nExtraction model\nLocal data\nBackup\nReset\nClear data\n\nWhat will be affected\n\nConfirmed memories, versions, sources, and proposals will be deleted.\nAgent connections and access history will be deleted.\nExtraction settings saved here will be cleared.\nBackup files you saved separately will not be deleted.\n\nConfirm\n\nType “Clear data” to confirm\nClear data"
+    },
+    {
+      "name": "Settings changes immediately to Chinese",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese survives refresh",
+      "status": "PASS"
+    },
+    {
+      "name": "Dates change with locale",
+      "status": "PASS",
+      "detail": {
+        "en": "Jan 2, 06:04 AM",
+        "zh": "1月2日 06:04"
+      }
+    },
+    {
+      "name": "V2 has exactly three primary tabs",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 English memory list and inline detail",
+      "status": "PASS",
+      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nCtrl\nK\nAll\n1\nTo review\n1\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\nTo review\n1\n周末我会去湖边慢跑。\nNew\nYou\nPreferences\n1\n我喜欢周末在湖边慢跑。\nYou\nJan 2, 2025\nLoading…\n1 memories · 1 agents · All saved on this computer\nEdit Enter\nStop sharing Ctrl D\nSearch Ctrl K"
+    },
+    {
+      "name": "memories-en: no horizontal overflow 1440",
+      "status": "PASS"
+    },
+    {
+      "name": "memories-en: no horizontal overflow 1024",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese memory not translated in editor",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese switch retains editing draft",
+      "status": "PASS"
+    },
+    {
+      "name": "English switch retains editing draft",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese brace interpolation remains raw",
+      "status": "PASS"
+    },
+    {
+      "name": "detail-en: no horizontal overflow 1440",
+      "status": "PASS"
+    },
+    {
+      "name": "detail-en: no horizontal overflow 1024",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 unified pending memory view English",
+      "status": "PASS",
+      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nCtrl\nK\nAll\n1\nTo review\n1\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\n\nOMNA\n· New\nPreferences\n\n周末我会去湖边慢跑。\n\n1 memories · 1 agents · All saved on this computer\nSelect ↑↓\nKeep Y\nDismiss N\nEdit E"
+    },
+    {
+      "name": "V2 connected Agent and ConnectImport offer English",
+      "status": "PASS",
+      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nMy agents\nConnections\n\n1 Awaiting verification\n\nClaude Code\nAwaiting verification\nOther MCP clients\nClaude Code\n\nAwaiting verification · Waiting for its first call\n\nAllow access\nLet Claude Code read the instructions you wrote for it\n\nIt sends suggestions about you to OMNA. Only the ones you approve become memories.\n\nsynthetic-only/CLAUDE.md\nNever mind\nStart\nPermissions\nAccess history\nWhat it can do\nRead only\nRead the memories you allow\nCan propose changes\nAlso propose memories for you to review\nWhat it can read\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\n\nOnly confirmed, current memories that are not marked Only me will be shared.\n\nWhat it can propose\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\n\nAll proposals need your approval. Proposal categories and read access are set separately.\n\nConfigure individual tools"
+    },
+    {
+      "name": "V2 ConnectImport menu English",
+      "status": "PASS",
+      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nMy agents\nConnections\n\n1 Awaiting verification\n\nClaude Code\nAwaiting verification\nOther MCP clients\nClaude Code\n\nAwaiting verification · Waiting for its first call\n\nAllow access\nLet Claude Code read the instructions you wrote for it\n\nIt sends suggestions about you to OMNA. Only the ones you approve become memories.\n\nsynthetic-only/CLAUDE.md\nNever mind\nStart\nPermissions\nAccess history\nWhat it can do\nRead only\nRead the memories you allow\nCan propose changes\nAlso propose memories for you to review\nWhat it can read\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\n\nOnly confirmed, current memories that are not marked Only me will be shared.\n\nWhat it can propose\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\n\nAll proposals need your approval. Proposal categories and read access are set separately.\n\nConfigure individual tools\nRead the file directly (without AI)"
+    },
+    {
+      "name": "V2 ConnectImport copied product instruction English",
+      "status": "FAIL",
+      "detail": "请先查一下 OMNA 里我的偏好，再读一下你的全局说明文件，把其中关于我本人的内容（身份、偏好、目标、正在做的项目）整理成记忆，逐条用 propose_memory 提交给 OMNA。只对某个代码库成立的规则、命令和路径不要提交。\nCopy"
+    },
+    {
+      "name": "V2 onboarding screen 1 English",
+      "status": "PASS",
+      "detail": "OMNA\n\nStep 1 of 3\n\nConnect the AI tools you use\n\nOMNA adds its configuration to each tool's settings and preserves existing entries. Connected tools can initially read only your Preferences and Goals.\n\nClaude Code\nConnected · Awaiting verification\nHas your instructions\nAbout 1 minute\nSkip\nNext"
+    },
+    {
+      "name": "V2 onboarding screen 2 English",
+      "status": "PASS",
+      "detail": "OMNA\n\nStep 2 of 3\n\nBring the instructions you have already written\n\nAsk a connected AI tool to read its instruction file and send OMNA suggestions about you. Only checked suggestions will be saved as memories.\n\nClaude Code\nsynthetic-only/CLAUDE.md\nAsk it to organize\n\nThis allows it to propose changes without changing what it can read. Each suggestion requires your approval before it becomes a memory.\n\nYou can skip this and ask it to organize the file later on the Agent page.\nBack\nSkip\nNext"
+    },
+    {
+      "name": "V2 onboarding screen 3 English",
+      "status": "PASS",
+      "detail": "OMNA\n\nStep 3 of 3\n\nWhat AI now knows about you\nPreferences\n我喜欢周末在湖边慢跑。\n\nSynthetic Agent can now read 「Goals」「Preferences」. Identity details are not shared by default.\n\nIn Synthetic Agent try this message:「First check which of my preferences you can read in OMNA, then answer me using those preferences.」. It will first retrieve what you have allowed it to read from OMNA.\nCopy message\nOMNA runs quietly in the tray and lets you know when suggestions arrive.\nDone"
+    },
+    {
+      "name": "V2 flyout English",
+      "status": "PASS",
+      "detail": "OMNA\nRunning\nRead 0 times today\n\nNo agent reads today\n\nTo review 1\nAll\nYou\n\n周末我会去湖边慢跑。\n\nOMNA · NewPreferences\n↑↓ Select\nY Keep\nN Dismiss\nRecently\nNo agent has read a memory yet\nOpen OMNA\nCtrl\nShift\nM"
+    },
+    {
+      "name": "Existing offline notice immediately Chinese",
+      "status": "PASS"
+    },
+    {
+      "name": "Existing offline notice immediately English",
+      "status": "PASS",
+      "detail": "The local service is offline. Showing previously loaded data. Your drafts are preserved; reconnect to continue.\nRetry"
+    },
+    {
+      "name": "No missing synthetic fixture",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "No browser runtime errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "unhandledFixtures": [],
+  "notRun": [
+    "Real native cross-window main/flyout locale sync and packaged installer (separate native QA)",
+    "Native tray/notifications UI (separate native QA)",
+    "Model requests or real client configuration"
+  ],
+  "status": "FAIL"
+}

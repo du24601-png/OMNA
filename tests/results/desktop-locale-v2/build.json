@@ -1,0 +1,335 @@
+{
+  "status": "PASS",
+  "worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98",
+  "branch": "v2",
+  "base_head": "2420e03502423c6d6ff8849eaed80a3519212c99",
+  "source_modified": true,
+  "source_sha256": "0e1857dc4e395649b6b9e461fb3310f32521ba7676553af82fab767c12cf0d1b",
+  "source_files": [
+    {
+      "path": "apps/desktop/electron-builder.yml",
+      "sha256": "0ccc1b5dee96f290a1c687d603adc4752fa5eff4302bdf079dd567473d9e38f0"
+    },
+    {
+      "path": "apps/desktop/package.json",
+      "sha256": "8de3e41d2839e0e589401f46e5c696835b00e63ecfe4c11b1b082b0cb0c98046"
+    },
+    {
+      "path": "apps/desktop/src/locale.cjs",
+      "sha256": "63bc70f254f9e52897b5c75ce879eee0d6d4a9501541b2a5f6d0e9e604a405c6"
+    },
+    {
+      "path": "apps/desktop/src/main.cjs",
+      "sha256": "8847ee2c41b4cb0b9d41cc1c5c3d0c5b03bb6f3e359a939f92243c0a3ade51f3"
+    },
+    {
+      "path": "apps/desktop/src/preload.cjs",
+      "sha256": "168aae7ebc37992240f3ce359bef514f60b75f7c78df547701dc884f062533a0"
+    },
+    {
+      "path": "apps/desktop/src/tray-icons.cjs",
+      "sha256": "9085aa45316f1b2dd9f99195b954ae62c8abe490b3b6de7fdc5fd1fa84571790"
+    },
+    {
+      "path": "apps/web/index.html",
+      "sha256": "07042e5268f2a6af910d5858b27dfa01277c630a9cf4248ec2678a169d71ec6a"
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "33fecee2160d4fd061b8938791565cdff3c3a792d7463322c22137f090c23866"
+    },
+    {
+      "path": "apps/web/src/Agents.tsx",
+      "sha256": "5db31f82150a5d51abfc599a8a1a40eea4d1ff0014fc9dd9b201ec88d618a1bd"
+    },
+    {
+      "path": "apps/web/src/App.tsx",
+      "sha256": "4c61844c16f12b674f1fa42814454a47f7a0b988f7d74d8fe2dcc29f32d1c4a6"
+    },
+    {
+      "path": "apps/web/src/BatchBar.tsx",
+      "sha256": "490742930a0af50c13f6500666cf6005d2aa8befc3a64370bf155856d6fab420"
+    },
+    {
+      "path": "apps/web/src/Brand.tsx",
+      "sha256": "de7c230164081dbe47fc5d78411b7000e5bf94ad2125e6c4ef3b0a9fb20e48e2"
+    },
+    {
+      "path": "apps/web/src/Clients.tsx",
+      "sha256": "e3efeaa755e7ef5be5b0fe6911c7ac99c8c4f5033c69ad5eb8410999a8f37444"
+    },
+    {
+      "path": "apps/web/src/Composer.tsx",
+      "sha256": "3af8652176e926d29d081c0de00cca8a32643dd4739c613af5277f163753c1ff"
+    },
+    {
+      "path": "apps/web/src/ConnectImport.tsx",
+      "sha256": "5352d2af1f1bce7eb25f1e476e6034fee2b04efadc8beff9fa731ad6499ff5e9"
+    },
+    {
+      "path": "apps/web/src/Detail.tsx",
+      "sha256": "95a10b86ddb76631eb9d228df4ca62f82e97b73cea8cb2906e6da8b8f4bd40ce"
+    },
+    {
+      "path": "apps/web/src/Flyout.tsx",
+      "sha256": "0204f0e5f06b4c3e8d4f16442d15f346c5df9108cf788ec192d0efc03ec34e5b"
+    },
+    {
+      "path": "apps/web/src/Memories.tsx",
+      "sha256": "e7e9e5079b55d019ab70f502eae81f025f8510917d9152416d9e8daac6cdec1c"
+    },
+    {
+      "path": "apps/web/src/Onboarding.tsx",
+      "sha256": "ace02245e14840fc8b51f77f4246386b176e01e5a486472f25f7ce284e13aebd"
+    },
+    {
+      "path": "apps/web/src/Review.tsx",
+      "sha256": "378cc0bf0e57401f93bacdae0727338ecd9e65ab4707bac090301efabc1916ee"
+    },
+    {
+      "path": "apps/web/src/Settings.tsx",
+      "sha256": "393e9f2680628394210b677b4a380cb8180078773fe892f0cba767b9134f60cc"
+    },
+    {
+      "path": "apps/web/src/api.ts",
+      "sha256": "ee4c1eee4e26583b2f7e1649ff88489202abf32a005d532db083ec1540dd11ac"
+    },
+    {
+      "path": "apps/web/src/batch.ts",
+      "sha256": "e856bc6c0cb839f99b04252edec9c8b729e62d68a0474631d8768a6e9e0a8b4f"
+    },
+    {
+      "path": "apps/web/src/format.ts",
+      "sha256": "bde865583b349651501bd7154aef780167b5877732ce7a15058c34756c72d127"
+    },
+    {
+      "path": "apps/web/src/i18n.ts",
+      "sha256": "ae692b92f70835e9a5014639557580d74a7820fd16c1e3036ab1c115f460240e"
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "c24be9fa5e24e25a5d886ad53885347a21b8ab8458b4dbd2df8789f0e0bb6486"
+    },
+    {
+      "path": "apps/web/src/messages.en.json",
+      "sha256": "44ba186a82d6693944dd4f00c5ad99e19f2d10f50c59b6847a5100577a882cfc"
+    },
+    {
+      "path": "apps/web/src/styles.css",
+      "sha256": "61443bbf537879e41f68c9b095522dbad2fc676d6d40df35f088f82d4341c035"
+    },
+    {
+      "path": "apps/web/src/theme.ts",
+      "sha256": "576aac673ca51ff2a57f8b54b02550a3993e2aac967d43340914d4ee136f8f30"
+    },
+    {
+      "path": "apps/web/src/ui.tsx",
+      "sha256": "7f069c84be12a3c15517a49673d338c3b38240472c8775d6e16a309a32fc2260"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c96d9676acb1e64fd2fd6c4c7426b18631c2c40bba4898b8b4444685020a05db"
+    },
+    {
+      "path": "server/uv.lock",
+      "sha256": "35c2778b51c39926f36f32d7c11002170bb3e313aca283a4fb67ce89282443bd"
+    },
+    {
+      "path": "server/zhiwo/__init__.py",
+      "sha256": "fc8fef9eab7c324add55ba32c087d07710debe8f57b00d71aac8c0632d37e8f4"
+    },
+    {
+      "path": "server/zhiwo/adapters/__init__.py",
+      "sha256": "f85f25220b73029e0846ea3a809a07924ea03a4a1350f69b7c4a424ef648e9a1"
+    },
+    {
+      "path": "server/zhiwo/adapters/derived_cleanup.py",
+      "sha256": "80cf1ca51332eb8e0f5260c07abcf65c697d100bc5845728d79f3fa1936e92d9"
+    },
+    {
+      "path": "server/zhiwo/adapters/kernel_client.py",
+      "sha256": "85c8e58f0292001d2fff5938fb4858236d801d1c07d9f057ebc7c749fe926ab7"
+    },
+    {
+      "path": "server/zhiwo/adapters/kernel_session.py",
+      "sha256": "451629816768b6d84c3efd953eeac53d1e1495b20e0b46fa8ae31679aeef54a9"
+    },
+    {
+      "path": "server/zhiwo/adapters/memory_search.py",
+      "sha256": "488be52e76df4baad37a272caf3aed25f1cb9ae438aa723139076cc062ffcf79"
+    },
+    {
+      "path": "server/zhiwo/adapters/retention.py",
+      "sha256": "5549fb0d1fbb908013ef6550d96665f766c42845fc4d4ae9b2865a59e14b9ac6"
+    },
+    {
+      "path": "server/zhiwo/api/__init__.py",
+      "sha256": "a39d10b981931142ffa98e39dd757c5bde6db280a6a4902324a47a0106c4813d"
+    },
+    {
+      "path": "server/zhiwo/api/app.py",
+      "sha256": "1f81059684caa24447d0ef3d4d99a9d4ae093645501028808683cbb3f9dbc381"
+    },
+    {
+      "path": "server/zhiwo/api/auth.py",
+      "sha256": "259ddd5f08a5d99fcb470732f9fad911ffd51094b057aa8904ca7da8c62f3764"
+    },
+    {
+      "path": "server/zhiwo/api/channel.py",
+      "sha256": "bb7a557ec1c081932442d1683f5a812eeeb414fb11b01924f78aa3c4d41a36ec"
+    },
+    {
+      "path": "server/zhiwo/api/errors.py",
+      "sha256": "7ddf2a9b6ae672c1a6c6e51eb52b8d0eabbe0581949f3fc44ac310ae084a954f"
+    },
+    {
+      "path": "server/zhiwo/config.py",
+      "sha256": "490fecdfe0aa09a7ac1204611c9c174eaa3fe344752ccd410c1f16eb3ff2d31a"
+    },
+    {
+      "path": "server/zhiwo/contracts/__init__.py",
+      "sha256": "f2569995acefebab357841be01d2c34bf6b4c853eccc3476949c8b2236a4d7b6"
+    },
+    {
+      "path": "server/zhiwo/contracts/memory.py",
+      "sha256": "138716b8be8c0e1fcc289e1ba635262fc15966ba81bc251a199b82bb4cc2a720"
+    },
+    {
+      "path": "server/zhiwo/gateway/__init__.py",
+      "sha256": "625b7824554fbb428f0545b1eddd1f1e2b3ded0bb54a7402eca40116d7575016"
+    },
+    {
+      "path": "server/zhiwo/gateway/stdio_bridge.py",
+      "sha256": "1ae3e0b828545befafe327f4243255888fac7e66217977f7d9654d27220a5aff"
+    },
+    {
+      "path": "server/zhiwo/mcp_bridge.py",
+      "sha256": "f317fc8be984a7bf5a83a6dadedb4623774acb9aa9e1a1b71d724258d919fe92"
+    },
+    {
+      "path": "server/zhiwo/repositories/__init__.py",
+      "sha256": "a2fb69e8142c98b1e6f31b693393440b6070b0e23b1ed59a38732d41ac1b5e8a"
+    },
+    {
+      "path": "server/zhiwo/repositories/migrate.py",
+      "sha256": "da55bbbf8cc22c5e3666749ac5e12fc3870cfb6c20d1378a14f2fa41213aaaec"
+    },
+    {
+      "path": "server/zhiwo/services/__init__.py",
+      "sha256": "acab156552d58e2e338847911d9cdb082f87482a1efc81cc9ac8e2a81c6bf8f6"
+    },
+    {
+      "path": "server/zhiwo/services/access.py",
+      "sha256": "b4398369edc69c688c1f41cf083dd369c12cf6ca5b80b355ea7c3065338d1381"
+    },
+    {
+      "path": "server/zhiwo/services/agent_files.py",
+      "sha256": "6159985552ffef26d5309c1f9c3f542a240bb8cd4ee89f22b3e4c2e64bccde6a"
+    },
+    {
+      "path": "server/zhiwo/services/agent_tools.py",
+      "sha256": "3eeae2a9fe75869334caaf99865d92b0c14b53e14db7e1f1fab0550bef90698b"
+    },
+    {
+      "path": "server/zhiwo/services/agents.py",
+      "sha256": "aad1b465f6aad18881c6a3ca872929bea73f38a901679663baa397fc156141f5"
+    },
+    {
+      "path": "server/zhiwo/services/batches.py",
+      "sha256": "faf07fd350ad0c4e049495cff8c3a7f3f1e0f6232d9d799a4c169f23f677392f"
+    },
+    {
+      "path": "server/zhiwo/services/client_connect.py",
+      "sha256": "034000549ca49d9445239eb9e72128ae8a2f9b3b9483b1ff38ef08d611d913a3"
+    },
+    {
+      "path": "server/zhiwo/services/commit_gate.py",
+      "sha256": "c2a30914f01e82088bb5e46d86c2a58d8029c93ac14d89ec6bf69ec03e6463a1"
+    },
+    {
+      "path": "server/zhiwo/services/deletion.py",
+      "sha256": "b8f5fca5f2feb6284e1d98e5f8fb5dc1d5177451382929f1b4a79ab5aefe92e2"
+    },
+    {
+      "path": "server/zhiwo/services/extract.py",
+      "sha256": "28d70ab6f94c15d91afe482f1550d80dc7b35b215aae39d53ea5ba3b5a5c4233"
+    },
+    {
+      "path": "server/zhiwo/services/imports.py",
+      "sha256": "ee368b1de67cc035faa44cf1cc44b73e91ab387caee7cc20691333fb43ee30b8"
+    },
+    {
+      "path": "server/zhiwo/services/library.py",
+      "sha256": "41f44a8e5f32c4f7d206e1fc7b92c6c78c44b16323bfe8e9c7ce3bd284dbaee2"
+    },
+    {
+      "path": "server/zhiwo/services/memories.py",
+      "sha256": "d9ebfc7f373775013a69f20f8dca8781e7eb2b6b918b97a28a9c5cf476ab6133"
+    },
+    {
+      "path": "server/zhiwo/services/organize.py",
+      "sha256": "f060a09439321be4be08199d9e74b3dff08a2d0764ab1ff4832daf05d0294b64"
+    },
+    {
+      "path": "server/zhiwo/services/policy.py",
+      "sha256": "a193754c86088fd0ab3bd8f906050b7e44ed0849a25f81af29b1c9989fcec6ea"
+    },
+    {
+      "path": "server/zhiwo/services/profile_summary.py",
+      "sha256": "b31b0ceb1b018673b09625ff4cc739680dfef3ce4e9ce7e7c783aa6e9c72f7eb"
+    },
+    {
+      "path": "server/zhiwo/services/publish.py",
+      "sha256": "200331bc66e3da460ef1af0ef8c1d9d6cca07704e467612feccb7a92dc19f4b9"
+    },
+    {
+      "path": "server/zhiwo/services/review.py",
+      "sha256": "81f45fec15cb48d6db57aee209eaaf05d75f87c4babfd4832903aa72f17efead"
+    },
+    {
+      "path": "server/zhiwo/services/runtime_settings.py",
+      "sha256": "a00a9797700dd310931c495e1a525d771aa106f43df2586acf3848eb61893d6b"
+    },
+    {
+      "path": "server/zhiwo/services/search.py",
+      "sha256": "6c47f5ade4df60f1a28606d2bcab9d18764487bd08864c3de9445ed2741c6e32"
+    },
+    {
+      "path": "server/zhiwo/services/secret_file.py",
+      "sha256": "c60ac912ece6497c28fa892b4241b5e146c8f52f3493cd009a5e09c55f2b50da"
+    },
+    {
+      "path": "server/zhiwo/services/sharing.py",
+      "sha256": "6b9c9de12143fbbaa3a0e2be492263cdf9958025fa7c62a6a36e05f29bb13ae5"
+    },
+    {
+      "path": "server/zhiwo/services/shell.py",
+      "sha256": "40a68802609764e2c65d9c38cf257b8814e859d70d582ad8f0965d2b49cf00d1"
+    },
+    {
+      "path": "server/zhiwo/services/split.py",
+      "sha256": "d9d79b89f01e335d236f40fd6cbdb6b4828cc5eff12fb19f7484b4a9cad1ac05"
+    },
+    {
+      "path": "server/zhiwo/services/status.py",
+      "sha256": "cadd3b12551722696ecadd58ee9098f21c13e20bc44014c1950e801d5f3de8a0"
+    }
+  ],
+  "package_version": "2.0.0",
+  "installer": {
+    "path": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\apps\\desktop\\dist\\english-20261006\\OMNA-Setup-2.0.0-English-20261006.exe",
+    "size_bytes": 220502913,
+    "modified_utc": "2026-10-06T08:13:53.256Z",
+    "sha256": "871807a2c2dd49d698874177172cdff649aa95e2024300bc66f5432705cf1073"
+  },
+  "packaged_source_mismatches": [],
+  "build_command": "npm run dist -- --config.directories.output=dist/english-20261006 --config.nsis.artifactName=OMNA-Setup-2.0.0-English-20261006.exe",
+  "model_source": "Shared offline bge-small-zh-v1.5 assets copied into V2 runtime/model; no V1 app code copied",
+  "runtime_dependencies": "Existing V2 Python 3.12.13 cache; normalized uv.lock matches shared locked dependency graph",
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "Real third-party MCP client/model",
+    "OS tray menu click and notification delivery"
+  ]
+}

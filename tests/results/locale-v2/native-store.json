@@ -1,0 +1,38 @@
+{
+  "platform": "win32",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "missing preference defaults English",
+      "status": "PASS"
+    },
+    {
+      "name": "malformed preference defaults English",
+      "status": "PASS"
+    },
+    {
+      "name": "unsupported saved locale defaults English",
+      "status": "PASS"
+    },
+    {
+      "name": "unsupported update does not write or change active locale",
+      "status": "PASS"
+    },
+    {
+      "name": "Chinese saves and reloads",
+      "status": "PASS"
+    },
+    {
+      "name": "English saves and reloads",
+      "status": "PASS"
+    },
+    {
+      "name": "failed write preserves active and saved locale",
+      "status": "PASS"
+    },
+    {
+      "name": "unrelated synthetic user content remains unchanged",
+      "status": "PASS"
+    }
+  ]
+}

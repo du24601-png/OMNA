@@ -1,3 +1,4 @@
+import { t, useMessage } from "./i18n"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ApiError, api, explain, type Memory, type Proposal } from "./api"
 import { BatchBar } from "./BatchBar"
@@ -71,12 +72,12 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
   if (resource.loading && !resource.data && !resource.error) return <InboxSkeleton />
   return <div className={`page inbox-page${empty ? " inbox-empty" : ""}`}>
     <ResourceNotice resource={resource} pending={false} />
-    {memories.error && <div className="notice error inbox-note" role="alert"><div><strong>还没核对已有记忆</strong><p>{memories.error}</p></div><button className="button secondary" onClick={memories.reload}>重试</button></div>}
-    {notice && <div className="notice success inbox-note" role="status"><span>{notice.text}</span>{notice.id && <button className="text-button" onClick={() => onOpen(notice.id!)}>查看正式记忆</button>}</div>}
+    {memories.error && <div className="notice error inbox-note" role="alert"><div><strong>{t("还没核对已有记忆")}</strong><p>{memories.error}</p></div><button className="button secondary" onClick={memories.reload}>{t("重试")}</button></div>}
+    {notice && <div className="notice success inbox-note" role="status"><span>{notice.text}</span>{notice.id && <button className="text-button" onClick={() => onOpen(notice.id!)}>{t("查看正式记忆")}</button>}</div>}
     <div className="inbox">
-      <header className="inbox-head"><h1>待确认</h1>{resource.data && <span>{pending.length}</span>}</header>
+      <header className="inbox-head"><h1>{t("待确认")}</h1>{resource.data && <span>{pending.length}</span>}</header>
       <BatchBar proposals={pending} tick={tick} online={live} onChanged={() => { resource.reload(); onSaved() }} />
-      {empty && <Empty title="当前没有待确认的记忆" />}
+      {empty && <Empty title={t("当前没有待确认的记忆")} />}
       {!!pending.length && <ol className="inbox-rows">
         {pending.map(item => <InboxRow key={item.id} proposal={item} library={library} libraryReady={libraryReady} focused={item.id === currentId} open={item.id === openId} online={live} command={command} onSelect={toggle => choose(item.id, toggle)} onDone={finish} />)}
       </ol>}
@@ -85,7 +86,7 @@ export function ReviewPage({ tick, online, onOpen, onSaved }: { tick: number; on
 }
 
 function InboxSkeleton() {
-  return <div className="page inbox-page" role="status" aria-label="正在加载待确认"><div className="inbox"><header className="inbox-head"><h1>待确认</h1></header><div className="inbox-rows">{Array.from({ length: 6 }, (_, index) => <div className="inbox-row" key={index}><Skeleton className="skeleton-mark" style={{ width: 28, height: 28, borderRadius: 8 }} /><Skeleton className="skeleton-sentence" style={{ width: `${52 + (index % 3) * 12}%` }} /></div>)}</div></div></div>
+  return <div className="page inbox-page" role="status" aria-label={t("正在加载待确认")}><div className="inbox"><header className="inbox-head"><h1>{t("待确认")}</h1></header><div className="inbox-rows">{Array.from({ length: 6 }, (_, index) => <div className="inbox-row" key={index}><Skeleton className="skeleton-mark" style={{ width: 28, height: 28, borderRadius: 8 }} /><Skeleton className="skeleton-sentence" style={{ width: `${52 + (index % 3) * 12}%` }} /></div>)}</div></div></div>
 }
 
 function InboxRow({ proposal, library, libraryReady, focused, open, online, command, onSelect, onDone }: {
@@ -100,7 +101,7 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   onDone: (id: string, result: { text: string; id?: string }) => void
 }) {
   const requester = proposal.requester || (proposal.source.kind === "agent_claim"
-    ? { client: "agent", name: proposal.source.name || "Agent 提案" }
+    ? { client: "agent", name: proposal.source.name || t("Agent 提案") }
     : { client: "omna", name: "OMNA" })
   const [mode, setMode] = useState<"idle" | "edit" | "choice">("idle")
   const [draft, setDraft] = useState(proposal.payload.content)
@@ -108,7 +109,7 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   const [shareTouched, setShareTouched] = useState(false)
   const [scope, setScope] = useState("")
   const [keeping, setKeeping] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useMessage()
   const [conflict, setConflict] = useState(false)
   const [busy, setBusy] = useState(false)
   const attempt = useRef<{ sig: string; key: string } | null>(null)
@@ -150,13 +151,13 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
     setError("")
     try {
       const result = await api.decide(proposal.id, body, attempt.current.key)
-      if (result.status !== "accepted" && result.status !== "rejected") throw new Error("服务未确认审核结果，请重试核对。")
+      if (result.status !== "accepted" && result.status !== "rejected") throw new Error(t("服务未确认审核结果，请重试核对。"))
       onDone(proposal.id, {
-        text: result.status === "rejected" ? "已忽略，正式记忆没有改变。" : "已记住，记忆列表已更新。",
+        text: result.status === "rejected" ? t("已忽略，正式记忆没有改变。") : t("已记住，记忆列表已更新。"),
         id: result.memory_id,
       })
     } catch (err) {
-      setError(explain(err))
+      setError(() => (explain(err)))
       if (err instanceof ApiError && err.code === "CONFLICT") {
         setConflict(true)
         setMode("choice")
@@ -180,12 +181,12 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   }
   async function updateOriginal() {
     if (!proposal.target_id || blocked) return
-    if (!current) { setError("当前记忆还未加载成功，请重试。"); return }
+    if (!current) { setError(() => (t("当前记忆还未加载成功，请重试。"))); return }
     if (proposal.base_revision == null || current.revision !== proposal.base_revision) return
     await send(bodyFor("update", { target_id: proposal.target_id, base_revision: proposal.base_revision }))
   }
   async function keepBoth() {
-    if (!scope.trim()) { setError("另存一条需要填写适用场景。"); return }
+    if (!scope.trim()) { setError(() => (t("另存一条需要填写适用场景。"))); return }
     await send(bodyFor("keep_both", { scope: scope.trim() }))
   }
   async function ignore() {
@@ -194,9 +195,9 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
   }
   async function remember() {
     if (!online || running.current || mode === "choice") return
-    if (!text) { setError("记忆内容不能为空。"); if (!open) onSelect(); setMode("edit"); return }
-    if (lane === "long") { setError("这条太长，先改短再保存。"); if (!open) onSelect(); setMode("edit"); return }
-    if (lane === "unchecked") { setError("还在核对已有记忆，稍后再保存。"); return }
+    if (!text) { setError(() => (t("记忆内容不能为空。"))); if (!open) onSelect(); setMode("edit"); return }
+    if (lane === "long") { setError(() => (t("这条太长，先改短再保存。"))); if (!open) onSelect(); setMode("edit"); return }
+    if (lane === "unchecked") { setError(() => (t("还在核对已有记忆，稍后再保存。"))); return }
     if (lane === "quick") { setMode("idle"); await saveNew(); return }
     setError("")
     if (!open) onSelect()
@@ -220,41 +221,41 @@ function InboxRow({ proposal, library, libraryReady, focused, open, online, comm
       run()
     }
   }
-  const verb = proposal.target_id ? "修改" : "新增"
+  const verb = proposal.target_id ? t("修改") : t("新增")
   const was = current?.content?.trim()
   const showChoice = open && (mode === "choice" || lane === "update" || lane === "similar" || lane === "evidence")
   return <li className={`inbox-row${focused ? " selected" : ""}${open ? " open" : ""}`} aria-current={focused ? "true" : undefined} aria-expanded={open} onClick={() => onSelect(true)}>
     <span className="inbox-avatar" title={requester.name}><SourceMark origin={requester} /></span>
     <div className="inbox-copy">
       <p className="inbox-kicker"><span className="agent">{requester.name}</span><span>· {verb}</span><CategoryTag category={proposal.payload.category} /></p>
-      {open && mode === "edit" ? <textarea ref={editor} className="inbox-editor" aria-label="修改后的内容" rows={Math.min(6, Math.max(2, draft.split("\n").length))} maxLength={4000} value={draft} disabled={busy} onClick={event => event.stopPropagation()} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
+      {open && mode === "edit" ? <textarea ref={editor} className="inbox-editor" aria-label={t("修改后的内容")} rows={Math.min(6, Math.max(2, draft.split("\n").length))} maxLength={4000} value={draft} disabled={busy} onClick={event => event.stopPropagation()} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
         if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setDraft(proposal.payload.content); setOnlySelf(proposal.payload.share_enabled === false); setShareTouched(false); setMode("idle"); setError("") }
         if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void remember() }
       }} /> : <p className="inbox-sentence">{draft}</p>}
-      {open && mode === "edit" && <label className="inbox-share"><input type="checkbox" checked={onlySelf} disabled={busy} onChange={event => { setOnlySelf(event.target.checked); setShareTouched(true) }} />仅自己可见</label>}
-      {open && mode !== "edit" && lane === "update" && !blocked && <p className="inbox-hint">{was ? `替换「${was}」` : "替换一条已有记忆"}</p>}
-      {open && mode !== "edit" && lane === "similar" && <p className="inbox-hint">{similar && !("id" in similar) && !similar.memory_id ? "和这次导入里的另一条很像" : "已有一条几乎一样的记忆"}</p>}
-      {open && mode !== "edit" && lane === "long" && <p className="inbox-hint">这条太长，先改短再保存。</p>}
-      {open && mode !== "edit" && lane === "evidence" && <p className="inbox-hint">缺少依据，不能直接保存。</p>}
+      {open && mode === "edit" && <label className="inbox-share"><input type="checkbox" checked={onlySelf} disabled={busy} onChange={event => { setOnlySelf(event.target.checked); setShareTouched(true) }} />{t("仅自己可见")}</label>}
+      {open && mode !== "edit" && lane === "update" && !blocked && <p className="inbox-hint">{was ? t("替换「{0}」", [was]) : t("替换一条已有记忆")}</p>}
+      {open && mode !== "edit" && lane === "similar" && <p className="inbox-hint">{similar && !("id" in similar) && !similar.memory_id ? t("和这次导入里的另一条很像") : t("已有一条几乎一样的记忆")}</p>}
+      {open && mode !== "edit" && lane === "long" && <p className="inbox-hint">{t("这条太长，先改短再保存。")}</p>}
+      {open && mode !== "edit" && lane === "evidence" && <p className="inbox-hint">{t("缺少依据，不能直接保存。")}</p>}
       {showChoice && lane === "update" && <div className="inbox-choices">
-        {blocked && <p className="inbox-hint">当前记忆已经更新，这条建议不能再改它。</p>}
-        {!blocked && <button type="button" className="primary" disabled={busy || !online || !current} onClick={press(() => void updateOriginal())}>更新原记忆</button>}
-        <button type="button" disabled={busy} onClick={press(() => setKeeping(true))}>另存一条</button>
+        {blocked && <p className="inbox-hint">{t("当前记忆已经更新，这条建议不能再改它。")}</p>}
+        {!blocked && <button type="button" className="primary" disabled={busy || !online || !current} onClick={press(() => void updateOriginal())}>{t("更新原记忆")}</button>}
+        <button type="button" disabled={busy} onClick={press(() => setKeeping(true))}>{t("另存一条")}</button>
       </div>}
-      {showChoice && keeping && <input className="inbox-scope" aria-label="适用场景" placeholder="适用场景，例如：正式报告" value={scope} disabled={busy} onClick={event => event.stopPropagation()} onChange={event => setScope(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); void keepBoth() } }} />}
-      {showChoice && keeping && <div className="inbox-choices"><button type="button" className="primary" disabled={busy || !online || !scope.trim()} onClick={press(() => void keepBoth())}>保存为新记忆</button></div>}
+      {showChoice && keeping && <input className="inbox-scope" aria-label={t("适用场景")} placeholder={t("适用场景，例如：正式报告")} value={scope} disabled={busy} onClick={event => event.stopPropagation()} onChange={event => setScope(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); void keepBoth() } }} />}
+      {showChoice && keeping && <div className="inbox-choices"><button type="button" className="primary" disabled={busy || !online || !scope.trim()} onClick={press(() => void keepBoth())}>{t("保存为新记忆")}</button></div>}
       {showChoice && (lane === "similar" || lane === "evidence") && <div className="inbox-choices">
         {lane === "similar" && similar?.content && <p className="inbox-hint">{similar.content}</p>}
-        <button type="button" className="primary" disabled={busy || !online} onClick={press(() => void saveNew())}>仍要记住</button>
-        <button type="button" disabled={busy || !online} onClick={press(() => void ignore())}>不用了</button>
+        <button type="button" className="primary" disabled={busy || !online} onClick={press(() => void saveNew())}>{t("仍要记住")}</button>
+        <button type="button" disabled={busy || !online} onClick={press(() => void ignore())}>{t("不用了")}</button>
       </div>}
-      {proposal.target_id && target.error && <p className="inbox-error">{target.error} <button type="button" className="text-button" onClick={event => { event.stopPropagation(); target.reload() }}>重试</button></p>}
+      {proposal.target_id && target.error && <p className="inbox-error">{target.error} <button type="button" className="text-button" onClick={event => { event.stopPropagation(); target.reload() }}>{t("重试")}</button></p>}
       {error && <p className="inbox-error" role="alert">{error}</p>}
     </div>
     <div className="inbox-actions">
-      <button type="button" className="inbox-icon edit" aria-label="编辑" disabled={busy} onClick={press(() => setMode("edit"))}><Icon name="edit" /></button>
-      <button type="button" className="inbox-icon ignore" aria-label="忽略" disabled={busy || !online} onClick={press(() => void ignore())}><Icon name="close" /></button>
-      <button type="button" className="inbox-icon remember" aria-label="记住" disabled={busy || !online} onClick={press(() => void remember())}><Icon name="check" /></button>
+      <button type="button" className="inbox-icon edit" aria-label={t("编辑")} disabled={busy} onClick={press(() => setMode("edit"))}><Icon name="edit" /></button>
+      <button type="button" className="inbox-icon ignore" aria-label={t("忽略")} disabled={busy || !online} onClick={press(() => void ignore())}><Icon name="close" /></button>
+      <button type="button" className="inbox-icon remember" aria-label={t("记住")} disabled={busy || !online} onClick={press(() => void remember())}><Icon name="check" /></button>
     </div>
   </li>
 }
