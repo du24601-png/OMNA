@@ -1,4 +1,4 @@
-"""Merge one zhiwo entry into the known client configs.
+"""Merge one omna entry into the known client configs.
 
 Uses a temporary home. Does not read or write the real user profile.
 """
@@ -109,10 +109,10 @@ class ClientConnectTest(unittest.TestCase):
         opencode = json.loads((self.home / ".config" / "opencode" / "opencode.json").read_text(encoding="utf-8"))
         self.assertEqual(opencode["model"], "keep-me")
         self.assertEqual(opencode["mcp"]["other"]["command"], ["echo"])
-        self.assertEqual(opencode["mcp"]["zhiwo"]["type"], "local")
-        self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["ZHIWO_AGENT_CREDENTIAL"], secret)
-        self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["ZHIWO_API_ORIGIN"], "http://127.0.0.1:8765")
-        self.assertEqual(opencode["mcp"]["zhiwo"]["environment"]["PYTHONPATH"], str(ROOT / "server"))
+        self.assertEqual(opencode["mcp"]["omna"]["type"], "local")
+        self.assertEqual(opencode["mcp"]["omna"]["environment"]["ZHIWO_AGENT_CREDENTIAL"], secret)
+        self.assertEqual(opencode["mcp"]["omna"]["environment"]["ZHIWO_API_ORIGIN"], "http://127.0.0.1:8765")
+        self.assertEqual(opencode["mcp"]["omna"]["environment"]["PYTHONPATH"], str(ROOT / "server"))
         permissions = self._permissions(result["agent_id"])
         self.assertEqual(permissions["allowed_categories"], ["preference", "goal"])
         self.assertEqual(permissions["allowed_tools"], ["get_context", "search_memory"])
@@ -128,7 +128,7 @@ class ClientConnectTest(unittest.TestCase):
         second = connect_client(self.db, self.home, "opencode", "propose", str(uuid.uuid4()), port=8765)
         self.assertEqual(second["agent_id"], result["agent_id"])
         changed = json.loads((self.home / ".config" / "opencode" / "opencode.json").read_text(encoding="utf-8"))
-        new_secret = changed["mcp"]["zhiwo"]["environment"]["ZHIWO_AGENT_CREDENTIAL"]
+        new_secret = changed["mcp"]["omna"]["environment"]["ZHIWO_AGENT_CREDENTIAL"]
         self.assertNotEqual(new_secret, secret)
         self.assertNotIn(secret, json.dumps(changed))
         self.assertEqual(self._permissions(second["agent_id"])["allowed_tools"], ["get_context", "search_memory", "propose_memory"])
@@ -141,24 +141,24 @@ class ClientConnectTest(unittest.TestCase):
 
         workbuddy = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))
         self.assertEqual(workbuddy["mcpServers"]["wecom"]["command"], "uvx")
-        self.assertIn("zhiwo", workbuddy["mcpServers"])
+        self.assertIn("omna", workbuddy["mcpServers"])
         zcode = json.loads((self.home / ".zcode" / "cli" / "config.json").read_text(encoding="utf-8"))
         self.assertEqual(zcode["theme"], "quiet")
         self.assertEqual(zcode["mcp"]["servers"]["memory"]["command"], "npx")
         codex = (self.home / ".codex" / "config.toml").read_text(encoding="utf-8")
         self.assertIn('model = "keep-me"', codex)
         self.assertIn("[mcp_servers.other]", codex)
-        self.assertEqual(codex.count("[mcp_servers.zhiwo]"), 1)
+        self.assertEqual(codex.count("[mcp_servers.omna]"), 1)
         self.assertNotIn("old-secret", codex)
         listed = list_clients(self.home, self.lookup)
         claude = json.loads((self.home / "AppData" / "Roaming" / "Claude" / "claude_desktop_config.json").read_text(encoding="utf-8"))
         self.assertEqual(claude["mcpServers"]["other"]["command"], "keep")
-        self.assertEqual(claude["mcpServers"]["zhiwo"]["command"], sys.executable)
-        self.assertNotIn("type", claude["mcpServers"]["zhiwo"])
+        self.assertEqual(claude["mcpServers"]["omna"]["command"], sys.executable)
+        self.assertNotIn("type", claude["mcpServers"]["omna"])
         code = json.loads((self.home / ".claude.json").read_text(encoding="utf-8"))
         self.assertEqual(code["theme"], "keep-me")
         self.assertEqual(code["mcpServers"]["other"]["command"], "echo")
-        self.assertEqual(code["mcpServers"]["zhiwo"]["type"], "stdio")
+        self.assertEqual(code["mcpServers"]["omna"]["type"], "stdio")
         self.assertEqual(sum(1 for item in listed["clients"] if item["configured"]), 6)
 
     def test_invalid_json_is_left_unchanged(self) -> None:
@@ -235,7 +235,7 @@ class ClientConnectTest(unittest.TestCase):
         os.environ["ZHIWO_BRIDGE_PYTHONPATH"] = str(bundled)
         connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
         written = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))
-        entry = written["mcpServers"]["zhiwo"]
+        entry = written["mcpServers"]["omna"]
         self.assertEqual(entry["command"], str(python.resolve()))
         self.assertEqual(entry["args"], ["-m", "zhiwo.gateway.stdio_bridge"])
         self.assertEqual(entry["env"]["PYTHONPATH"], str(bundled.resolve()))
@@ -247,7 +247,7 @@ class ClientConnectTest(unittest.TestCase):
         python.write_bytes(b"")
         os.environ["ZHIWO_BRIDGE_PYTHON"] = str(python)
         connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
-        entry = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))["mcpServers"]["zhiwo"]
+        entry = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))["mcpServers"]["omna"]
         self.assertEqual(entry["command"], str(python.resolve()))
         self.assertEqual(entry["args"], ["-I", "-X", "utf8", "-m", "zhiwo.gateway.stdio_bridge"])
         self.assertNotIn("PYTHONPATH", entry["env"])
@@ -264,7 +264,7 @@ class ClientConnectTest(unittest.TestCase):
         first = connect_client(self.db, self.home, "workbuddy", "read", str(uuid.uuid4()), port=8765)
         path = self.home / ".workbuddy" / "mcp.json"
         before = path.read_text(encoding="utf-8")
-        secret = json.loads(before)["mcpServers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+        secret = json.loads(before)["mcpServers"]["omna"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
         digest = self._hash(first["agent_id"])
         self.assertEqual(digest, credential_digest(secret))
         path.with_name("mcp.json.tmp").mkdir()
@@ -349,19 +349,19 @@ class ClientConnectTest(unittest.TestCase):
     def _secret(self, client_id: str) -> str:
         if client_id == "opencode":
             data = json.loads((self.home / ".config" / "opencode" / "opencode.json").read_text(encoding="utf-8"))
-            return data["mcp"]["zhiwo"]["environment"]["ZHIWO_AGENT_CREDENTIAL"]
+            return data["mcp"]["omna"]["environment"]["ZHIWO_AGENT_CREDENTIAL"]
         if client_id == "workbuddy":
             data = json.loads((self.home / ".workbuddy" / "mcp.json").read_text(encoding="utf-8"))
-            return data["mcpServers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+            return data["mcpServers"]["omna"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
         if client_id == "zcode":
             data = json.loads((self.home / ".zcode" / "cli" / "config.json").read_text(encoding="utf-8"))
-            return data["mcp"]["servers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+            return data["mcp"]["servers"]["omna"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
         if client_id == "claude":
             data = json.loads((self.home / "AppData" / "Roaming" / "Claude" / "claude_desktop_config.json").read_text(encoding="utf-8"))
-            return data["mcpServers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+            return data["mcpServers"]["omna"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
         if client_id == "claude-code":
             data = json.loads((self.home / ".claude.json").read_text(encoding="utf-8"))
-            return data["mcpServers"]["zhiwo"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
+            return data["mcpServers"]["omna"]["env"]["ZHIWO_AGENT_CREDENTIAL"]
         text = (self.home / ".codex" / "config.toml").read_text(encoding="utf-8")
         for line in text.splitlines():
             if line.startswith("ZHIWO_AGENT_CREDENTIAL"):

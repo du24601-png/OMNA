@@ -40,8 +40,8 @@ def main() -> None:
         workdir = Path(tempfile.mkdtemp(prefix="ae-cli-"))
         config = workdir / "mcp.json"
         command = server.bridge_command(entry)
-        config.write_text(json.dumps({"mcpServers": {"zhiwo": {"type": "stdio", **command}}}, ensure_ascii=False), encoding="utf-8")
-        allowed = ",".join(f"mcp__zhiwo__{name}" for name in TOOLS)
+        config.write_text(json.dumps({"mcpServers": {"omna": {"type": "stdio", **command}}}, ensure_ascii=False), encoding="utf-8")
+        allowed = ",".join(f"mcp__omna__{name}" for name in TOOLS)
         args = [
             "claude", "-p", PROMPT_IMPORT if use_import else PROMPT_TEXT,
             "--model", model,

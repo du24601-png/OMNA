@@ -79,7 +79,7 @@ def secret_from_config(home: Path, client_id: str = "claude-code") -> dict:
     """Read the stdio entry the one-click connect wrote for this client."""
     assert client_id == "claude-code"
     data = json.loads((home / ".claude.json").read_text(encoding="utf-8"))
-    return data["mcpServers"]["zhiwo"]
+    return data["mcpServers"]["omna"]
 
 
 def free_port() -> int:

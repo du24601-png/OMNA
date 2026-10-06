@@ -140,7 +140,7 @@ def main() -> None:
     from mcp.server.mcpserver import MCPServer
 
     server = MCPServer(
-        name="zhiwo",
+        name="omna",
         version="0.2.0",
         instructions=_INSTRUCTIONS,
         log_level="WARNING",

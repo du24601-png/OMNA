@@ -22,4 +22,3 @@ const result={platform:process.platform,status:results.every(r=>r.status==='PASS
 fs.writeFileSync(path.join(__dirname,'results/locale-v2/native-store.json'),JSON.stringify(result,null,2));
 console.log(JSON.stringify(result,null,2));
 process.exitCode=result.status==='PASS'?0:1;
-

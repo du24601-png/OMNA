@@ -268,8 +268,8 @@ function IssuedCredential({ agent, runtime, onDone }: { agent: AgentConnection; 
   const env = runtime ? { ...runtime.environment, ZHIWO_AGENT_CREDENTIAL: agent.credential } : null
   const config = runtime && env
     ? JSON.stringify(format === "opencode"
-      ? { mcp: { zhiwo: { type: "local", command: runtime.command, environment: env } } }
-      : { mcpServers: { zhiwo: { command: runtime.command[0], args: runtime.command.slice(1), env } } }, null, 2)
+      ? { mcp: { omna: { type: "local", command: runtime.command, environment: env } } }
+      : { mcpServers: { omna: { command: runtime.command[0], args: runtime.command.slice(1), env } } }, null, 2)
     : ""
   return <section className="credential-box">
     <div className="section-heading"><h3>{t("把这份配置填进客户端")}</h3><div className="segmented" role="tablist" aria-label={t("配置格式")}>
@@ -393,7 +393,7 @@ function VerifyGuide({ row, agent, waiting, onRestart, onOpenPermissions }: { ro
         <Collapsible.Panel>
           <ul className="verify-tips">
             <li>{row.client ? t("先完全退出 {0}，再重新打开。", [row.name]) : t("确认配置已经填进去，然后完全退出再打开。")}</li>
-            <li>{t("在客户端里开启名为 zhiwo 的 MCP 工具。")}</li>
+            <li>{t("在客户端里开启名为 omna 的 MCP 工具。")}</li>
             {row.client && <li>{t("配置文件：")}<code>{row.client.config_path}</code> <CopyButton text={row.client.config_path} /></li>}
             <li>{row.client ? t("还不行，就用右上角 ⋯ 里的「重新写入配置」。") : t("还不行，就用右上角 ⋯ 重置凭证，换一份新配置。")}</li>
           </ul>

@@ -472,7 +472,6 @@
   "来源筛选无效。": "Invalid source filter.",
   "请先在设置中配置提取模型。": "Configure an extraction model in Settings first.",
   "当前没有可用于生成摘要的已确认记忆。": "There are no confirmed memories available for a summary.",
-  "在客户端里开启名为 zhiwo 的 MCP 工具。": "Enable the MCP tools named omna in your client (legacy configurations may call it zhiwo).",
   "，重复的 {0} 条已合并": ", with {0} duplicates merged",
   "按结构拆出": "Split into",
   "已放入待确认": "Queued for review",

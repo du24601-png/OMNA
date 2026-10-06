@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "version": "2.0.1.0",
+  "native_desktop_startup": "PASS",
+  "local_service": "PASS",
+  "embeddings_loaded": true,
+  "synthetic_user_data": true,
+  "visual_inspection": "NOT_RUN"
+}
