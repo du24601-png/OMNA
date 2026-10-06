@@ -1,0 +1,18 @@
+// Build provenance: current V2 source fingerprint and bytes actually packaged.
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
+const asar=require(require.resolve('@electron/asar',{paths:[require.resolve('electron-builder',{paths:[path.resolve(__dirname,'../apps/desktop')]})]}));
+const root=path.resolve(__dirname,'..'),artifact=path.join(root,'apps/desktop/dist/release-2.0.2');
+const hash=x=>crypto.createHash('sha256').update(x).digest('hex'),fileHash=p=>hash(fs.readFileSync(p));
+function files(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(d=>d.isDirectory()?d.name==='__pycache__'?[]:files(path.join(dir,d.name)):[path.join(dir,d.name)]);}
+const sourceFiles=[...files(path.join(root,'apps/web/src')),...files(path.join(root,'apps/desktop/src')),...files(path.join(root,'server/zhiwo')).filter(p=>p.endsWith('.py')),...['apps/web/index.html','apps/web/package.json','apps/desktop/package.json','apps/desktop/electron-builder.yml','server/uv.lock','pnpm-lock.yaml'].map(p=>path.join(root,p))].sort();
+const sources=sourceFiles.map(p=>({path:path.relative(root,p).replaceAll('\\','/'),sha256:fileHash(p)}));
+const installer=path.join(artifact,'OMNA-Setup-2.0.2.exe'),stat=fs.statSync(installer),resources=path.join(artifact,'win-unpacked/resources');
+const mismatches=[];
+for(const src of files(path.join(root,'apps/desktop/src'))){const name=path.relative(path.join(root,'apps/desktop'),src).replaceAll('\\','/');if(fileHash(src)!==hash(asar.extractFile(path.join(resources,'app.asar'),name)))mismatches.push('desktop/'+name);}
+for(const src of files(path.join(root,'server/zhiwo')).filter(p=>p.endsWith('.py'))){const rel=path.relative(path.join(root,'server/zhiwo'),src),pkg=path.join(resources,'python/Lib/site-packages/zhiwo',rel);if(!fs.existsSync(pkg)||fileHash(src)!==fileHash(pkg))mismatches.push('server/'+rel);}
+for(const src of files(path.join(root,'apps/web/dist'))){const rel=path.relative(path.join(root,'apps/web/dist'),src),pkg=path.join(resources,'web',rel);if(!fs.existsSync(pkg)||fileHash(src)!==fileHash(pkg))mismatches.push('web/'+rel);}
+const packagedVersion=JSON.parse(asar.extractFile(path.join(resources,'app.asar'),'package.json').toString('utf8')).version;
+const result={status:mismatches.length===0&&packagedVersion==='2.0.2'?'PASS':'FAIL',worktree:root,branch:execFileSync('git',['branch','--show-current'],{cwd:root,encoding:'utf8'}).trim(),base_head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),source_modified:true,source_sha256:hash(JSON.stringify(sources)),source_files:sources,package_version:packagedVersion,installer:{path:installer,size_bytes:stat.size,modified_utc:stat.mtime.toISOString(),sha256:fileHash(installer)},packaged_source_mismatches:mismatches,build_command:'npm run dist -- --config.directories.output=dist/release-2.0.2 --config.nsis.artifactName=OMNA-Setup-2.0.2.exe',model_source:'Existing locked V2 runtime and offline embedding assets; current merged 2.0.2 server/web copied before build',runtime_dependencies:'Existing V2 Python 3.12.13 cache; normalized uv.lock matches shared locked dependency graph',not_run:['NSIS installation/upgrade/uninstall','Clean-machine acceptance','Real third-party MCP client/model','OS tray menu click and notification delivery']};
+fs.mkdirSync(path.join(root,'tests/results/english-release-2.0.2'),{recursive:true});fs.writeFileSync(path.join(root,'tests/results/english-release-2.0.2/build.json'),JSON.stringify(result,null,2));
+console.log(JSON.stringify({...result,source_files:`${sources.length} files recorded`}));if(result.status!=='PASS')process.exitCode=1;

@@ -7,7 +7,7 @@
 
 <p align="center"><b>换一个 AI，也不用重新介绍自己。</b></p>
 
-<p align="center">Windows 桌面应用 · 2.0.1 · 数据保存在本机</p>
+<p align="center">Windows 桌面应用 · 2.0.2 · 数据保存在本机</p>
 
 <p align="center"><a href="README.md"><img alt="简体中文" src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-%E5%BD%93%E5%89%8D%E9%A1%B5%E9%9D%A2-252a32?style=for-the-badge"></a> <a href="README_EN.md"><img alt="English" src="https://img.shields.io/badge/English-Read-687386?style=for-the-badge"></a></p>
 
@@ -90,9 +90,9 @@ OMNA 对 Agent 只提供这四个 MCP 工具，没有直接修改、删除或读
 
 **系统要求：** Windows 10 / 11 x64，约 700 MB 磁盘空间。不需要另装 Python、Node.js 或其他运行库。
 
-从 [GitHub Releases](https://github.com/du24601-png/OMNA/releases/tag/v2.0.1) 下载 `OMNA-Setup-2.0.1.exe`。
+从 [GitHub Releases](https://github.com/du24601-png/OMNA/releases/tag/v2.0.2) 下载 `OMNA-Setup-2.0.2.exe`。
 
-1. 运行 `OMNA-Setup-2.0.1.exe`。
+1. 运行 `OMNA-Setup-2.0.2.exe`。
 2. 安装包目前没有代码签名，Windows SmartScreen 可能提示「无法识别的应用」。确认来源后点「更多信息」→「仍要运行」。
 3. 安装到当前用户，不需要管理员权限，可以自选目录，会创建桌面和开始菜单快捷方式。
 4. 首次启动要加载本地模型，可能需要二三十秒；之后几秒内就能打开。第一次打开且记忆库为空时会进入新手引导。
@@ -181,7 +181,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File apps\desktop\scripts\prepare
 pnpm --filter @zhiwo/desktop dist
 ```
 
-`prepare-runtime` 会在 `apps/desktop/runtime/` 生成随包的 Python、锁定依赖、前端构建和模型；`dist` 输出 `apps/desktop/dist/OMNA-Setup-2.0.1.exe`。访问 GitHub 较慢时，可以先设置 `ELECTRON_MIRROR` 和 `ELECTRON_BUILDER_BINARIES_MIRROR` 指向镜像。
+`prepare-runtime` 会在 `apps/desktop/runtime/` 生成随包的 Python、锁定依赖、前端构建和模型；`dist` 输出 `apps/desktop/dist/OMNA-Setup-2.0.2.exe`。访问 GitHub 较慢时，可以先设置 `ELECTRON_MIRROR` 和 `ELECTRON_BUILDER_BINARIES_MIRROR` 指向镜像。
 
 ### 测试
 
