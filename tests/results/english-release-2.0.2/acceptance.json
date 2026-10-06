@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "version": "2.0.2",
+  "preserved_remote_baseline": "7dbf4a10105420200dc192c91d53e4c327aab164",
+  "source_commit": "8f68f6a706587c0543378cd2be79e2a8c60e55db",
+  "source_sha256": "5b9995094f135a2000245f53d575e9b0760a1c4dad85c2683c510c429e5a6527",
+  "checks": {
+    "locale_ui": "40/40 PASS",
+    "locale_store": "8/8 PASS",
+    "actual_source_ipc_vm": "11/11 PASS",
+    "mcp_name_and_real_stdio_handshake": "3/3 PASS",
+    "client_configuration_migration": "14/14 PASS",
+    "actual_packaged_native": "32/32 PASS",
+    "packaged_source_files": "77/77 matched",
+    "package_cleanliness": "PASS",
+    "typecheck_and_frontend_build": "PASS",
+    "nsis_build": "PASS"
+  },
+  "commands": [
+    "node tests/v2_locale_ui.cjs",
+    "node tests/v2_locale_store.cjs",
+    "node tests/v2_locale_ipc.cjs",
+    "apps/desktop/runtime/python/python.exe -I -X utf8 -m unittest discover -s tests -p test_mcp_name.py -v",
+    "apps/desktop/runtime/python/python.exe -I -X utf8 tests/test_client_connect.py",
+    "pnpm --filter @zhiwo/web build",
+    "pnpm --filter @zhiwo/desktop dist --config.directories.output=dist/release-2.0.2",
+    "node tests/release_2_0_2_evidence.cjs",
+    "node tests/release_2_0_2_native.cjs"
+  ],
+  "installer": {
+    "path": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\apps\\desktop\\dist\\release-2.0.2\\OMNA-Setup-2.0.2.exe",
+    "size_bytes": 220311305,
+    "modified_utc": "2026-10-06T13:28:08.169Z",
+    "sha256": "b074460afb7ab3acbec91b81e97bb703f92bbf053a37310c448893eda78afe1f"
+  },
+  "assets": [
+    {
+      "name": "OMNA-Setup-2.0.2.exe",
+      "size": 220311305,
+      "sha256": "b074460afb7ab3acbec91b81e97bb703f92bbf053a37310c448893eda78afe1f"
+    },
+    {
+      "name": "OMNA-Setup-2.0.2.exe.blockmap",
+      "size": 229363,
+      "sha256": "0e10d46fc57b89c2b69b5d9c89591c43b380f520ffc6e3e0e0929d1e5c21cde3"
+    }
+  ],
+  "signed": false,
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "OS tray menu click and notification delivery",
+    "Real third-party MCP client/model",
+    "Screenshot of hidden flyout webContents"
+  ],
+  "scope": "Actual packaged Electron main and flyout, real bundled Python/Mnemosyne, isolated synthetic user directory; no real user database or external model/client requests.",
+  "finished_at": "2026-10-06T13:30:03.426Z"
+}

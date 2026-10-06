@@ -1,0 +1,214 @@
+{
+  "platform": "win32",
+  "mode": "Actual V2 packaged Electron executable; real bundled Python/Mnemosyne; ten synthetic English memories; no API mocks",
+  "capture": "CDP screenshot of actual Electron webContents at native default window size, not an OS desktop screenshot",
+  "checks": [
+    {
+      "name": "Actual source is the V2 English release branch and 2.0.2 package",
+      "status": "PASS"
+    },
+    {
+      "name": "8765 initially free; no existing service stopped",
+      "status": "PASS"
+    },
+    {
+      "name": "Main window and native V2 flyout both loaded actual service UI",
+      "status": "PASS"
+    },
+    {
+      "name": "Native preload default English in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Real bundled embeddings ready; test mode off; extractor unconfigured",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 5",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 6",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 7",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 8",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 9",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 10",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 11",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 12",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 13",
+      "status": "PASS"
+    },
+    {
+      "name": "Real backend saved synthetic memory 14",
+      "status": "PASS"
+    },
+    {
+      "name": "Real Mnemosyne-backed API lists exactly ten memories",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual V2 has exactly three text navigation tabs",
+      "status": "PASS",
+      "detail": [
+        "Memories",
+        "Agent",
+        "Settings"
+      ]
+    },
+    {
+      "name": "V2 has inline review filter within Memories",
+      "status": "PASS"
+    },
+    {
+      "name": "English preference details appear in right sidebar",
+      "status": "PASS",
+      "detail": {
+        "x": 680,
+        "y": 48,
+        "width": 348,
+        "height": 584
+      }
+    },
+    {
+      "name": "User memory text is unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "Main uses V2 default native dimensions",
+      "status": "PASS",
+      "detail": {
+        "width": 1040,
+        "height": 682,
+        "dpr": 1.5
+      }
+    },
+    {
+      "name": "Real flyout owner authentication and backend polling work",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings switches main window and existing flyout to Chinese",
+      "status": "PASS"
+    },
+    {
+      "name": "Native locale JSON persists Chinese",
+      "status": "PASS"
+    },
+    {
+      "name": "Original Electron and service quit before Chinese restart",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual app restart retains native Chinese in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings restores main and existing flyout to English",
+      "status": "PASS"
+    },
+    {
+      "name": "Native locale JSON persists English",
+      "status": "PASS"
+    },
+    {
+      "name": "Original Electron and service quit before restart",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual app restart retains native English in both windows",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual restart preserves ten real backend memories",
+      "status": "PASS"
+    },
+    {
+      "name": "Final native test quit releases 8765",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\tests\\results\\english-release-2.0.2\\omna-v2-memories-en.png",
+      "width": 1560,
+      "height": 1023,
+      "sha256": "dfd9630c59facf7ba179fa356c50496fac580455b1f33f917598a33fbcea1f78"
+    }
+  ],
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "OS tray menu click and notification delivery",
+    "Real third-party MCP client/model",
+    "Screenshot of hidden flyout webContents"
+  ],
+  "started_at": "2026-10-06T13:28:35.928Z",
+  "source_worktree": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98",
+  "branch": "codex/omna-english-release",
+  "head": "8f68f6a706587c0543378cd2be79e2a8c60e55db",
+  "package_version": "2.0.2",
+  "exe": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\apps\\desktop\\dist\\release-2.0.2\\win-unpacked\\OMNA.exe",
+  "user_data": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\.cache\\english-release-2.0.2\\1791293315915\\user-data",
+  "client_home": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\.cache\\english-release-2.0.2\\1791293315915\\home",
+  "last_pid": 29216,
+  "health": {
+    "status": "ok",
+    "schema_version": 8,
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "embeddings_loaded": true,
+    "connect_only": false,
+    "extractor_configured": false,
+    "test_mode": false,
+    "mcp_runtime": {
+      "command": [
+        "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\apps\\desktop\\dist\\release-2.0.2\\win-unpacked\\resources\\python\\python.exe",
+        "-I",
+        "-X",
+        "utf8",
+        "-m",
+        "zhiwo.gateway.stdio_bridge"
+      ],
+      "environment": {
+        "ZHIWO_API_ORIGIN": "http://127.0.0.1:8765"
+      }
+    },
+    "memory_ref_count": 0,
+    "kernel": {
+      "connected": true,
+      "version": "3.15.1",
+      "db_path": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98\\.cache\\english-release-2.0.2\\1791293315915\\user-data\\data\\kernel\\mnemosyne.db"
+    }
+  },
+  "pre_demo_reload_view": {
+    "onboarding": true,
+    "hash": "#/"
+  },
+  "main_viewport": {
+    "width": 1040,
+    "height": 682,
+    "dpr": 1.5
+  },
+  "finished_at": "2026-10-06T13:29:00.650Z",
+  "status": "PASS"
+}

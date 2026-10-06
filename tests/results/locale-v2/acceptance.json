@@ -1,18 +1,54 @@
 {
-  "version": "V2 desktop 2.0.0",
+  "version": "V2 desktop 2.0.2",
   "repository": "D:\\zhiwo\\.claude\\worktrees\\omna-v2-upgrade-prep-9dab98",
-  "branch": "v2",
-  "base_head": "2420e03",
+  "branch": "codex/omna-english-release",
+  "base_head": "8f68f6a706587c0543378cd2be79e2a8c60e55db",
   "status": "PASS",
   "platform": "native Windows",
-  "commands": ["node tests/v2_locale_ui.cjs", "node tests/v2_locale_store.cjs", "node tests/v2_locale_ipc.cjs", "pnpm --filter @zhiwo/web build"],
-  "results": {"ui": "40/40 PASS", "native_store": "8/8 PASS", "actual_V2_IPC_and_preload_in_VM": "11/11 PASS", "typecheck_and_build": "PASS"},
-  "reproduced_failures": ["before.json: V2 initial English expectation failed because gate remained Chinese", "prompt-before.json: actual fixed server ORGANIZE_PROMPT appeared Chinese in English ConnectImport live state; implementation fixed and regression passed"],
-  "ui_coverage": ["Actual three-tab V2 shell", "Settings subsections and language selector", "Bidirectional switching and refresh persistence", "Locale date formatting and existing offline errors", "Unified memory and pending review", "Inline detail and unsaved editor draft", "Raw Chinese content, scope and Agent names", "Connected Agent and ConnectImport offer/menu/live prompt", "All three onboarding screens and actual raw product prompt", "Actual CopyButton text matches English displayed product instruction", "Known product prompt returns Chinese and unknown custom prompt remains raw", "Flyout frontend route"],
+  "commands": [
+    "node tests/v2_locale_ui.cjs",
+    "node tests/v2_locale_store.cjs",
+    "node tests/v2_locale_ipc.cjs",
+    "pnpm --filter @zhiwo/web build"
+  ],
+  "results": {
+    "ui": "40/40 PASS",
+    "native_store": "8/8 PASS",
+    "actual_V2_IPC_and_preload_in_VM": "11/11 PASS",
+    "typecheck_and_build": "PASS"
+  },
+  "reproduced_failures": [
+    "before.json: V2 initial English expectation failed because gate remained Chinese",
+    "prompt-before.json: actual fixed server ORGANIZE_PROMPT appeared Chinese in English ConnectImport live state; implementation fixed and regression passed"
+  ],
+  "ui_coverage": [
+    "Actual three-tab V2 shell",
+    "Settings subsections and language selector",
+    "Bidirectional switching and refresh persistence",
+    "Locale date formatting and existing offline errors",
+    "Unified memory and pending review",
+    "Inline detail and unsaved editor draft",
+    "Raw Chinese content, scope and Agent names",
+    "Connected Agent and ConnectImport offer/menu/live prompt",
+    "All three onboarding screens and actual raw product prompt",
+    "Actual CopyButton text matches English displayed product instruction",
+    "Known product prompt returns Chinese and unknown custom prompt remains raw",
+    "Flyout frontend route"
+  ],
   "fixtures": "Synthetic raw-schema fixtures only. The organize prompt is extracted directly from the real server constant, never replaced with an English mock. Chinese user text is excluded from UI-only language scans by exact value.",
   "visual_review": "Opened and inspected all six Settings/list/inline-editor screenshots at 1440x900 and 1024x768. No horizontal overflow or clipped translated controls found.",
   "cleanup": "Browser closed, Vite test process stopped, final random port 56889 no longer listening. Native temporary synthetic directory removed.",
-  "warnings": ["Existing Vite chunk-size warning above 500 kB", "Minor copy suggestion: singular count currently reads 1 memories / 1 agents"],
-  "not_run": ["Real native main/flyout cross-window language change and tray/notification interaction", "Actual packaged installer", "Real backend and real client integration", "Model requests", "Every possible destructive data dialog"],
-  "native_scope": "IPC and preload tests execute actual V2 source in isolated VMs; they do not substitute for real Electron or packaged acceptance. Native checks are assigned separately."
+  "warnings": [
+    "Existing Vite chunk-size warning above 500 kB",
+    "Minor copy suggestion: singular count currently reads 1 memories / 1 agents"
+  ],
+  "not_run": [
+    "Real native main/flyout cross-window language change and tray/notification interaction",
+    "Actual packaged installer",
+    "Real backend and real client integration",
+    "Model requests",
+    "Every possible destructive data dialog"
+  ],
+  "native_scope": "IPC and preload tests execute actual V2 source in isolated VMs; they do not substitute for real Electron or packaged acceptance. Native checks are assigned separately.",
+  "current_release_evidence": "../english-release-2.0.2/acceptance.json"
 }

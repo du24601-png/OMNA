@@ -1,7 +1,7 @@
 {
   "version": "V2",
   "platform": "win32",
-  "port": 56889,
+  "port": 51744,
   "mode": "isolated frontend synthetic API mocks; no real databases or clients",
   "checks": [
     {
@@ -65,7 +65,7 @@
     {
       "name": "V2 English memory list and inline detail",
       "status": "PASS",
-      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nCtrl\nK\nAll\n1\nTo review\n1\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\nTo review\n1\n周末我会去湖边慢跑。\nNew\nYou\nPreferences\n1\n我喜欢周末在湖边慢跑。\nYou\nJan 2, 2025\nLoading…\n1 memories · 1 agents · All saved on this computer\nEdit Enter\nStop sharing Ctrl D\nSearch Ctrl K"
+      "detail": "OMNA\nMemories\nAgent\nSettings\nDemo\nCtrl\nK\nAll\n1\nTo review\n1\nIdentity\nGoals\nPreferences\nProjects\nEvents\nOther\nTo review\n1\n周末我会去湖边慢跑。\nNew\nYou\nPreferences\n1\n我喜欢周末在湖边慢跑。\nYou\nJan 2, 2025\n1 memories · 1 agents · All saved on this computer\nEdit Enter\nStop sharing Ctrl D\nSearch Ctrl K"
     },
     {
       "name": "memories-en: no horizontal overflow 1440",

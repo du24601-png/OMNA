@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "version": "2.0.2",
+  "mode": "File inventory of actual packaged resources and app.asar. Databases, user locale/settings, credentials and env files excluded.",
+  "resource_file_count": 8157,
+  "archive_entries": 6,
+  "forbidden_paths": [],
+  "source_commit": "8f68f6a706587c0543378cd2be79e2a8c60e55db",
+  "native_data_directory": "Tests use a separate synthetic user directory outside packaged resources.",
+  "not_run": [
+    "NSIS installation/upgrade/uninstall",
+    "Clean-machine acceptance",
+    "Real third-party MCP client/model"
+  ]
+}

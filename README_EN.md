@@ -21,9 +21,9 @@ US go-to-market strategy: [View online (PDF, 23 pages, Chinese)](docs/gtm/OMNA_U
 
 **One place for your memories, with clear access controls.** Search your background, goals, preferences, and projects. Select a memory to see its source, which Agents can read it, and its read count over the past seven days. Edit it or stop sharing at any time.
 
-![OMNA 2.0 Memories: categories, permitted Agents, sources, and read counts](docs/images/v2-memories.png)
+![OMNA 2.0 Memories: categories, permitted Agents, sources, and read counts](docs/images/v2-memories-en.png)
 
-<sub>All screenshots show the 2.0 Chinese interface with synthetic demo data. Connection states and read counts illustrate the UI, not real-world usage results.</sub>
+<sub>The Memories image comes from the actual 2.0.2 English client; the remaining images show the V2 Chinese UI. All content is synthetic demo data. Connection states and read counts do not represent real-world usage results.</sub>
 
 **AI suggests. You decide what stays.** Pending suggestions now live inside Memories. Edit, approve, or dismiss each one; unapproved content is never shared with other Agents.
 
@@ -184,6 +184,9 @@ pnpm --filter @zhiwo/desktop dist
 `prepare-runtime` creates the bundled Python runtime, locked dependencies, frontend build, and model under `apps/desktop/runtime/`. `dist` outputs `apps/desktop/dist/OMNA-Setup-2.0.2.exe`. If GitHub downloads are slow, set `ELECTRON_MIRROR` and `ELECTRON_BUILDER_BINARIES_MIRROR` to your preferred mirrors.
 
 ### Tests
+
+Version 2.0.2 retains the 2.0.1 MCP name migration and adds default English with an English/Chinese setting. Locale checks passed 59/59, MCP name/configuration regressions 17/17, and actual packaged main/flyout checks 32/32. All 77 source files matched packaged content; no user databases, settings, or credential files were found in packaged resources. See the [2.0.2 acceptance record](tests/results/english-release-2.0.2/acceptance.json). The installer is unsigned. This release was not installed over the user application; NSIS install/upgrade/uninstall, clean-machine checks, OS notifications, and real third-party model end-to-end acceptance remain untested. The 2.0.0 locale records below are historical implementation-stage evidence.
+
 
 The client defaults to English on first launch. Choose **Settings → Appearance → Language → 简体中文** for Chinese; choose **设置 → 外观 → 语言 → English** to switch back. The main window, tray flyout, and native menus follow the preference, which persists across restarts. Memory content, sources, Agent names, existing summaries, and model output are not translated. Review, permissions, import behavior, and model configuration retain their existing contracts.
 

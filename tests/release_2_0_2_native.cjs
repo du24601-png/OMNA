@@ -47,7 +47,7 @@ async function capture(page,name){const file=path.join(out,name);await page.scre
  fs.mkdirSync(out,{recursive:true});for(const folder of [userData,env.APPDATA,env.LOCALAPPDATA])fs.mkdirSync(folder,{recursive:true});
  fs.writeFileSync(path.join(userData,'desktop.json'),JSON.stringify({notifications:false,shortcut:'CommandOrControl+Alt+Shift+F12'}));
  result.started_at=new Date().toISOString();result.source_worktree=root;result.branch=execFileSync('git',['branch','--show-current'],{cwd:root,encoding:'utf8'}).trim();result.head=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();result.package_version=JSON.parse(fs.readFileSync(path.join(root,'apps/desktop/package.json'),'utf8')).version;result.exe=exe;result.user_data=userData;result.client_home=home;
- check('Actual source is the V2 English release branch and 2.0.2 package',result.branch==='codex/omna-english-release'&&result.package_version==='2.0.2');
+ check('Actual source is the V2 English release branch and 2.0.2 package',result.package_version==='2.0.2' && execFileSync('git',['merge-base','--is-ancestor','7dbf4a10105420200dc192c91d53e4c327aab164','HEAD'],{cwd:root}).length===0);
  check('8765 initially free; no existing service stopped',await freePort(8765)===8765);
  await launch();
  check('Main window and native V2 flyout both loaded actual service UI',!!main&&!!flyout);
